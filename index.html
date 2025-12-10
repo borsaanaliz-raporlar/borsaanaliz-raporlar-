@@ -349,205 +349,6 @@
             margin-bottom: 5px;
         }
         
-        /* YENİ EKLENEN MESAJ GÖNDERME STİLLERİ */
-        .message-btn-container {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        
-        .message-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-        }
-        
-        .message-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 25px rgba(102, 126, 234, 0.4);
-            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-        }
-        
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .modal {
-            background: white;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 500px;
-            padding: 30px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-            animation: modalSlideUp 0.4s ease;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        @keyframes modalSlideUp {
-            from { transform: translateY(40px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-        
-        .modal-header h3 {
-            color: #333;
-            font-size: 22px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .close-modal {
-            background: none;
-            border: none;
-            color: #999;
-            font-size: 28px;
-            cursor: pointer;
-            transition: color 0.3s;
-            line-height: 1;
-        }
-        
-        .close-modal:hover {
-            color: #e74c3c;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-        }
-        
-        .form-input {
-            width: 100%;
-            padding: 14px;
-            background: #f8f9fa;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            color: #333;
-            font-size: 15px;
-            transition: all 0.3s;
-        }
-        
-        .form-input:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-        }
-        
-        textarea.form-input {
-            min-height: 120px;
-            resize: vertical;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        .optional-text {
-            font-size: 13px;
-            color: #888;
-            margin-top: 5px;
-            font-style: italic;
-        }
-        
-        .required {
-            color: #e74c3c;
-        }
-        
-        .submit-btn {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 10px;
-        }
-        
-        .submit-btn:hover {
-            background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
-        }
-        
-        .submit-btn:disabled {
-            background: #cccccc;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        .form-info {
-            background: rgba(102, 126, 234, 0.08);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 20px;
-            border: 1px solid rgba(102, 126, 234, 0.2);
-            color: #555;
-            font-size: 13px;
-            line-height: 1.5;
-        }
-        
-        .form-message {
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 15px;
-            font-size: 14px;
-            display: none;
-        }
-        
-        .form-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .form-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
         @media (max-width: 600px) {
             .container {
                 padding: 25px;
@@ -567,26 +368,8 @@
                 width: 100%;
                 justify-content: center;
             }
-            
-            .modal {
-                width: 95%;
-                padding: 20px;
-                margin: 10px;
-            }
-            
-            .message-btn {
-                padding: 12px 20px;
-                font-size: 15px;
-            }
         }
     </style>
-    <!-- EmailJS CDN -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    <script type="text/javascript">
-        (function() {
-            emailjs.init("zBcM0vl7FbH8mZWwL"); // Benim EmailJS Public Key'im - ÜCRETSİZ
-        })();
-    </script>
 </head>
 <body>
     <div class="container">
@@ -626,13 +409,6 @@
                 <p>BORSAANALIZ V11 - Günlük Teknik Analiz Raporlarına Erişiminiz Aktif</p>
             </div>
             
-            <!-- YENİ EKLENEN MESAJ GÖNDER BUTONU -->
-            <div class="message-btn-container">
-                <button class="message-btn" id="openMessageModal">
-                    📨 Mesaj Gönder
-                </button>
-            </div>
-            
             <div class="stats">
                 <div class="stat-card">
                     <div class="stat-number" id="totalReports">3</div>
@@ -667,54 +443,6 @@
         </div>
     </div>
     
-    <!-- YENİ EKLENEN MESAJ GÖNDER MODAL (POPUP) -->
-    <div class="modal-overlay" id="messageModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h3><span>📨</span> Bana Mesaj Gönder</h3>
-                <button class="close-modal" id="closeModal">&times;</button>
-            </div>
-            
-            <div class="form-info">
-                📩 Aşağıdaki formu doldurup gönderin, mesajınız direkt e-posta adresime iletilecektir.
-            </div>
-            
-            <form id="messageForm">
-                <div class="form-group">
-                    <label for="senderName">İsminiz <span class="optional-text">(opsiyonel)</span></label>
-                    <input type="text" id="senderName" name="senderName" class="form-input" placeholder="Adınızı yazabilirsiniz">
-                </div>
-                
-                <div class="form-group">
-                    <label for="senderEmail">E-posta adresiniz <span class="optional-text">(opsiyonel)</span></label>
-                    <input type="email" id="senderEmail" name="senderEmail" class="form-input" placeholder="email@example.com">
-                    <div class="optional-text">E-posta adresinizi yazarsanız size dönüş yapabilirim</div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="messageContent">Mesajınız <span class="required">*</span></label>
-                    <textarea id="messageContent" name="messageContent" class="form-input" placeholder="Lütfen mesajınızı detaylı bir şekilde yazınız..." required></textarea>
-                    <div class="optional-text">Bu alan zorunludur</div>
-                </div>
-                
-                <!-- Form mesajları -->
-                <div class="form-message form-error" id="formError">
-                    Lütfen mesajınızı yazın!
-                </div>
-                
-                <div class="form-message form-success" id="formSuccess">
-                    ✅ Mesajınız başarıyla gönderildi! En kısa sürede size dönüş yapacağım.
-                </div>
-                
-                <button type="button" class="submit-btn" id="submitBtn">📨 Mesajı Gönder</button>
-            </form>
-            
-            <div class="form-info" style="margin-top: 20px;">
-                <strong>Not:</strong> Mesajınız gönderildikten sonra bu pencere otomatik kapanacaktır.
-            </div>
-        </div>
-    </div>
-
     <script>
         const correctPassword = "ba";
         
@@ -852,143 +580,17 @@
                 logout();
             }
         }, 2 * 60 * 60 * 1000);
-        
-        // YENİ EKLENEN MESAJ GÖNDERME FONKSİYONLARI - EMAILJS İLE
-        document.addEventListener('DOMContentLoaded', function() {
-            const openMessageModal = document.getElementById('openMessageModal');
-            const messageModal = document.getElementById('messageModal');
-            const closeModal = document.getElementById('closeModal');
-            const submitBtn = document.getElementById('submitBtn');
-            const formError = document.getElementById('formError');
-            const formSuccess = document.getElementById('formSuccess');
-            const messageContent = document.getElementById('messageContent');
-            const senderName = document.getElementById('senderName');
-            const senderEmail = document.getElementById('senderEmail');
-            
-            // Mesaj gönder modalını aç
-            if (openMessageModal) {
-                openMessageModal.addEventListener('click', function() {
-                    messageModal.style.display = 'flex';
-                    formError.style.display = 'none';
-                    formSuccess.style.display = 'none';
-                    // Formu temizle
-                    senderName.value = '';
-                    senderEmail.value = '';
-                    messageContent.value = '';
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = '📨 Mesajı Gönder';
-                });
-            }
-            
-            // Modalı kapat
-            if (closeModal) {
-                closeModal.addEventListener('click', function() {
-                    messageModal.style.display = 'none';
-                });
-            }
-            
-            // Modal dışına tıklayarak kapat
-            if (messageModal) {
-                messageModal.addEventListener('click', function(e) {
-                    if (e.target === messageModal) {
-                        messageModal.style.display = 'none';
-                    }
-                });
-            }
-            
-            // Mesaj gönderme butonu - EMAILJS İLE
-            if (submitBtn) {
-                submitBtn.addEventListener('click', async function() {
-                    // Kontroller
-                    if (!messageContent.value.trim()) {
-                        formError.textContent = "Lütfen mesajınızı yazın!";
-                        formError.style.display = 'block';
-                        formSuccess.style.display = 'none';
-                        return;
-                    }
-                    
-                    // Butonu devre dışı bırak
-                    submitBtn.disabled = true;
-                    submitBtn.textContent = 'Gönderiliyor...';
-                    
-                    // Mesaj bilgilerini hazırla
-                    const name = senderName.value.trim() || 'İsimsiz';
-                    const email = senderEmail.value.trim() || 'E-posta belirtilmemiş';
-                    const message = messageContent.value.trim();
-                    const date = new Date().toLocaleString('tr-TR');
-                    
-                    try {
-                        // EmailJS ile e-posta gönder
-                        const templateParams = {
-                            to_name: "Ufuk Bey",
-                            from_name: name,
-                            from_email: email,
-                            message: message,
-                            date: date,
-                            reply_to: email
-                        };
-                        
-                        // EmailJS gönderimi
-                        const response = await emailjs.send(
-                            'service_9wqz68m', // Benim EmailJS Service ID'm
-                            'template_8p0lq3n', // Benim EmailJS Template ID'm
-                            templateParams
-                        );
-                        
-                        // Başarılı
-                        console.log('E-posta gönderildi:', response.status, response.text);
-                        
-                        // Başarı mesajını göster
-                        formSuccess.textContent = "✅ Mesajınız başarıyla gönderildi! En kısa sürede size dönüş yapacağım.";
-                        formSuccess.style.display = 'block';
-                        formError.style.display = 'none';
-                        
-                        // 2 saniye sonra modalı kapat
-                        setTimeout(function() {
-                            messageModal.style.display = 'none';
-                            // Formu temizle
-                            senderName.value = '';
-                            senderEmail.value = '';
-                            messageContent.value = '';
-                            // Butonu eski haline getir
-                            submitBtn.disabled = false;
-                            submitBtn.textContent = '📨 Mesajı Gönder';
-                            
-                            // Kullanıcıya bildirim göster
-                            alert('✅ Mesajınız başarıyla gönderildi! En kısa sürede size dönüş yapacağım.');
-                        }, 2000);
-                        
-                    } catch (error) {
-                        // Hata durumu
-                        console.error('E-posta gönderme hatası:', error);
-                        
-                        formError.textContent = "Mesaj gönderilirken bir hata oluştu. Lütfen tekrar deneyin.";
-                        formError.style.display = 'block';
-                        formSuccess.style.display = 'none';
-                        
-                        // Butonu eski haline getir
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = '📨 Mesajı Gönder';
-                        
-                        // Alternatif çözüm: mailto linki
-                        setTimeout(function() {
-                            const subject = `BORSAANALIZ Mesaj - ${date}`;
-                            const body = `İsim: ${name}%0D%0AE-posta: ${email}%0D%0ATarih: ${date}%0D%0A%0D%0AMesaj:%0D%0A${message}`;
-                            window.open(`mailto:ufukyamansavci@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
-                        }, 500);
-                    }
-                });
-            }
-            
-            // Enter tuşu ile gönderme
-            if (messageContent) {
-                messageContent.addEventListener('keydown', function(e) {
-                    if (e.ctrlKey && e.key === 'Enter') {
-                        submitBtn.click();
-                    }
-                });
-            }
-        });
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
