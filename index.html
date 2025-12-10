@@ -1,392 +1,589 @@
-<!-- index.html (TAM ENTEGRE) -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>BORSAANALIZ V11 - Günlük Teknik Analiz Raporları</title>
-
-<!-- DataTables CSS (rapor görüntüleyicide) -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-
-<style>
-  /* (Sizin mevcut stilinizi koruyorum, rapor bölümüne ek stiller) */
-  *{box-sizing:border-box}
-  body{
-    font-family:'Segoe UI', Tahoma, Verdana, sans-serif;
-    background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-    min-height:100vh;
-    padding:20px;
-    display:flex;
-    justify-content:center;
-    align-items:flex-start;
-  }
-
-  .container{
-    width:100%;
-    max-width:1100px;
-    background:#fff;
-    border-radius:14px;
-    padding:28px;
-    box-shadow:0 20px 60px rgba(0,0,0,0.22);
-  }
-
-  /* --- Mevcut login tasarımınız --- */
-  .logo{text-align:center;margin-bottom:18px}
-  .logo h1{color:#667eea;margin-bottom:6px}
-  .version-badge{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:4px 12px;border-radius:12px;font-weight:700}
-
-  .input-group{position:relative;margin:12px 0}
-  .input-group input{width:100%;padding:12px 44px;border:2px solid #ddd;border-radius:10px;font-size:15px}
-  .input-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%)}
-
-  .login-btn{width:100%;padding:12px;border-radius:10px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;font-weight:700;border:none;cursor:pointer}
-  .error{display:none;background:#fee;padding:10px;border-left:4px solid #e74c3c;border-radius:8px;margin-top:10px}
-
-  /* --- Dashboard (giriş sonrası) --- */
-  #contentBox{display:none}
-  .stats{display:flex;gap:12px;margin:16px 0}
-  .stat-card{flex:1;background:#f8f9fa;padding:12px;border-radius:8px;text-align:center}
-  .file-list{margin-top:12px}
-
-  .file-item{
-    display:flex;align-items:center;justify-content:space-between;padding:14px;border-radius:10px;background:#f8f9fa;margin-bottom:10px;border:1px solid #eee;
-  }
-  .file-meta{display:flex;flex-direction:column;gap:6px}
-  .file-name{font-weight:700;color:#333}
-  .file-actions{display:flex;gap:8px;align-items:center}
-
-  .btn{padding:8px 12px;border-radius:8px;text-decoration:none;color:#fff;font-weight:700;border:none;cursor:pointer}
-  .btn-download{background:#28a745}
-  .btn-view{background:#667eea}
-
-  .small{font-size:13px;color:#666}
-
-  /* --- RAPOR GÖRÜNTÜLEYİCİ (overlay-style veya iç alan) --- */
-  .report-wrapper{display:none;margin-top:18px;border-top:1px solid #e6e6e6;padding-top:18px}
-  .report-layout{display:flex;gap:16px}
-  .left-col{width:260px;background:#f4f6f7;border-radius:8px;padding:12px;height:520px;overflow:auto}
-  .right-col{flex:1;background:white;border-radius:8px;padding:12px;height:520px;overflow:auto; border:1px solid #eee}
-
-  .sheet-item{padding:8px;border-radius:6px;margin-bottom:8px;cursor:pointer}
-  .sheet-item.active{background:linear-gradient(90deg,#667eea,#764ba2);color:#fff}
-
-  .top-actions{display:flex;justify-content:space-between;gap:8px;margin-bottom:12px}
-  .back-btn{background:#6c757d;color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
-
-  /* responsive */
-  @media(max-width:900px){
-    .report-layout{flex-direction:column}
-    .left-col{width:100%;height:auto}
-    .right-col{height:auto}
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BORSAANALIZ V11 - Günlük Teknik Analiz Raporları</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 700px;
+            width: 100%;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            color: #667eea;
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .logo p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        
+        #loginBox {
+            text-align: center;
+        }
+        
+        #loginBox h2 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 24px;
+        }
+        
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 15px 45px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .input-group input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .login-btn:active {
+            transform: translateY(0);
+        }
+        
+        .error {
+            background: #fee;
+            color: #e74c3c;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none;
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .error.show {
+            display: block;
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .youtube-link {
+            display: block;
+            margin-top: 20px;
+            padding: 15px;
+            background: #ff0000;
+            color: white;
+            text-align: center;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .youtube-link:hover {
+            background: #cc0000;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 0, 0, 0.3);
+        }
+        
+        #contentBox {
+            display: none;
+        }
+        
+        .welcome {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .welcome h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .welcome p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+        
+        .file-list {
+            margin-bottom: 20px;
+        }
+        
+        .file-item {
+            background: #f8f9fa;
+            padding: 18px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .file-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+            border-color: #667eea;
+        }
+        
+        .file-item.today {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-color: #667eea;
+        }
+        
+        .file-info {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 15px;
+        }
+        
+        .file-date {
+            color: #666;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .today-badge {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+        
+        .download-btn {
+            background: #28a745;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .download-btn:hover {
+            background: #218838;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .logout-btn {
+            margin-top: 20px;
+            padding: 12px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 15px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #856404;
+        }
+        
+        .warning strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+            
+            .logo h1 {
+                font-size: 24px;
+            }
+            
+            .file-item {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+            
+            .download-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div class="logo">
-      <h1>📊 BORSAANALIZ V11</h1>
-      <p>Günlük Teknik Analiz Raporları</p>
-      <span class="version-badge">VERSION 11.0</span>
-    </div>
-
-    <!-- LOGIN BOX -->
-    <div id="loginBox">
-      <h2>🔒 Üye Girişi</h2>
-      <p style="color:#666;margin-bottom:12px">YouTube Katıl grubundan aldığınız şifre ile giriş yapın</p>
-
-      <div class="input-group">
-        <span class="input-icon">🔑</span>
-        <input id="passwordInput" type="password" placeholder="Şifrenizi girin" autocomplete="off">
-      </div>
-
-      <button class="login-btn" onclick="checkPassword()">🚀 Raporlara Eriş</button>
-      <div class="error" id="errorMsg">❌ Hatalı şifre! Lütfen YouTube gönderisinden güncel şifreyi alın.</div>
-
-      <a href="https://www.youtube.com" target="_blank" class="small" style="display:block;margin-top:12px">📺 Şifreyi YouTube'dan Al</a>
-    </div>
-
-    <!-- CONTENT BOX -->
-    <div id="contentBox">
-      <div class="stats">
-        <div class="stat-card"><div style="font-size:20px;font-weight:700" id="totalReports">0</div><div class="small">Toplam Rapor</div></div>
-        <div class="stat-card"><div style="font-size:20px;font-weight:700">—</div><div class="small">Analiz Edilen Hisse</div></div>
-        <div class="stat-card"><div style="font-size:20px;font-weight:700">10</div><div class="small">Analiz Sayfa (Max)</div></div>
-      </div>
-
-      <div style="display:flex;gap:12px;align-items:center;justify-content:space-between">
-        <h3 style="margin:0">📁 Günlük Analiz Raporları</h3>
-        <div>
-          <button id="openLatestBtn" class="btn btn-view" style="margin-right:8px">📊 En Güncel Raporu Görüntüle</button>
-          <button class="btn btn-download" onclick="downloadLatest()">⬇️ En Güncel Excel İndir</button>
+    <div class="container">
+        <div class="logo">
+            <h1>📊 BORSAANALIZ V11</h1>
+            <p>Günlük Teknik Analiz Raporları</p>
+            <span class="version-badge">VERSION 11.0</span>
         </div>
-      </div>
-
-      <div id="fileList" class="file-list"></div>
-
-      <div class="report-wrapper" id="reportWrapper">
-        <div class="top-actions">
-          <button class="back-btn" onclick="closeReport()">◀️ Geri Dön</button>
-          <div>
-            <a id="downloadCurrentExcel" class="btn btn-download" href="#" download>💾 Excel'i İndir</a>
-          </div>
-        </div>
-
-        <div class="report-layout">
-          <div class="left-col" id="sheetsList">
-            <!-- sayfa isimleri burada listelenecek -->
-            <div style="font-weight:700;margin-bottom:8px">Sayfalar</div>
-          </div>
-
-          <div class="right-col">
-            <div id="reportTitle" style="font-weight:700;margin-bottom:8px">Rapor</div>
-            <div id="tableContainer">
-              <!-- DataTable burada oluşturulacak -->
-              <table id="reportTable" class="display" style="width:100%"></table>
+        
+        <div id="loginBox">
+            <h2>🔒 Üye Girişi</h2>
+            <p style="color: #666; margin-bottom: 20px; font-size: 14px;">
+                YouTube Katıl grubundan aldığınız şifre ile giriş yapın
+            </p>
+            
+            <div class="input-group">
+                <span class="input-icon">🔑</span>
+                <input type="password" id="passwordInput" placeholder="Şifrenizi girin" autocomplete="off">
             </div>
-          </div>
+            
+            <button class="login-btn" onclick="checkPassword()">
+                🚀 Raporlara Eriş
+            </button>
+            
+            <div class="error" id="errorMsg">
+                ❌ Hatalı şifre! Lütfen YouTube gönderisinden güncel şifreyi alın.
+            </div>
+            
+            <a href="https://www.youtube.com" class="youtube-link" target="_blank">
+                📺 Şifreyi YouTube'dan Al
+            </a>
         </div>
-
-      </div>
-
-      <div style="margin-top:14px" class="warning small">
-        <strong>⚠️ Önemli Uyarılar:</strong>
-        • Bu raporlar yatırım tavsiyesi değildir • Raporları üçüncü kişilerle paylaşmayınız
-      </div>
-
-      <div style="margin-top:14px">
-        <button class="back-btn" onclick="logout()">🚪 Güvenli Çıkış</button>
-      </div>
-
+        
+        <div id="contentBox">
+            <div class="welcome">
+                <h2>Hoş Geldiniz! 🎉</h2>
+                <p>BORSAANALIZ V11 - Günlük Teknik Analiz Raporlarına Erişiminiz Aktif</p>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalReports">3</div>
+                    <div class="stat-label">Toplam Rapor</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">Analiz Edilen Hisse</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">7</div>
+                    <div class="stat-label">Analiz Sayfası</div>
+                </div>
+            </div>
+            
+            <h3 class="section-title">📁 Günlük Analiz Raporları</h3>
+            
+            <div class="file-list" id="fileList">
+            </div>
+            
+            <div class="warning">
+                <strong>⚠️ Önemli Uyarılar:</strong>
+                • Bu raporlar yatırım tavsiyesi değildir<br>
+                • Raporları üçüncü kişilerle paylaşmayınız<br>
+                • Şifrenizi kimseyle paylaşmayınız<br>
+                • Kendi araştırmanızı mutlaka yapınız
+            </div>
+            
+            <button class="logout-btn" onclick="logout()">
+                🚪 Güvenli Çıkış
+            </button>
+        </div>
     </div>
-  </div>
-
-  <!-- jQuery + DataTables -->
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-
-  <script>
-    // Mevcut şifre (sizin talimatınıza göre): "ba"
-    const correctPassword = "ba";
-
-    // Varsayılan fallback dosya listesi (eğer tablolar/files_index.json yoksa kullanılacak)
-    const fallbackFiles = [
-      {"name":"BORSAANALIZ_V11_TAM_26112025.xlsx","date":"26.11.2025","download_url":"raporlar/BORSAANALIZ_V11_TAM_26112025.xlsx","sheets":[]},
-      {"name":"BORSAANALIZ_V11_TAM_25112025.xlsx","date":"25.11.2025","download_url":"raporlar/BORSAANALIZ_V11_TAM_25112025.xlsx","sheets":[]}
-    ];
-
-    // Global state
-    let filesIndex = [];     // yapı tablolar/files_index.json içeriği
-    let currentFile = null;  // seçili dosya objesi
-    let currentSheet = null; // seçili sayfa objesi
-    let dt = null;           // DataTables instance
-
-    window.onload = function() {
-      if (sessionStorage.getItem('authenticated') === 'true') {
-        showContent();
-      }
-    };
-
-    function checkPassword(){
-      const v = document.getElementById('passwordInput').value.trim();
-      const err = document.getElementById('errorMsg');
-      if (v === correctPassword){
-        sessionStorage.setItem('authenticated','true');
-        err.style.display = 'none';
-        showContent();
-      } else {
-        err.style.display = 'block';
-        document.getElementById('passwordInput').value = '';
-        document.getElementById('passwordInput').focus();
-      }
-    }
-
-    // Giriş sonrası gösterilecek şeyler
-    async function showContent(){
-      document.getElementById('loginBox').style.display = 'none';
-      document.getElementById('contentBox').style.display = 'block';
-
-      // Önce files_index.json çekmeye çalış
-      try {
-        const res = await fetch('tablolar/files_index.json', {cache: "no-store"});
-        if (!res.ok) throw new Error('no index');
-        filesIndex = await res.json();
-      } catch(e) {
-        // fallback
-        filesIndex = fallbackFiles;
-      }
-
-      // Toplam rapor sayısı ve dosya listesi doldur
-      document.getElementById('totalReports').textContent = filesIndex.length;
-      const fileList = document.getElementById('fileList');
-      fileList.innerHTML = '';
-
-      // Sırala: en yeni en üst (dosya adından veya date alanından)
-      filesIndex.sort((a,b) => {
-        // try parse date from a.date (dd.mm.yyyy)
-        const da = parseDate(a.date);
-        const db = parseDate(b.date);
-        return db - da;
-      });
-
-      filesIndex.forEach((f, idx) => {
-        const el = document.createElement('div');
-        el.className = 'file-item';
-        el.innerHTML = `
-          <div class="file-meta">
-            <div class="file-name">📊 ${f.name}</div>
-            <div class="small">📅 ${f.date} • 🔢 ${f.sheets.length || '—'} Sayfa</div>
-          </div>
-          <div class="file-actions">
-            <button class="btn btn-view" onclick="openReportFromIndex(${idx})">📊 Görüntüle</button>
-            <a class="btn btn-download" href="${f.download_url}" download>⬇️ İndir</a>
-          </div>
-        `;
-        fileList.appendChild(el);
-      });
-
-      // en güncel raporu görüntüle butonu
-      document.getElementById('openLatestBtn').onclick = function(){
-        if (filesIndex.length>0) openReportFromIndex(0);
-        else alert('Hiç rapor bulunamadı.');
-      };
-    }
-
-    function parseDate(s){
-      // beklenen format: "26.11.2025" veya "2025-11-26"
-      if (!s) return 0;
-      if (s.indexOf('.')>-1){
-        const parts = s.split('.');
-        if (parts.length===3) return new Date(+parts[2], +parts[1]-1, +parts[0]);
-      }
-      return new Date(s);
-    }
-
-    // Dosya indexindeki belirli dosyayı aç
-    async function openReportFromIndex(idx){
-      const f = filesIndex[idx];
-      if (!f) return alert('Dosya bulunamadı.');
-      currentFile = f;
-
-      // Dosya metadata -> download button
-      document.getElementById('downloadCurrentExcel').href = f.download_url || '#';
-
-      // Rapor wrapper göster
-      document.getElementById('reportWrapper').style.display = 'block';
-      // sol menü sayfaları doldur
-      const sheetsList = document.getElementById('sheetsList');
-      sheetsList.innerHTML = '<div style="font-weight:700;margin-bottom:8px">Sayfalar</div>';
-
-      // Eğer f.sheets yoksa (fallback) uyarı ver
-      if (!Array.isArray(f.sheets) || f.sheets.length===0){
-        sheetsList.innerHTML += '<div class="small">Bu dosya sayfa listesi içermiyor.</div>';
-        document.getElementById('reportTitle').textContent = f.name;
-        // temiz tablo
-        renderTable([], []);
-        return;
-      }
-
-      f.sheets.forEach((sh, i) => {
-        const div = document.createElement('div');
-        div.className = 'sheet-item' + (i===0 ? ' active' : '');
-        div.textContent = sh.name;
-        div.onclick = () => { selectSheet(sh, div); };
-        sheetsList.appendChild(div);
-      });
-
-      // otomatik olarak ilk sayfayı yükle
-      selectSheet(f.sheets[0], sheetsList.querySelector('.sheet-item'));
-    }
-
-    // sayfa seçildiğinde JSON'dan veriyi çek & DataTable göster
-    async function selectSheet(sheetObj, domEl){
-      // active class toggle
-      document.querySelectorAll('.sheet-item').forEach(x => x.classList.remove('active'));
-      if (domEl) domEl.classList.add('active');
-
-      currentSheet = sheetObj;
-      document.getElementById('reportTitle').textContent = (currentFile.name || '') + ' → ' + sheetObj.name;
-
-      // fetch json (sheetObj.json should be relative path e.g. "tablolar/xxx.json")
-      if (!sheetObj.json) {
-        // fallback: show empty
-        renderTable([], []);
-        return;
-      }
-
-      try {
-        const res = await fetch(sheetObj.json + '?t=' + Date.now(), {cache:'no-store'});
-        if (!res.ok) throw new Error('json yok');
-        const payload = await res.json();
-        // payload expected: {columns: [...], rows: [[...],[...],...]}
-        renderTable(payload.columns || [], payload.rows || []);
-      } catch (e) {
-        console.error(e);
-        renderTable([], []);
-        alert('Bu sayfanın JSON verisi yüklenemedi: ' + (sheetObj.json || ''));
-      }
-    }
-
-    // render DataTable from columns[] and rows[] (rows is array of arrays)
-    function renderTable(columns, rows){
-      // destroy existing
-      if (dt) { try { dt.destroy(); } catch(e) {} }
-      const table = $('#reportTable');
-      table.empty();
-
-      // if no columns, show placeholder
-      if (!columns || columns.length===0){
-        table.html('<thead><tr><th>Veri bulunamadı</th></tr></thead><tbody><tr><td>—</td></tr></tbody>');
-        return;
-      }
-
-      // build thead
-      let thead = '<thead><tr>';
-      columns.forEach(c => { thead += '<th>' + escapeHtml(c) + '</th>'; });
-      thead += '</tr></thead>';
-      table.append(thead);
-
-      // build rows
-      let tbody = '<tbody>';
-      rows.forEach(r => {
-        tbody += '<tr>';
-        r.forEach(cell => {
-          tbody += '<td>' + (cell === null || cell === undefined ? '' : escapeHtml('' + cell)) + '</td>';
+    
+    <script>
+        const correctPassword = "ba";
+        
+        const files = [
+              {
+                name: "BORSAANALIZ_V11_TAM_09122025.xlsx",
+                date: "09.12.2025",
+                dateObj: new Date("2025-12-09"),
+                url: "raporlar/BORSAANALIZ_V11_TAM_09122025.xlsx",
+                size: "2.3 MB"
+             },
+              {
+                name: "BORSAANALIZ_V11_TAM_08122025.xlsx",
+                date: "08.12.2025",
+                dateObj: new Date("2025-12-08"),
+                url: "raporlar/BORSAANALIZ_V11_TAM_08122025.xlsx",
+                size: "2.3 MB"
+             },
+              {
+                name: "BORSAANALIZ_V11_TAM_05122025.xlsx",
+                date: "05.12.2025",
+                dateObj: new Date("2025-12-05"),
+                url: "raporlar/BORSAANALIZ_V11_TAM_05122025.xlsx",
+                size: "2.3 MB"
+             },
+               {
+                name: "BORSAANALIZ_V11_TAM_04122025.xlsx",
+                date: "04.12.2025",
+                dateObj: new Date("2025-12-04"),
+                url: "raporlar/BORSAANALIZ_V11_TAM_04122025.xlsx",
+                size: "2.3 MB"
+             },
+               {
+                name: "BORSAANALIZ_V11_TAM_03122025.xlsx",
+                date: "03.12.2025",
+                dateObj: new Date("2025-12-03"),
+                url: "raporlar/BORSAANALIZ_V11_TAM_03122025.xlsx",
+                size: "2.3 MB"
+             },
+               {
+                name: "BORSAANALIZ_V11_TAM_02122025.xlsx",
+                date: "02.12.2025",
+                dateObj: new Date("2025-12-02"),
+                url: "raporlar/BORSAANALIZ_V11_TAM_02122025.xlsx",
+                size: "2.3 MB"
+             },
+               {
+                name: "BORSAANALIZ_V11_TAM_01122025.xlsx",
+                date: "01.12.2025",
+                dateObj: new Date("2025-12-01"),
+                url: "raporlar/BORSAANALIZ_V11_TAM_01122025.xlsx",
+                size: "2.3 MB"
+             }
+        ];
+        
+        window.onload = function() {
+            if (sessionStorage.getItem('authenticated') === 'true') {
+                showContent();
+            }
+        };
+        
+        function checkPassword() {
+            const input = document.getElementById('passwordInput').value.trim();
+            const errorMsg = document.getElementById('errorMsg');
+            
+            if (input === correctPassword) {
+                sessionStorage.setItem('authenticated', 'true');
+                errorMsg.classList.remove('show');
+                showContent();
+            } else {
+                errorMsg.classList.add('show');
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('passwordInput').focus();
+            }
+        }
+        
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
         });
-        tbody += '</tr>';
-      });
-      tbody += '</tbody>';
-      table.append(tbody);
-
-      // init datatable
-      dt = table.DataTable({
-        pageLength: 25,
-        lengthMenu: [10,25,50,100,-1],
-        order: []
-      });
-    }
-
-    function escapeHtml(s){
-      return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
-    }
-
-    function closeReport(){
-      document.getElementById('reportWrapper').style.display = 'none';
-    }
-
-    function logout(){
-      if (confirm('Çıkış yapmak istediğinizden emin misiniz?')){
-        sessionStorage.removeItem('authenticated');
-        location.reload();
-      }
-    }
-
-    function downloadLatest(){
-      if (filesIndex.length>0){
-        const latest = filesIndex[0];
-        window.open(latest.download_url, '_blank');
-      } else alert('İndirilecek rapor bulunamadı.');
-    }
-  </script>
+        
+        function showContent() {
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('contentBox').style.display = 'block';
+            
+            document.getElementById('totalReports').textContent = files.length;
+            
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            files.forEach((file, index) => {
+                const isToday = file.dateObj.getTime() === today.getTime();
+                
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item' + (isToday ? ' today' : '');
+                fileItem.innerHTML = `
+                    <div class="file-info">
+                        <div class="file-name">
+                            📊 ${file.name}
+                            ${isToday ? '<span class="today-badge">BUGÜN</span>' : ''}
+                        </div>
+                        <div class="file-date">
+                            📅 ${file.date} • 💾 ${file.size} • 🔢 7 Sayfa Analiz
+                        </div>
+                    </div>
+                    <a href="${file.url}" class="download-btn" download>
+                        ⬇️ İndir
+                    </a>
+                `;
+                fileList.appendChild(fileItem);
+            });
+        }
+        
+        function logout() {
+            if (confirm('Çıkış yapmak istediğinizden emin misiniz?')) {
+                sessionStorage.removeItem('authenticated');
+                location.reload();
+            }
+        }
+        
+        setTimeout(function() {
+            if (sessionStorage.getItem('authenticated') === 'true') {
+                alert('Oturumunuz güvenlik nedeniyle sonlandırıldı. Lütfen tekrar giriş yapın.');
+                logout();
+            }
+        }, 2 * 60 * 60 * 1000);
+    </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
