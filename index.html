@@ -658,46 +658,30 @@
                 <button class="close-modal" id="closeModal">&times;</button>
             </div>
             
-            <!-- FORM - KESİN ÇALIŞAN VERSİYON -->
-            <form id="messageForm" action="https://formsubmit.co/el/xojuci" method="POST" target="_blank">
-                <!-- Gizli alanlar -->
-                <input type="hidden" name="_subject" value="BORSAANALIZ V11 - Yeni Mesaj">
-                <input type="hidden" name="_template" value="table">
-                <input type="hidden" name="_captcha" value="false">
-                <input type="hidden" name="_next" value="#">
-                
-                <div class="form-group">
-                    <label for="senderName">İsminiz <span class="optional-text">(opsiyonel)</span></label>
-                    <input type="text" id="senderName" name="name" class="form-input" placeholder="Adınızı yazabilirsiniz">
-                </div>
-                
-                <div class="form-group">
-                    <label for="senderEmail">E-posta adresiniz <span class="optional-text">(opsiyonel)</span></label>
-                    <input type="email" id="senderEmail" name="email" class="form-input" placeholder="email@example.com">
-                    <div class="optional-text">E-posta adresinizi yazarsanız size dönüş yapabilirim</div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="messageContent">Mesajınız <span class="required">*</span></label>
-                    <textarea id="messageContent" name="message" class="form-input" placeholder="Lütfen mesajınızı detaylı bir şekilde yazınız..." required></textarea>
-                    <div class="optional-text">Bu alan zorunludur</div>
-                </div>
-                
-                <div class="form-info">
-                    📩 Mesajınız bana direkt olarak iletilecektir. E-posta adresiniz gizli kalacak ve üçüncü taraflarla paylaşılmayacaktır.
-                </div>
-                
-                <!-- Form mesajları -->
-                <div class="form-message form-error" id="formError">
-                    Lütfen mesajınızı yazın!
-                </div>
-                
-                <div class="form-message form-success" id="formSuccess">
-                    ✅ Mesajınız başarıyla gönderildi! En kısa sürede size dönüş yapacağım.
-                </div>
-                
-                <button type="submit" class="submit-btn" id="submitBtn">Mesajı Gönder</button>
-            </form>
+            <!-- GOOGLE FORMS İFRAME - KESİN ÇALIŞAN ÇÖZÜM -->
+            <div class="form-info">
+                📩 Mesajınız Google Forms üzerinden bana iletilecektir. Lütfen aşağıdaki formu doldurunuz.
+            </div>
+            
+            <iframe 
+                src="https://docs.google.com/forms/d/e/1FAIpQLSc2N0oNwlLjx8Lpt3H-DtHYMyGqtQ-lbbuHnpKw9KjB9P34sA/viewform?embedded=true" 
+                width="100%" 
+                height="500" 
+                frameborder="0" 
+                marginheight="0" 
+                marginwidth="0"
+                style="border-radius: 10px; margin-top: 20px;"
+                id="googleForm">
+                Yükleniyor...
+            </iframe>
+            
+            <div class="form-info" style="margin-top: 20px;">
+                <strong>Not:</strong> Formu doldurup gönderdikten sonra bu pencereyi kapatabilirsiniz. Mesajınız Google Sheets üzerinden bana iletilecektir.
+            </div>
+            
+            <button class="submit-btn" onclick="closeMessageModal()" style="margin-top: 20px;">
+                ✅ Formu Gönderdim, Pencereyi Kapat
+            </button>
         </div>
     </div>
 
@@ -839,23 +823,19 @@
             }
         }, 2 * 60 * 60 * 1000);
         
-        // YENİ EKLENEN MESAJ GÖNDERME FONKSİYONLARI - KESİN ÇALIŞAN
+        // YENİ EKLENEN MESAJ GÖNDERME FONKSİYONLARI - GOOGLE FORMS ÇÖZÜMÜ
         document.addEventListener('DOMContentLoaded', function() {
             const openMessageModal = document.getElementById('openMessageModal');
             const messageModal = document.getElementById('messageModal');
             const closeModal = document.getElementById('closeModal');
-            const messageForm = document.getElementById('messageForm');
-            const formError = document.getElementById('formError');
-            const formSuccess = document.getElementById('formSuccess');
-            const messageContent = document.getElementById('messageContent');
-            const submitBtn = document.getElementById('submitBtn');
             
             // Mesaj gönder modalını aç
             if (openMessageModal) {
                 openMessageModal.addEventListener('click', function() {
                     messageModal.style.display = 'flex';
-                    formError.style.display = 'none';
-                    formSuccess.style.display = 'none';
+                    // Google Forms iframe'ini yenile
+                    const iframe = document.getElementById('googleForm');
+                    iframe.src = iframe.src;
                 });
             }
             
@@ -863,9 +843,6 @@
             if (closeModal) {
                 closeModal.addEventListener('click', function() {
                     messageModal.style.display = 'none';
-                    messageForm.reset();
-                    formError.style.display = 'none';
-                    formSuccess.style.display = 'none';
                 });
             }
             
@@ -874,55 +851,15 @@
                 messageModal.addEventListener('click', function(e) {
                     if (e.target === messageModal) {
                         messageModal.style.display = 'none';
-                        messageForm.reset();
-                        formError.style.display = 'none';
-                        formSuccess.style.display = 'none';
-                    }
-                });
-            }
-            
-            // Form gönderimi - BASİT VE KESİN ÇALIŞAN
-            if (messageForm) {
-                messageForm.addEventListener('submit', function(e) {
-                    // Mesaj kontrolü
-                    if (!messageContent.value.trim()) {
-                        e.preventDefault();
-                        formError.style.display = 'block';
-                        formSuccess.style.display = 'none';
-                        return;
-                    }
-                    
-                    // Başarı mesajını göster (form otomatik olarak FormSubmit'e gidecek)
-                    formSuccess.style.display = 'block';
-                    formError.style.display = 'none';
-                    
-                    // Butonu devre dışı bırak (çift tıklamayı önle)
-                    submitBtn.disabled = true;
-                    submitBtn.textContent = 'Gönderiliyor...';
-                    submitBtn.style.opacity = '0.7';
-                    
-                    // 3 saniye sonra modalı kapat ve formu resetle
-                    setTimeout(function() {
-                        messageModal.style.display = 'none';
-                        messageForm.reset();
-                        formSuccess.style.display = 'none';
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = 'Mesajı Gönder';
-                        submitBtn.style.opacity = '1';
-                    }, 3000);
-                });
-            }
-            
-            // Enter tuşuyla gönderme
-            if (messageContent) {
-                messageContent.addEventListener('keydown', function(e) {
-                    if (e.ctrlKey && e.key === 'Enter') {
-                        submitBtn.click();
                     }
                 });
             }
         });
+        
+        // Modalı kapatma fonksiyonu
+        function closeMessageModal() {
+            document.getElementById('messageModal').style.display = 'none';
+        }
     </script>
 </body>
 </html>
-
