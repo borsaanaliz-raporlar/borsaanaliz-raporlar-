@@ -510,6 +510,13 @@
             box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
         }
         
+        .submit-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
         .form-info {
             background: rgba(102, 126, 234, 0.08);
             border-radius: 10px;
@@ -573,6 +580,13 @@
             }
         }
     </style>
+    <!-- EmailJS CDN -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            emailjs.init("zBcM0vl7FbH8mZWwL"); // Benim EmailJS Public Key'im - ÜCRETSİZ
+        })();
+    </script>
 </head>
 <body>
     <div class="container">
@@ -653,7 +667,7 @@
         </div>
     </div>
     
-    <!-- YENİ EKLENEN MESAJ GÖNDER MODAL (POPUP) - BASİT HTML FORM -->
+    <!-- YENİ EKLENEN MESAJ GÖNDER MODAL (POPUP) -->
     <div class="modal-overlay" id="messageModal">
         <div class="modal">
             <div class="modal-header">
@@ -661,26 +675,25 @@
                 <button class="close-modal" id="closeModal">&times;</button>
             </div>
             
-            <!-- BASİT VE ÇALIŞAN HTML FORM -->
             <div class="form-info">
-                📩 Aşağıdaki formu doldurup gönderin, mesajınız bana iletilecektir.
+                📩 Aşağıdaki formu doldurup gönderin, mesajınız direkt e-posta adresime iletilecektir.
             </div>
             
             <form id="messageForm">
                 <div class="form-group">
                     <label for="senderName">İsminiz <span class="optional-text">(opsiyonel)</span></label>
-                    <input type="text" id="senderName" name="name" class="form-input" placeholder="Adınızı yazabilirsiniz">
+                    <input type="text" id="senderName" name="senderName" class="form-input" placeholder="Adınızı yazabilirsiniz">
                 </div>
                 
                 <div class="form-group">
                     <label for="senderEmail">E-posta adresiniz <span class="optional-text">(opsiyonel)</span></label>
-                    <input type="email" id="senderEmail" name="email" class="form-input" placeholder="email@example.com">
+                    <input type="email" id="senderEmail" name="senderEmail" class="form-input" placeholder="email@example.com">
                     <div class="optional-text">E-posta adresinizi yazarsanız size dönüş yapabilirim</div>
                 </div>
                 
                 <div class="form-group">
                     <label for="messageContent">Mesajınız <span class="required">*</span></label>
-                    <textarea id="messageContent" name="message" class="form-input" placeholder="Lütfen mesajınızı detaylı bir şekilde yazınız..." required></textarea>
+                    <textarea id="messageContent" name="messageContent" class="form-input" placeholder="Lütfen mesajınızı detaylı bir şekilde yazınız..." required></textarea>
                     <div class="optional-text">Bu alan zorunludur</div>
                 </div>
                 
@@ -840,7 +853,7 @@
             }
         }, 2 * 60 * 60 * 1000);
         
-        // YENİ EKLENEN MESAJ GÖNDERME FONKSİYONLARI - BASİT VE ÇALIŞAN
+        // YENİ EKLENEN MESAJ GÖNDERME FONKSİYONLARI - EMAILJS İLE
         document.addEventListener('DOMContentLoaded', function() {
             const openMessageModal = document.getElementById('openMessageModal');
             const messageModal = document.getElementById('messageModal');
@@ -862,6 +875,8 @@
                     senderName.value = '';
                     senderEmail.value = '';
                     messageContent.value = '';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '📨 Mesajı Gönder';
                 });
             }
             
@@ -881,9 +896,9 @@
                 });
             }
             
-            // Mesaj gönderme butonu
+            // Mesaj gönderme butonu - EMAILJS İLE
             if (submitBtn) {
-                submitBtn.addEventListener('click', function() {
+                submitBtn.addEventListener('click', async function() {
                     // Kontroller
                     if (!messageContent.value.trim()) {
                         formError.textContent = "Lütfen mesajınızı yazın!";
@@ -902,36 +917,66 @@
                     const message = messageContent.value.trim();
                     const date = new Date().toLocaleString('tr-TR');
                     
-                    // Mailto linki oluştur (GİZLİ - kullanıcı göremez)
-                    const subject = `BORSAANALIZ Mesaj - ${date}`;
-                    const body = `İsim: ${name}%0D%0AE-posta: ${email}%0D%0ATarih: ${date}%0D%0A%0D%0AMesaj:%0D%0A${message}`;
-                    
-                    // Gizli mail gönderme (kullanıcı görmez)
-                    const mailtoLink = `mailto:ufukyamansavci@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                    
-                    // Başarı mesajını göster
-                    formSuccess.style.display = 'block';
-                    formError.style.display = 'none';
-                    
-                    // 1 saniye bekle ve mail göndermeyi tetikle
-                    setTimeout(function() {
-                        // Gizli iframe ile mail gönder
-                        const iframe = document.createElement('iframe');
-                        iframe.style.display = 'none';
-                        iframe.src = mailtoLink;
-                        document.body.appendChild(iframe);
+                    try {
+                        // EmailJS ile e-posta gönder
+                        const templateParams = {
+                            to_name: "Ufuk Bey",
+                            from_name: name,
+                            from_email: email,
+                            message: message,
+                            date: date,
+                            reply_to: email
+                        };
+                        
+                        // EmailJS gönderimi
+                        const response = await emailjs.send(
+                            'service_9wqz68m', // Benim EmailJS Service ID'm
+                            'template_8p0lq3n', // Benim EmailJS Template ID'm
+                            templateParams
+                        );
+                        
+                        // Başarılı
+                        console.log('E-posta gönderildi:', response.status, response.text);
+                        
+                        // Başarı mesajını göster
+                        formSuccess.textContent = "✅ Mesajınız başarıyla gönderildi! En kısa sürede size dönüş yapacağım.";
+                        formSuccess.style.display = 'block';
+                        formError.style.display = 'none';
                         
                         // 2 saniye sonra modalı kapat
                         setTimeout(function() {
                             messageModal.style.display = 'none';
+                            // Formu temizle
+                            senderName.value = '';
+                            senderEmail.value = '';
+                            messageContent.value = '';
                             // Butonu eski haline getir
                             submitBtn.disabled = false;
                             submitBtn.textContent = '📨 Mesajı Gönder';
                             
-                            // Başarı mesajı göster
+                            // Kullanıcıya bildirim göster
                             alert('✅ Mesajınız başarıyla gönderildi! En kısa sürede size dönüş yapacağım.');
                         }, 2000);
-                    }, 1000);
+                        
+                    } catch (error) {
+                        // Hata durumu
+                        console.error('E-posta gönderme hatası:', error);
+                        
+                        formError.textContent = "Mesaj gönderilirken bir hata oluştu. Lütfen tekrar deneyin.";
+                        formError.style.display = 'block';
+                        formSuccess.style.display = 'none';
+                        
+                        // Butonu eski haline getir
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = '📨 Mesajı Gönder';
+                        
+                        // Alternatif çözüm: mailto linki
+                        setTimeout(function() {
+                            const subject = `BORSAANALIZ Mesaj - ${date}`;
+                            const body = `İsim: ${name}%0D%0AE-posta: ${email}%0D%0ATarih: ${date}%0D%0A%0D%0AMesaj:%0D%0A${message}`;
+                            window.open(`mailto:ufukyamansavci@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
+                        }, 500);
+                    }
                 });
             }
             
