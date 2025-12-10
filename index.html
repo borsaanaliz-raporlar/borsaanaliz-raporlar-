@@ -1,501 +1,950 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BORSAANALIZ V11 - Günlük Teknik Analiz Raporları</title>
-
-<style>
-/* --- ORİJİNAL CSS AYNEN KORUNDU --- */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
-
-.container {
-    background: white;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    max-width: 700px;
-    width: 100%;
-    animation: slideUp 0.5s ease-out;
-}
-
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.logo {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.logo h1 {
-    color: #667eea;
-    font-size: 32px;
-    margin-bottom: 10px;
-    font-weight: 700;
-}
-
-.logo p {
-    color: #666;
-    font-size: 16px;
-}
-
-.version-badge {
-    display: inline-block;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-size: 12px;
-    margin-top: 10px;
-    font-weight: bold;
-}
-
-#loginBox {
-    text-align: center;
-}
-
-#loginBox h2 {
-    margin-bottom: 20px;
-    color: #333;
-    font-size: 24px;
-}
-
-.input-group {
-    position: relative;
-    margin-bottom: 20px;
-}
-
-.input-group input {
-    width: 100%;
-    padding: 15px 45px;
-    border: 2px solid #ddd;
-    border-radius: 12px;
-    font-size: 16px;
-    transition: all 0.3s;
-}
-
-.input-group input:focus {
-    border-color: #667eea;
-    outline: none;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-}
-
-.input-icon {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 20px;
-}
-
-.login-btn {
-    width: 100%;
-    padding: 15px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s;
-    margin-bottom: 15px;
-}
-
-.login-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-}
-
-.login-btn:active {
-    transform: translateY(0);
-}
-
-.error {
-    background: #fee;
-    color: #e74c3c;
-    padding: 12px;
-    border-radius: 8px;
-    margin-top: 15px;
-    font-size: 14px;
-    display: none;
-    border-left: 4px solid #e74c3c;
-}
-
-.error.show {
-    display: block;
-    animation: shake 0.5s;
-}
-
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-10px); }
-    75% { transform: translateX(10px); }
-}
-
-.youtube-link {
-    display: block;
-    margin-top: 20px;
-    padding: 15px;
-    background: #ff0000;
-    color: white;
-    text-align: center;
-    border-radius: 10px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: all 0.3s;
-}
-
-.youtube-link:hover {
-    background: #cc0000;
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(255, 0, 0, 0.3);
-}
-
-#contentBox {
-    display: none;
-}
-
-.welcome {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 20px;
-    border-radius: 12px;
-    text-align: center;
-    margin-bottom: 25px;
-}
-
-.welcome h2 {
-    font-size: 24px;
-    margin-bottom: 10px;
-}
-
-.stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
-    margin-bottom: 25px;
-}
-
-.stat-card {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 10px;
-    text-align: center;
-}
-
-.stat-number {
-    font-size: 28px;
-    font-weight: bold;
-    color: #667eea;
-    margin-bottom: 5px;
-}
-
-.section-title {
-    font-size: 18px;
-    color: #333;
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.section-title::before {
-    content: '';
-    width: 4px;
-    height: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 2px;
-}
-
-.file-list {
-    margin-bottom: 20px;
-}
-
-.file-item {
-    background: #f8f9fa;
-    padding: 18px;
-    margin-bottom: 12px;
-    border-radius: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: all 0.3s;
-    border: 2px solid transparent;
-}
-
-.file-item:hover {
-    background: #e9ecef;
-    transform: translateX(5px);
-    border-color: #667eea;
-}
-
-.today-badge {
-    display: inline-block;
-    background: #28a745;
-    color: white;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: bold;
-    margin-left: 8px;
-}
-
-.download-btn {
-    background: #28a745;
-    color: white;
-    padding: 12px 24px;
-    border-radius: 10px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: all 0.3s;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-}
-
-.logout-btn {
-    margin-top: 20px;
-    padding: 12px;
-    background: #e74c3c;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    width: 100%;
-    font-size: 15px;
-    font-weight: bold;
-    transition: all 0.3s;
-}
-
-.warning {
-    background: #fff3cd;
-    border-left: 4px solid #ffc107;
-    padding: 15px;
-    border-radius: 8px;
-    margin-top: 20px;
-    font-size: 13px;
-    color: #856404;
-}
-
-/* █████████████████████████████████████ */
-/* 🔵 MESAJ GÖNDER BUTONU + POPUP EKLENDİ */
-/* █████████████████████████████████████ */
-
-.msg-btn {
-    width: 100%;
-    padding: 14px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-size: 16px;
-    margin-bottom: 20px;
-    cursor: pointer;
-    transition: 0.3s;
-    font-weight: bold;
-}
-
-.msg-btn:hover {
-    background: #0069d9;
-    transform: translateY(-2px);
-}
-
-.popup-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.55);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 5000;
-}
-
-.popup-box {
-    background: white;
-    padding: 25px;
-    width: 90%;
-    max-width: 450px;
-    border-radius: 16px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
-}
-
-.popup-title {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 15px;
-}
-
-.popup-box input,
-.popup-box textarea {
-    width: 100%;
-    padding: 12px;
-    border: 2px solid #ddd;
-    border-radius: 10px;
-    margin-bottom: 12px;
-}
-
-.send-btn {
-    width: 100%;
-    background: #28a745;
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    color:white;
-    cursor:pointer;
-    font-weight:bold;
-}
-
-.close-btn {
-    width: 100%;
-    background: #e74c3c;
-    padding: 10px;
-    border:none;
-    border-radius:10px;
-    color:white;
-    margin-top:8px;
-}
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BORSAANALIZ V11 - Günlük Teknik Analiz Raporları</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 700px;
+            width: 100%;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            color: #667eea;
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .logo p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        
+        #loginBox {
+            text-align: center;
+        }
+        
+        #loginBox h2 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 24px;
+        }
+        
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 15px 45px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .input-group input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .login-btn:active {
+            transform: translateY(0);
+        }
+        
+        .error {
+            background: #fee;
+            color: #e74c3c;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none;
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .error.show {
+            display: block;
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .youtube-link {
+            display: block;
+            margin-top: 20px;
+            padding: 15px;
+            background: #ff0000;
+            color: white;
+            text-align: center;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .youtube-link:hover {
+            background: #cc0000;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 0, 0, 0.3);
+        }
+        
+        #contentBox {
+            display: none;
+        }
+        
+        .welcome {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .welcome h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .welcome p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+        
+        .file-list {
+            margin-bottom: 20px;
+        }
+        
+        .file-item {
+            background: #f8f9fa;
+            padding: 18px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .file-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+            border-color: #667eea;
+        }
+        
+        .file-item.today {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-color: #667eea;
+        }
+        
+        .file-info {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 15px;
+        }
+        
+        .file-date {
+            color: #666;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .today-badge {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+        
+        .download-btn {
+            background: #28a745;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .download-btn:hover {
+            background: #218838;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .logout-btn {
+            margin-top: 20px;
+            padding: 12px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 15px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #856404;
+        }
+        
+        .warning strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        /* YENİ EKLENEN MESAJ GÖNDERME STİLLERİ */
+        .message-btn-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .message-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .message-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+        
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            animation: modalSlideUp 0.4s ease;
+        }
+        
+        @keyframes modalSlideUp {
+            from { transform: translateY(40px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .modal-header h3 {
+            color: #333;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 28px;
+            cursor: pointer;
+            transition: color 0.3s;
+            line-height: 1;
+        }
+        
+        .close-modal:hover {
+            color: #e74c3c;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px;
+            background: #f8f9fa;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            color: #333;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+        
+        textarea.form-input {
+            min-height: 120px;
+            resize: vertical;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .optional-text {
+            font-size: 13px;
+            color: #888;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        
+        .required {
+            color: #e74c3c;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+        }
+        
+        .form-info {
+            background: rgba(102, 126, 234, 0.08);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            color: #555;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        
+        .form-message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .form-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .form-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+            
+            .logo h1 {
+                font-size: 24px;
+            }
+            
+            .file-item {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+            
+            .download-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .modal {
+                width: 95%;
+                padding: 20px;
+            }
+            
+            .message-btn {
+                padding: 12px 20px;
+                font-size: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<div class="container">
-
-<!-- LOGO BLOĞU AYNEN -->
-<div class="logo">
-    <h1>📊 BORSAANALIZ V11</h1>
-    <p>Günlük Teknik Analiz Raporları</p>
-    <span class="version-badge">VERSION 11.0</span>
-</div>
-
-<!-- LOGIN BOX AYNEN -->
-<div id="loginBox">
-    <h2>🔒 Üye Girişi</h2>
-
-    <div class="input-group">
-        <span class="input-icon">🔑</span>
-        <input type="password" id="passwordInput" placeholder="Şifrenizi girin" autocomplete="off">
+    <div class="container">
+        <div class="logo">
+            <h1>📊 BORSAANALIZ V11</h1>
+            <p>Günlük Teknik Analiz Raporları</p>
+            <span class="version-badge">VERSION 11.0</span>
+        </div>
+        
+        <div id="loginBox">
+            <h2>🔒 Üye Girişi</h2>
+            <p style="color: #666; margin-bottom: 20px; font-size: 14px;">
+                YouTube Katıl grubundan aldığınız şifre ile giriş yapın
+            </p>
+            
+            <div class="input-group">
+                <span class="input-icon">🔑</span>
+                <input type="password" id="passwordInput" placeholder="Şifrenizi girin" autocomplete="off">
+            </div>
+            
+            <button class="login-btn" onclick="checkPassword()">
+                🚀 Raporlara Eriş
+            </button>
+            
+            <div class="error" id="errorMsg">
+                ❌ Hatalı şifre! Lütfen YouTube gönderisinden güncel şifreyi alın.
+            </div>
+            
+            <a href="https://www.youtube.com" class="youtube-link" target="_blank">
+                📺 Şifreyi YouTube'dan Al
+            </a>
+        </div>
+        
+        <div id="contentBox">
+            <div class="welcome">
+                <h2>Hoş Geldiniz! 🎉</h2>
+                <p>BORSAANALIZ V11 - Günlük Teknik Analiz Raporlarına Erişiminiz Aktif</p>
+            </div>
+            
+            <!-- YENİ EKLENEN MESAJ GÖNDER BUTONU -->
+            <div class="message-btn-container">
+                <button class="message-btn" id="openMessageModal">
+                    📨 Mesaj Gönder
+                </button>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalReports">3</div>
+                    <div class="stat-label">Toplam Rapor</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">Analiz Edilen Hisse</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">7</div>
+                    <div class="stat-label">Analiz Sayfası</div>
+                </div>
+            </div>
+            
+            <h3 class="section-title">📁 Günlük Analiz Raporları</h3>
+            
+            <div class="file-list" id="fileList">
+            </div>
+            
+            <div class="warning">
+                <strong>⚠️ Önemli Uyarılar:</strong>
+                • Bu raporlar yatırım tavsiyesi değildir<br>
+                • Raporları üçüncü kişilerle paylaşmayınız<br>
+                • Şifrenizi kimseyle paylaşmayınız<br>
+                • Kendi araştırmanızı mutlaka yapınız
+            </div>
+            
+            <button class="logout-btn" onclick="logout()">
+                🚪 Güvenli Çıkış
+            </button>
+        </div>
+    </div>
+    
+    <!-- YENİ EKLENEN MESAJ GÖNDER MODAL (POPUP) -->
+    <div class="modal-overlay" id="messageModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><span>📨</span> Mesaj Gönder</h3>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            
+            <!-- FormSubmit Formu (E-posta gizli: el/xojuci) -->
+            <form id="messageForm" action="https://formsubmit.co/el/xojuci" method="POST">
+                <!-- Gizli alanlar -->
+                <input type="hidden" name="_subject" value="BORSAANALIZ V11 - Yeni Mesaj">
+                <input type="hidden" name="_template" value="table">
+                <input type="hidden" name="_next" value="#">
+                <input type="hidden" name="_captcha" value="false">
+                
+                <div class="form-group">
+                    <label for="senderName">İsminiz <span class="optional-text">(opsiyonel)</span></label>
+                    <input type="text" id="senderName" name="name" class="form-input" placeholder="Adınızı yazabilirsiniz">
+                </div>
+                
+                <div class="form-group">
+                    <label for="senderEmail">E-posta adresiniz <span class="optional-text">(opsiyonel)</span></label>
+                    <input type="email" id="senderEmail" name="email" class="form-input" placeholder="email@example.com">
+                    <div class="optional-text">E-posta adresinizi yazarsanız size dönüş yapabilirim</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="messageContent">Mesajınız <span class="required">*</span></label>
+                    <textarea id="messageContent" name="message" class="form-input" placeholder="Lütfen mesajınızı detaylı bir şekilde yazınız..." required></textarea>
+                    <div class="optional-text">Bu alan zorunludur</div>
+                </div>
+                
+                <div class="form-info">
+                    📩 Mesajınız bana direkt olarak iletilecektir. E-posta adresiniz gizli kalacak ve üçüncü taraflarla paylaşılmayacaktır.
+                </div>
+                
+                <!-- Form mesajları -->
+                <div class="form-message form-error" id="formError">
+                    Mesaj gönderilirken bir hata oluştu. Lütfen tekrar deneyin.
+                </div>
+                
+                <div class="form-message form-success" id="formSuccess">
+                    ✅ Mesajınız başarıyla gönderildi! En kısa sürede size dönüş yapacağım.
+                </div>
+                
+                <button type="submit" class="submit-btn">Mesajı Gönder</button>
+            </form>
+        </div>
     </div>
 
-    <button class="login-btn" onclick="checkPassword()">🚀 Raporlara Eriş</button>
-
-    <div class="error" id="errorMsg">❌ Hatalı şifre!</div>
-</div>
-
-<!-- █████████████████████████████ -->
-<!-- CONTENT BOX (GİRİŞ SONRASI) -->
-<!-- █████████████████████████████ -->
-
-<div id="contentBox">
-
-<!-- 🔵 BURAYA MESAJ GÖNDER BUTONU EKLENDİ -->
-<button class="msg-btn" onclick="openMsg()">📨 Mesaj Gönder</button>
-
-<!-- HOŞGELDİNİZ BLOĞU AYNEN -->
-<div class="welcome">
-    <h2>Hoş Geldiniz! 🎉</h2>
-    <p>BORSAANALIZ V11 - Günlük Teknik Analiz Raporlarına Erişiminiz Aktif</p>
-</div>
-
-<h3 class="section-title">📁 Günlük Analiz Raporları</h3>
-<div class="file-list" id="fileList"></div>
-
-<div class="warning">
-    <strong>⚠️ Önemli Uyarılar:</strong>
-    • Bu rapor yatırım tavsiyesi değildir<br>
-    • Paylaşmayınız<br>
-    • Şifre gizlidir
-</div>
-
-<button class="logout-btn" onclick="logout()">🚪 Güvenli Çıkış</button>
-</div>
-</div>
-
-<!-- █████████████████████████████ -->
-<!-- 🔵 POPUP FORM EKLENDİ -->
-<!-- █████████████████████████████ -->
-
-<div class="popup-bg" id="popup">
-    <div class="popup-box">
-        <div class="popup-title">📨 Mesaj Gönder</div>
-
-        <form action="https://formsubmit.co/el/xojuci" method="POST">
-            <input type="text" name="isim" placeholder="İsminiz (opsiyonel)">
-            <input type="email" name="email" placeholder="E-posta (opsiyonel)">
-            <textarea name="mesaj" rows="5" placeholder="Mesajınız" required></textarea>
-            <button class="send-btn" type="submit">Gönder</button>
-        </form>
-
-        <button class="close-btn" onclick="closeMsg()">Kapat</button>
-    </div>
-</div>
-
-<script>
-/* ŞİFRE DOĞRULAMA AYNEN */
-const correctPassword="ba";
-
-function checkPassword(){
-    const input=document.getElementById('passwordInput').value.trim();
-    if(input===correctPassword){
-        sessionStorage.setItem('authenticated','true');
-        document.getElementById('loginBox').style.display='none';
-        document.getElementById('contentBox').style.display='block';
-    }
-    else{
-        document.getElementById('errorMsg').classList.add('show');
-    }
-}
-
-document.getElementById('passwordInput')
-    .addEventListener('keypress',e=>{
-        if(e.key==='Enter') checkPassword();
-    });
-
-function logout(){
-    sessionStorage.removeItem('authenticated');
-    location.reload();
-}
-
-/* ██████████████████████████ */
-/* 🔵 POPUP KONTROLLERİ EKLENDİ */
-/* ██████████████████████████ */
-
-function openMsg(){
-    document.getElementById("popup").style.display="flex";
-}
-
-function closeMsg(){
-    document.getElementById("popup").style.display="none";
-}
-
-</script>
-
+    <script>
+        const correctPassword = "ba";
+        
+        const files = [
+              {
+                name: "BORSAANALIZ_V11_TAM_10122025.xlsx",
+                date: "10.12.2025",
+                dateObj: new Date("2025-12-10"),
+                url: "raporlar/BORSAANALIZ_V11_TAM_10122025.xlsx",
+                size: "2.3 MB"
+             },
+              {
+                name: "BORSAANALIZ_V11_TAM_09122025.xlsx",
+                date: "09.12.2025",
+                dateObj: new Date("2025-12-09"),
+                url: "raporlar/BORSAANALIZ_V11_TAM_09122025.xlsx",
+                size: "2.3 MB"
+             },
+              {
+                name: "BORSAANALIZ_V11_TAM_08122025.xlsx",
+                date: "08.12.2025",
+                dateObj: new Date("2025-12-08"),
+                url: "raporlar/BORSAANALIZ_V11_TAM_08122025.xlsx",
+                size: "2.3 MB"
+             },
+              {
+                name: "BORSAANALIZ_V11_TAM_05122025.xlsx",
+                date: "05.12.2025",
+                dateObj: new Date("2025-12-05"),
+                url: "raporlar/BORSAANALIZ_V11_TAM_05122025.xlsx",
+                size: "2.3 MB"
+             },
+               {
+                name: "BORSAANALIZ_V11_TAM_04122025.xlsx",
+                date: "04.12.2025",
+                dateObj: new Date("2025-12-04"),
+                url: "raporlar/BORSAANALIZ_V11_TAM_04122025.xlsx",
+                size: "2.3 MB"
+             },
+               {
+                name: "BORSAANALIZ_V11_TAM_03122025.xlsx",
+                date: "03.12.2025",
+                dateObj: new Date("2025-12-03"),
+                url: "raporlar/BORSAANALIZ_V11_TAM_03122025.xlsx",
+                size: "2.3 MB"
+             },
+               {
+                name: "BORSAANALIZ_V11_TAM_02122025.xlsx",
+                date: "02.12.2025",
+                dateObj: new Date("2025-12-02"),
+                url: "raporlar/BORSAANALIZ_V11_TAM_02122025.xlsx",
+                size: "2.3 MB"
+             },
+               {
+                name: "BORSAANALIZ_V11_TAM_01122025.xlsx",
+                date: "01.12.2025",
+                dateObj: new Date("2025-12-01"),
+                url: "raporlar/BORSAANALIZ_V11_TAM_01122025.xlsx",
+                size: "2.3 MB"
+             }
+        ];
+        
+        window.onload = function() {
+            if (sessionStorage.getItem('authenticated') === 'true') {
+                showContent();
+            }
+        };
+        
+        function checkPassword() {
+            const input = document.getElementById('passwordInput').value.trim();
+            const errorMsg = document.getElementById('errorMsg');
+            
+            if (input === correctPassword) {
+                sessionStorage.setItem('authenticated', 'true');
+                errorMsg.classList.remove('show');
+                showContent();
+            } else {
+                errorMsg.classList.add('show');
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('passwordInput').focus();
+            }
+        }
+        
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+        
+        function showContent() {
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('contentBox').style.display = 'block';
+            
+            document.getElementById('totalReports').textContent = files.length;
+            
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            files.forEach((file, index) => {
+                const isToday = file.dateObj.getTime() === today.getTime();
+                
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item' + (isToday ? ' today' : '');
+                fileItem.innerHTML = `
+                    <div class="file-info">
+                        <div class="file-name">
+                            📊 ${file.name}
+                            ${isToday ? '<span class="today-badge">BUGÜN</span>' : ''}
+                        </div>
+                        <div class="file-date">
+                            📅 ${file.date} • 💾 ${file.size} • 🔢 7 Sayfa Analiz
+                        </div>
+                    </div>
+                    <a href="${file.url}" class="download-btn" download>
+                        ⬇️ İndir
+                    </a>
+                `;
+                fileList.appendChild(fileItem);
+            });
+        }
+        
+        function logout() {
+            if (confirm('Çıkış yapmak istediğinizden emin misiniz?')) {
+                sessionStorage.removeItem('authenticated');
+                location.reload();
+            }
+        }
+        
+        setTimeout(function() {
+            if (sessionStorage.getItem('authenticated') === 'true') {
+                alert('Oturumunuz güvenlik nedeniyle sonlandırıldı. Lütfen tekrar giriş yapın.');
+                logout();
+            }
+        }, 2 * 60 * 60 * 1000);
+        
+        // YENİ EKLENEN MESAJ GÖNDERME FONKSİYONLARI
+        document.addEventListener('DOMContentLoaded', function() {
+            // Modal elemanlarını seç
+            const openMessageModal = document.getElementById('openMessageModal');
+            const messageModal = document.getElementById('messageModal');
+            const closeModal = document.getElementById('closeModal');
+            const messageForm = document.getElementById('messageForm');
+            const formError = document.getElementById('formError');
+            const formSuccess = document.getElementById('formSuccess');
+            
+            // Mesaj gönder modalını aç
+            if (openMessageModal) {
+                openMessageModal.addEventListener('click', function() {
+                    messageModal.style.display = 'flex';
+                });
+            }
+            
+            // Modalı kapat
+            if (closeModal) {
+                closeModal.addEventListener('click', function() {
+                    messageModal.style.display = 'none';
+                    resetForm();
+                });
+            }
+            
+            // Modal dışına tıklayarak kapat
+            if (messageModal) {
+                messageModal.addEventListener('click', function(e) {
+                    if (e.target === messageModal) {
+                        messageModal.style.display = 'none';
+                        resetForm();
+                    }
+                });
+            }
+            
+            // Form gönderimi
+            if (messageForm) {
+                messageForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Form verilerini topla
+                    const formData = new FormData(messageForm);
+                    const name = formData.get('name') || 'Belirtilmemiş';
+                    const email = formData.get('email') || 'Belirtilmemiş';
+                    const message = formData.get('message');
+                    
+                    // Mesaj kontrolü
+                    if (!message.trim()) {
+                        showFormError("Lütfen mesajınızı yazın!");
+                        return;
+                    }
+                    
+                    // FormSubmit'e gönder
+                    fetch(messageForm.action, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            // Başarılı gönderim
+                            showFormSuccess();
+                            messageForm.reset();
+                            
+                            // 3 saniye sonra modalı kapat
+                            setTimeout(() => {
+                                messageModal.style.display = 'none';
+                                resetForm();
+                            }, 3000);
+                        } else {
+                            throw new Error('Form gönderilemedi');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Form gönderim hatası:', error);
+                        showFormError("Mesaj gönderilirken bir hata oluştu. Lütfen tekrar deneyin.");
+                    });
+                });
+            }
+            
+            // Yardımcı fonksiyonlar
+            function showFormError(text) {
+                if (formError) {
+                    formError.textContent = text;
+                    formError.style.display = 'block';
+                    if (formSuccess) formSuccess.style.display = 'none';
+                    
+                    // Hata mesajını 5 saniye sonra gizle
+                    setTimeout(() => {
+                        formError.style.display = 'none';
+                    }, 5000);
+                }
+            }
+            
+            function showFormSuccess() {
+                if (formSuccess) {
+                    formSuccess.style.display = 'block';
+                    if (formError) formError.style.display = 'none';
+                }
+            }
+            
+            function resetForm() {
+                if (messageForm) messageForm.reset();
+                if (formError) formError.style.display = 'none';
+                if (formSuccess) formSuccess.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
