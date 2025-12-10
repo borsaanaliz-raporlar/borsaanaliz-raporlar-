@@ -431,12 +431,18 @@
             transition: all 0.3s;
             margin-top: 10px;
             box-shadow: 0 5px 15px rgba(40, 167, 69, 0.2);
+            border: none;
+            cursor: pointer;
         }
         
         .email-btn:hover {
             background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
             transform: translateY(-3px);
             box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+        }
+        
+        .email-btn:active {
+            transform: translateY(-1px);
         }
         
         .copy-success {
@@ -558,15 +564,15 @@
                     </div>
                     
                     <p class="contact-note">
-                        <strong>📌 Not:</strong> Mail atarken lütfen;<br>
+                        <strong>📌 Notlar:</strong><br>
                         1. Konu kısmına <strong>"BORSAANALIZ SORU"</strong> yazın<br>
-                        2. İsminizi ve mesajınızı belirtin<br>
-                        3. Cevap almak istiyorsanız e-posta adresinizi yazın
+                        2. Mesajınızı detaylı şekilde belirtin<br>
+                        3. Cevabı farklı bir mail adresine almak isterseniz, mesajınızda belirtin
                     </p>
                     
-                    <a href="mailto:iletisimborsaanaliz@gmail.com?subject=BORSAANALIZ SORU" class="email-btn">
+                    <button class="email-btn" onclick="sendEmail()">
                         📨 Mail Gönder
-                    </a>
+                    </button>
                 </div>
             </div>
             
@@ -766,6 +772,34 @@
                 // Kopyalama başarısız olursa
                 alert('Kopyalama başarısız. Lütfen e-posta adresini manuel kopyalayın: ' + email);
             });
+        }
+        
+        // Mail gönderme fonksiyonu - DÜZELTİLMİŞ VERSİYON
+        function sendEmail() {
+            const email = "iletisimborsaanaliz@gmail.com";
+            const subject = "BORSAANALIZ SORU";
+            
+            // Mailto linki oluştur
+            const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
+            
+            // Yeni pencere açarak mail gönder (bu daha güvenilir)
+            const newWindow = window.open(mailtoLink, '_blank');
+            
+            // Eğer pencere açılamazsa alternatif
+            if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+                // Tarayıcı engellediyse, kullanıcıya bilgi ver
+                alert(
+                    "Mail gönderme penceresi açılamadı.\n\n" +
+                    "Lütfen şu adımları izleyin:\n" +
+                    "1. E-posta adresini kopyalayın: " + email + "\n" +
+                    "2. Kendi e-posta uygulamanızı açın\n" +
+                    "3. Konu kısmına 'BORSAANALIZ SORU' yazın\n" +
+                    "4. Mesajınızı yazıp gönderin"
+                );
+                
+                // E-posta adresini kopyala
+                copyEmail();
+            }
         }
         
         setTimeout(function() {
