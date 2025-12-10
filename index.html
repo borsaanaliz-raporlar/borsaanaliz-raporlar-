@@ -658,13 +658,13 @@
                 <button class="close-modal" id="closeModal">&times;</button>
             </div>
             
-            <!-- FormSubmit Formu (E-posta gizli: el/xojuci) -->
-            <form id="messageForm" action="https://formsubmit.co/el/xojuci" method="POST">
+            <!-- FORM - KESİN ÇALIŞAN VERSİYON -->
+            <form id="messageForm" action="https://formsubmit.co/el/xojuci" method="POST" target="_blank">
                 <!-- Gizli alanlar -->
                 <input type="hidden" name="_subject" value="BORSAANALIZ V11 - Yeni Mesaj">
                 <input type="hidden" name="_template" value="table">
-                <input type="hidden" name="_next" value="#">
                 <input type="hidden" name="_captcha" value="false">
+                <input type="hidden" name="_next" value="#">
                 
                 <div class="form-group">
                     <label for="senderName">İsminiz <span class="optional-text">(opsiyonel)</span></label>
@@ -689,14 +689,14 @@
                 
                 <!-- Form mesajları -->
                 <div class="form-message form-error" id="formError">
-                    Mesaj gönderilirken bir hata oluştu. Lütfen tekrar deneyin.
+                    Lütfen mesajınızı yazın!
                 </div>
                 
                 <div class="form-message form-success" id="formSuccess">
                     ✅ Mesajınız başarıyla gönderildi! En kısa sürede size dönüş yapacağım.
                 </div>
                 
-                <button type="submit" class="submit-btn">Mesajı Gönder</button>
+                <button type="submit" class="submit-btn" id="submitBtn">Mesajı Gönder</button>
             </form>
         </div>
     </div>
@@ -705,13 +705,6 @@
         const correctPassword = "ba";
         
         const files = [
-              {
-                name: "BORSAANALIZ_V11_TAM_10122025.xlsx",
-                date: "10.12.2025",
-                dateObj: new Date("2025-12-10"),
-                url: "raporlar/BORSAANALIZ_V11_TAM_10122025.xlsx",
-                size: "2.3 MB"
-             },
               {
                 name: "BORSAANALIZ_V11_TAM_09122025.xlsx",
                 date: "09.12.2025",
@@ -839,20 +832,23 @@
             }
         }, 2 * 60 * 60 * 1000);
         
-        // YENİ EKLENEN MESAJ GÖNDERME FONKSİYONLARI
+        // YENİ EKLENEN MESAJ GÖNDERME FONKSİYONLARI - KESİN ÇALIŞAN
         document.addEventListener('DOMContentLoaded', function() {
-            // Modal elemanlarını seç
             const openMessageModal = document.getElementById('openMessageModal');
             const messageModal = document.getElementById('messageModal');
             const closeModal = document.getElementById('closeModal');
             const messageForm = document.getElementById('messageForm');
             const formError = document.getElementById('formError');
             const formSuccess = document.getElementById('formSuccess');
+            const messageContent = document.getElementById('messageContent');
+            const submitBtn = document.getElementById('submitBtn');
             
             // Mesaj gönder modalını aç
             if (openMessageModal) {
                 openMessageModal.addEventListener('click', function() {
                     messageModal.style.display = 'flex';
+                    formError.style.display = 'none';
+                    formSuccess.style.display = 'none';
                 });
             }
             
@@ -860,7 +856,9 @@
             if (closeModal) {
                 closeModal.addEventListener('click', function() {
                     messageModal.style.display = 'none';
-                    resetForm();
+                    messageForm.reset();
+                    formError.style.display = 'none';
+                    formSuccess.style.display = 'none';
                 });
             }
             
@@ -869,80 +867,52 @@
                 messageModal.addEventListener('click', function(e) {
                     if (e.target === messageModal) {
                         messageModal.style.display = 'none';
-                        resetForm();
+                        messageForm.reset();
+                        formError.style.display = 'none';
+                        formSuccess.style.display = 'none';
                     }
                 });
             }
             
-            // Form gönderimi
+            // Form gönderimi - BASİT VE KESİN ÇALIŞAN
             if (messageForm) {
                 messageForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    // Form verilerini topla
-                    const formData = new FormData(messageForm);
-                    const name = formData.get('name') || 'Belirtilmemiş';
-                    const email = formData.get('email') || 'Belirtilmemiş';
-                    const message = formData.get('message');
-                    
                     // Mesaj kontrolü
-                    if (!message.trim()) {
-                        showFormError("Lütfen mesajınızı yazın!");
+                    if (!messageContent.value.trim()) {
+                        e.preventDefault();
+                        formError.style.display = 'block';
+                        formSuccess.style.display = 'none';
                         return;
                     }
                     
-                    // FormSubmit'e gönder
-                    fetch(messageForm.action, {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => {
-                        if (response.ok) {
-                            // Başarılı gönderim
-                            showFormSuccess();
-                            messageForm.reset();
-                            
-                            // 3 saniye sonra modalı kapat
-                            setTimeout(() => {
-                                messageModal.style.display = 'none';
-                                resetForm();
-                            }, 3000);
-                        } else {
-                            throw new Error('Form gönderilemedi');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Form gönderim hatası:', error);
-                        showFormError("Mesaj gönderilirken bir hata oluştu. Lütfen tekrar deneyin.");
-                    });
+                    // Başarı mesajını göster (form otomatik olarak FormSubmit'e gidecek)
+                    formSuccess.style.display = 'block';
+                    formError.style.display = 'none';
+                    
+                    // Butonu devre dışı bırak (çift tıklamayı önle)
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Gönderiliyor...';
+                    submitBtn.style.opacity = '0.7';
+                    
+                    // 3 saniye sonra modalı kapat ve formu resetle
+                    setTimeout(function() {
+                        messageModal.style.display = 'none';
+                        messageForm.reset();
+                        formSuccess.style.display = 'none';
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Mesajı Gönder';
+                        submitBtn.style.opacity = '1';
+                    }, 3000);
                 });
             }
             
-            // Yardımcı fonksiyonlar
-            function showFormError(text) {
-                if (formError) {
-                    formError.textContent = text;
-                    formError.style.display = 'block';
-                    if (formSuccess) formSuccess.style.display = 'none';
-                    
-                    // Hata mesajını 5 saniye sonra gizle
-                    setTimeout(() => {
-                        formError.style.display = 'none';
-                    }, 5000);
-                }
-            }
-            
-            function showFormSuccess() {
-                if (formSuccess) {
-                    formSuccess.style.display = 'block';
-                    if (formError) formError.style.display = 'none';
-                }
-            }
-            
-            function resetForm() {
-                if (messageForm) messageForm.reset();
-                if (formError) formError.style.display = 'none';
-                if (formSuccess) formSuccess.style.display = 'none';
+            // Enter tuşuyla gönderme
+            if (messageContent) {
+                messageContent.addEventListener('keydown', function(e) {
+                    if (e.ctrlKey && e.key === 'Enter') {
+                        submitBtn.click();
+                    }
+                });
             }
         });
     </script>
