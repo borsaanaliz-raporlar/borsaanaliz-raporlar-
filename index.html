@@ -349,142 +349,30 @@
             margin-bottom: 5px;
         }
         
-        /* YENİ EKLENEN İLETİŞİM BÖLÜMÜ - BASİT VERSİYON */
-        .contact-section {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 25px;
-            border: 2px solid rgba(102, 126, 234, 0.2);
-        }
-        
-        .contact-info {
+        /* SADE İLETİŞİM SATIRI */
+        .contact-line {
             text-align: center;
-        }
-        
-        .contact-info p {
-            color: #555;
-            margin-bottom: 15px;
-            font-size: 15px;
-            line-height: 1.5;
-        }
-        
-        .email-display {
-            background: white;
-            border: 2px solid #667eea;
-            border-radius: 10px;
-            padding: 20px;
             margin: 20px 0;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
         }
         
-        .email-display h4 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 16px;
+        .contact-line p {
+            margin: 0;
+            font-size: 15px;
+            color: #555;
+            line-height: 1.6;
         }
         
-        .email-address {
+        .contact-line .email {
             font-family: monospace;
-            font-size: 18px;
+            font-size: 16px;
             color: #667eea;
             font-weight: bold;
+            margin-top: 5px;
             word-break: break-all;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            margin: 15px 0;
-            border: 2px dashed #ddd;
-        }
-        
-        .copy-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 15px;
-        }
-        
-        .copy-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            flex: 1;
-            max-width: 200px;
-        }
-        
-        .copy-btn:hover {
-            background: #5a67d8;
-            transform: translateY(-2px);
-        }
-        
-        .copy-btn.success {
-            background: #10b981;
-        }
-        
-        .contact-note {
-            background: rgba(255, 193, 7, 0.1);
-            border-left: 4px solid #ffc107;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #856404;
-            margin: 20px 0;
-            text-align: left;
-        }
-        
-        .instructions {
-            background: rgba(102, 126, 234, 0.08);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 20px;
-            text-align: left;
-        }
-        
-        .instructions ol {
-            margin-left: 20px;
-            margin-bottom: 10px;
-        }
-        
-        .instructions li {
-            margin-bottom: 8px;
-            color: #555;
-        }
-        
-        .copy-success {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #10b981;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-weight: bold;
-            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
-            z-index: 1000;
-            animation: slideIn 0.3s ease, fadeOut 0.3s ease 2s forwards;
-            display: none;
-        }
-        
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
         }
         
         @media (max-width: 600px) {
@@ -506,23 +394,10 @@
                 width: 100%;
                 justify-content: center;
             }
-            
-            .copy-buttons {
-                flex-direction: column;
-            }
-            
-            .copy-btn {
-                max-width: 100%;
-            }
         }
     </style>
 </head>
 <body>
-    <!-- Kopyalama başarı mesajı -->
-    <div class="copy-success" id="copySuccess">
-        ✅ E-posta adresi kopyalandı!
-    </div>
-    
     <div class="container">
         <div class="logo">
             <h1>📊 BORSAANALIZ V11</h1>
@@ -560,43 +435,10 @@
                 <p>BORSAANALIZ V11 - Günlük Teknik Analiz Raporlarına Erişiminiz Aktif</p>
             </div>
             
-            <!-- YENİ EKLENEN İLETİŞİM BÖLÜMÜ - BASİT VERSİYON -->
-            <div class="contact-section">
-                <h3 class="section-title">📧 İletişim</h3>
-                <div class="contact-info">
-                    <p>Bana ulaşmak için aşağıdaki e-posta adresine mail gönderebilirsiniz:</p>
-                    
-                    <div class="email-display">
-                        <h4>📩 İletişim E-posta Adresi:</h4>
-                        <div class="email-address" id="emailAddress">
-                            iletisimborsaanaliz@gmail.com
-                        </div>
-                        
-                        <div class="copy-buttons">
-                            <button class="copy-btn" onclick="copyEmail()" id="copyBtn">
-                                📋 E-postayı Kopyala
-                            </button>
-                            <button class="copy-btn" onclick="copyEmailWithSubject()" id="copySubjectBtn">
-                                📝 E-posta + Konuyu Kopyala
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="instructions">
-                        <strong>📌 Nasıl Mail Göndereceksiniz:</strong>
-                        <ol>
-                            <li>Yukarıdaki e-posta adresini kopyalayın</li>
-                            <li>Kendi e-posta uygulamanızı açın (Gmail, Outlook, vs.)</li>
-                            <li>Alıcı kısmına kopyaladığınız adresi yapıştırın</li>
-                            <li>Konu kısmına: <strong>"BORSAANALIZ SORU"</strong> yazın</li>
-                            <li>Mesajınızı yazıp gönderin</li>
-                        </ol>
-                    </div>
-                    
-                    <div class="contact-note">
-                        <strong>💡 İpucu:</strong> "E-posta + Konuyu Kopyala" butonunu kullanarak hem e-posta adresini hem de konuyu tek seferde kopyalayabilirsiniz.
-                    </div>
-                </div>
+            <!-- SADE İLETİŞİM SATIRI -->
+            <div class="contact-line">
+                <p>📩 İletişim E-posta Adresi:</p>
+                <div class="email">iletisimborsaanaliz@gmail.com</div>
             </div>
             
             <div class="stats">
@@ -762,72 +604,6 @@
                 sessionStorage.removeItem('authenticated');
                 location.reload();
             }
-        }
-        
-        // E-posta kopyalama fonksiyonu
-        function copyEmail() {
-            const email = "iletisimborsaanaliz@gmail.com";
-            
-            // Kopyala işlemi
-            navigator.clipboard.writeText(email).then(function() {
-                showCopySuccess("✅ E-posta adresi kopyalandı!");
-                
-                // Buton görünümünü değiştir
-                const copyBtn = document.getElementById('copyBtn');
-                const originalText = copyBtn.textContent;
-                copyBtn.textContent = '✅ Kopyalandı!';
-                copyBtn.classList.add('success');
-                
-                // 2 saniye sonra eski haline getir
-                setTimeout(function() {
-                    copyBtn.textContent = originalText;
-                    copyBtn.classList.remove('success');
-                }, 2000);
-                
-            }).catch(function(err) {
-                // Kopyalama başarısız olursa
-                alert('Kopyalama başarısız. Lütfen e-posta adresini manuel kopyalayın: ' + email);
-            });
-        }
-        
-        // E-posta + Konu kopyalama fonksiyonu
-        function copyEmailWithSubject() {
-            const email = "iletisimborsaanaliz@gmail.com";
-            const subject = "BORSAANALIZ SORU";
-            const textToCopy = `${email}\n\nKonu: ${subject}`;
-            
-            // Kopyala işlemi
-            navigator.clipboard.writeText(textToCopy).then(function() {
-                showCopySuccess("✅ E-posta adresi ve konu kopyalandı!");
-                
-                // Buton görünümünü değiştir
-                const copyBtn = document.getElementById('copySubjectBtn');
-                const originalText = copyBtn.textContent;
-                copyBtn.textContent = '✅ Kopyalandı!';
-                copyBtn.classList.add('success');
-                
-                // 2 saniye sonra eski haline getir
-                setTimeout(function() {
-                    copyBtn.textContent = originalText;
-                    copyBtn.classList.remove('success');
-                }, 2000);
-                
-            }).catch(function(err) {
-                // Kopyalama başarısız olursa
-                alert('Kopyalama başarısız. Lütfen manuel kopyalayın:\n\n' + textToCopy);
-            });
-        }
-        
-        // Kopyalama başarı mesajı göster
-        function showCopySuccess(message) {
-            const successMsg = document.getElementById('copySuccess');
-            successMsg.textContent = message;
-            successMsg.style.display = 'block';
-            
-            // 2.5 saniye sonra mesajı gizle
-            setTimeout(function() {
-                successMsg.style.display = 'none';
-            }, 2500);
         }
         
         setTimeout(function() {
