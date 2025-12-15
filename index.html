@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BORSAANALIZ V11 - Günlük Teknik Analiz Raporları</title>
     <style>
+        /* MATRIX CANVAS STYLES */
+        #matrixCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        /* ORJİNAL STYLES (değişmedi) */
         * {
             margin: 0;
             padding: 0;
@@ -13,22 +24,25 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: transparent; /* Arka planı transparan yap */
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            position: relative;
         }
         
         .container {
-            background: white;
+            background: rgba(255, 255, 255, 0.95); /* Saydam beyaz */
             padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
             max-width: 700px;
             width: 100%;
             animation: slideUp 0.5s ease-out;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(0, 255, 0, 0.2);
         }
         
         @keyframes slideUp {
@@ -92,6 +106,7 @@
             border-radius: 12px;
             font-size: 16px;
             transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.9);
         }
         
         .input-group input:focus {
@@ -132,7 +147,7 @@
         }
         
         .error {
-            background: #fee;
+            background: rgba(254, 238, 238, 0.9);
             color: #e74c3c;
             padding: 12px;
             border-radius: 8px;
@@ -203,10 +218,11 @@
         }
         
         .stat-card {
-            background: #f8f9fa;
+            background: rgba(248, 249, 250, 0.9);
             padding: 15px;
             border-radius: 10px;
             text-align: center;
+            backdrop-filter: blur(2px);
         }
         
         .stat-number {
@@ -243,7 +259,7 @@
         }
         
         .file-item {
-            background: #f8f9fa;
+            background: rgba(248, 249, 250, 0.9);
             padding: 18px;
             margin-bottom: 12px;
             border-radius: 12px;
@@ -252,16 +268,17 @@
             align-items: center;
             transition: all 0.3s;
             border: 2px solid transparent;
+            backdrop-filter: blur(2px);
         }
         
         .file-item:hover {
-            background: #e9ecef;
+            background: rgba(233, 236, 239, 0.9);
             transform: translateX(5px);
             border-color: #667eea;
         }
         
         .file-item.today {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
             border-color: #667eea;
         }
         
@@ -335,13 +352,14 @@
         }
         
         .warning {
-            background: #fff3cd;
+            background: rgba(255, 243, 205, 0.9);
             border-left: 4px solid #ffc107;
             padding: 15px;
             border-radius: 8px;
             margin-top: 20px;
             font-size: 13px;
             color: #856404;
+            backdrop-filter: blur(2px);
         }
         
         .warning strong {
@@ -354,9 +372,10 @@
             text-align: center;
             margin: 20px 0;
             padding: 15px;
-            background: rgba(102, 126, 234, 0.05);
+            background: rgba(102, 126, 234, 0.08);
             border-radius: 10px;
-            border: 1px solid rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.15);
+            backdrop-filter: blur(2px);
         }
         
         .contact-line p {
@@ -398,6 +417,10 @@
     </style>
 </head>
 <body>
+    <!-- MATRIX CANVAS -->
+    <canvas id="matrixCanvas"></canvas>
+    
+    <!-- ORJİNAL İÇERİK -->
     <div class="container">
         <div class="logo">
             <h1>📊 BORSAANALIZ V11</h1>
@@ -476,6 +499,157 @@
     </div>
 
     <script>
+        // MATRIX EFFECT CODE
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initMatrix();
+        }
+        
+        const chars = "0123456789";
+        const fontSize = 14;
+        let columns = [];
+        
+        class MatrixColumn {
+            constructor(x) {
+                this.x = x;
+                this.chars = [];
+                this.speed = 1.2 + Math.random() * 0.8;
+                this.nextCharTime = Math.random() * 1000;
+                this.charSpacing = fontSize * 1.8;
+                this.maxChars = Math.floor(canvas.height / this.charSpacing) + 3;
+                
+                for (let i = 0; i < this.maxChars; i++) {
+                    this.addChar(canvas.height + i * this.charSpacing);
+                }
+            }
+            
+            addChar(startY) {
+                this.chars.push({
+                    y: startY,
+                    char: chars[Math.floor(Math.random() * chars.length)],
+                    rotation: Math.random() * Math.PI * 2,
+                    rotationSpeed: (Math.random() * 0.06) - 0.03,
+                    opacity: 0,
+                    targetOpacity: 0.85 + Math.random() * 0.15,
+                    life: 1.0
+                });
+                
+                if (this.chars.length > this.maxChars + 3) {
+                    this.chars.shift();
+                }
+            }
+            
+            update(deltaTime) {
+                for (let i = this.chars.length - 1; i >= 0; i--) {
+                    const char = this.chars[i];
+                    
+                    char.y -= this.speed;
+                    char.rotation += char.rotationSpeed;
+                    
+                    if (char.y < canvas.height * 0.4) {
+                        char.opacity = Math.min(char.opacity + 0.015, char.targetOpacity);
+                    }
+                    
+                    char.life -= 0.0005;
+                    
+                    if (char.y < -fontSize * 3 || char.life <= 0) {
+                        this.chars.splice(i, 1);
+                    }
+                }
+                
+                this.nextCharTime -= deltaTime;
+                if (this.nextCharTime <= 0) {
+                    this.addChar(canvas.height + fontSize * 2);
+                    this.nextCharTime = 150 + Math.random() * 300;
+                }
+            }
+            
+            draw() {
+                for (const char of this.chars) {
+                    const heightRatio = char.y / canvas.height;
+                    let red, green;
+                    
+                    if (heightRatio > 0.7) {
+                        red = 255;
+                        green = Math.floor((1 - heightRatio) * 255 / 0.3);
+                    } else if (heightRatio > 0.4) {
+                        red = 255;
+                        green = Math.floor(100 + (0.7 - heightRatio) * 155 / 0.3);
+                    } else {
+                        red = Math.floor(heightRatio * 255 / 0.4);
+                        green = 200 + Math.floor((0.4 - heightRatio) * 55 / 0.4);
+                    }
+                    
+                    if (char.y > -fontSize && char.y < canvas.height + fontSize) {
+                        ctx.save();
+                        ctx.translate(this.x + fontSize/2, char.y + fontSize/2);
+                        ctx.rotate(char.rotation);
+                        ctx.translate(-(this.x + fontSize/2), -(char.y + fontSize/2));
+                        
+                        const finalOpacity = char.opacity * char.life;
+                        if (finalOpacity > 0) {
+                            ctx.fillStyle = `rgba(${red}, ${green}, 0, ${finalOpacity})`;
+                            ctx.font = `bold ${fontSize}px 'Courier New', monospace`;
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(char.char, this.x + fontSize/2, char.y + fontSize/2);
+                            
+                            if (finalOpacity > 0.7) {
+                                ctx.shadowColor = `rgb(${red}, ${green}, 0)`;
+                                ctx.shadowBlur = 3;
+                                ctx.fillText(char.char, this.x + fontSize/2, char.y + fontSize/2);
+                                ctx.shadowBlur = 0;
+                            }
+                        }
+                        
+                        ctx.restore();
+                    }
+                }
+            }
+        }
+        
+        function initMatrix() {
+            const columnWidth = fontSize * 1.4;
+            const columnCount = Math.floor(canvas.width / columnWidth);
+            
+            columns = [];
+            for (let i = 0; i < columnCount; i++) {
+                columns.push(new MatrixColumn(i * columnWidth));
+            }
+            
+            for (let i = 0; i < Math.floor(columnCount * 0.2); i++) {
+                const x = Math.random() * canvas.width;
+                columns.push(new MatrixColumn(x));
+            }
+        }
+        
+        let lastTime = 0;
+        
+        function drawMatrix(timestamp) {
+            const deltaTime = timestamp - lastTime || 0;
+            lastTime = timestamp;
+            
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.03)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            for (const column of columns) {
+                column.update(deltaTime);
+                column.draw();
+            }
+            
+            requestAnimationFrame(drawMatrix);
+        }
+        
+        resizeCanvas();
+        requestAnimationFrame(drawMatrix);
+        
+        window.addEventListener('resize', resizeCanvas);
+        
+        // ORJINAL APP CODE
         const correctPassword = "ba";
         
         const files = [
@@ -636,7 +810,3 @@
     </script>
 </body>
 </html>
-
-
-
-
