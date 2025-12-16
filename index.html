@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BORSAANALIZ V11 - Günlük Teknik Analiz Raporları</title>
     <style>
+        /* MATRIX CANVAS STYLES */
+        #matrixCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        /* ORJİNAL STYLES */
         * {
             margin: 0;
             padding: 0;
@@ -19,6 +30,16 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
+            position: relative;
+        }
+        
+        /* İçerik görününce arka planı değiştir */
+        body.content-visible {
+            background: #f5f5f5; /* Sade arka plan */
+        }
+        
+        body.content-visible #matrixCanvas {
+            display: none; /* Matrix'i gizle */
         }
         
         .container {
@@ -398,6 +419,10 @@
     </style>
 </head>
 <body>
+    <!-- MATRIX CANVAS -->
+    <canvas id="matrixCanvas"></canvas>
+    
+    <!-- ORJİNAL İÇERİK -->
     <div class="container">
         <div class="logo">
             <h1>📊 BORSAANALIZ V11</h1>
@@ -476,6 +501,110 @@
     </div>
 
     <script>
+        // MATRIX EFFECT CODE - OPTİMİZE EDİLMİŞ
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+        let matrixAnimationId = null;
+        let isMatrixRunning = false;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            if (isMatrixRunning) initMatrix();
+        }
+        
+        // BASİT MATRIX EFEKTİ - PERFORMANS İÇİN
+        const chars = "0123456789";
+        const fontSize = 14;
+        let drops = [];
+        let columns = 0;
+
+        function initMatrix() {
+            columns = Math.floor(canvas.width / fontSize);
+            drops = [];
+            
+            // Başlangıç pozisyonları
+            for (let i = 0; i < columns; i++) {
+                drops[i] = {
+                    y: canvas.height + Math.random() * canvas.height,
+                    speed: 2 + Math.random() * 3,
+                    char: chars[Math.floor(Math.random() * chars.length)]
+                };
+            }
+        }
+
+        function drawMatrixSimple() {
+            // Hafif siyah overlay
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < columns; i++) {
+                const x = i * fontSize;
+                const y = drops[i].y;
+                
+                // Renk: Aşağıda kırmızı, yukarıda yeşil
+                const progress = y / canvas.height;
+                let r, g;
+                
+                if (progress > 0.7) {
+                    r = 255;
+                    g = 0;
+                } else if (progress > 0.4) {
+                    r = 255;
+                    g = Math.floor((0.7 - progress) * 255 / 0.3);
+                } else {
+                    r = Math.floor(progress * 255 / 0.4);
+                    g = 200 + Math.floor((0.4 - progress) * 55 / 0.4);
+                }
+                
+                // Karakter çiz
+                ctx.fillStyle = `rgb(${r}, ${g}, 0)`;
+                ctx.font = `bold ${fontSize}px 'Courier New', monospace`;
+                ctx.fillText(drops[i].char, x, y);
+                
+                // Hareket
+                drops[i].y -= drops[i].speed;
+                
+                // Ekranın üstüne çıkınca aşağıdan başlat
+                if (drops[i].y < 0) {
+                    drops[i].y = canvas.height + Math.random() * 100;
+                    drops[i].char = chars[Math.floor(Math.random() * chars.length)];
+                }
+                
+                // Rastgele karakter değişimi
+                if (Math.random() > 0.99) {
+                    drops[i].char = chars[Math.floor(Math.random() * chars.length)];
+                }
+            }
+            
+            if (isMatrixRunning) {
+                matrixAnimationId = requestAnimationFrame(drawMatrixSimple);
+            }
+        }
+
+        function startMatrix() {
+            if (!isMatrixRunning) {
+                isMatrixRunning = true;
+                resizeCanvas();
+                matrixAnimationId = requestAnimationFrame(drawMatrixSimple);
+            }
+        }
+
+        function stopMatrix() {
+            isMatrixRunning = false;
+            if (matrixAnimationId) {
+                cancelAnimationFrame(matrixAnimationId);
+                matrixAnimationId = null;
+            }
+            // Canvas'ı temizle
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Başlangıçta Matrix'i başlat
+        window.addEventListener('load', startMatrix);
+        window.addEventListener('resize', resizeCanvas);
+
+        // ORJINAL APP CODE
         const correctPassword = "ba";
         
         const files = [
@@ -571,6 +700,11 @@
             if (input === correctPassword) {
                 sessionStorage.setItem('authenticated', 'true');
                 errorMsg.classList.remove('show');
+                
+                // OPTİMİZASYON: Matrix'i durdur ve arka planı değiştir
+                stopMatrix();
+                document.body.classList.add('content-visible');
+                
                 showContent();
             } else {
                 errorMsg.classList.add('show');
@@ -623,8 +757,28 @@
         function logout() {
             if (confirm('Çıkış yapmak istediğinizden emin misiniz?')) {
                 sessionStorage.removeItem('authenticated');
+                // Logout yapınca Matrix'i tekrar başlat
+                document.body.classList.remove('content-visible');
+                startMatrix();
                 location.reload();
             }
+        }
+        
+        // PERFORMANS İÇİN EK OPTİMİZASYON
+        // Sayfa görünür değilse Matrix'i durdur
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                stopMatrix();
+            } else if (!sessionStorage.getItem('authenticated')) {
+                startMatrix();
+            }
+        });
+        
+        // Low-end cihazlar için daha da optimize et
+        const isLowEndDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isLowEndDevice) {
+            // Mobil cihazlarda daha az kolon
+            fontSize = 16; // Daha büyük font, daha az kolon
         }
         
         setTimeout(function() {
