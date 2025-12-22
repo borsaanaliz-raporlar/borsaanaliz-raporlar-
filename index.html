@@ -796,9 +796,9 @@
                             📅 ${file.date} • 💾 ${file.size} • 🔢 9 Sayfa Analiz
                         </div>
                     </div>
-                    <a href="${file.url}" class="download-btn" download title="">
+                    <span class="download-btn" onclick="downloadFile('${file.url}', '${file.name}')">  f
                         ⬇️ İndir
-                    </a>
+                    </span>
                 `;
                 fileList.appendChild(fileItem);
             });
@@ -813,7 +813,17 @@
                 location.reload();
             }
         }
-        
+        // logout() fonksiyonundan SONRA ekle (~450. satır)
+        function downloadFile(url, filename) {
+        // Gizli link oluştur
+        const link = document.createElement('a');
+          link.href = url;
+       link.download = filename;
+       link.style.display = 'none';
+       document.body.appendChild(link);
+       link.click();
+       document.body.removeChild(link);
+       }
         // PERFORMANS İÇİN EK OPTİMİZASYON
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
@@ -837,6 +847,7 @@
     </script>
 </body>
 </html>
+
 
 
 
