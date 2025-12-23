@@ -338,6 +338,9 @@
             align-items: center;
             gap: 8px;
             font-size: 14px;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
         }
         
         .download-btn:hover {
@@ -624,18 +627,11 @@
         
         const files = [
                {
-                name: "BORSAANALIZ_V11_TAM_22122025.xlsx",
-                date: "22.12.2025",
-                dateObj: new Date("2025-12-22"),
-                url: "raporlar/BORSAANALIZ_V11_TAM_22122025.xlsx",
-                size: "1.8 MB"
-             },
-               {
-                name: "BORSAANALIZ_V11_TAM_19122025.xlsb",
+                name: "BORSAANALIZ_V11_TAM_19122025.xlsm",
                 date: "19.12.2025",
                 dateObj: new Date("2025-12-19"),
-                url: "raporlar/BORSAANALIZ_V11_TAM_19122025.xlsb",
-                size: "1.8 MB"
+                url: "raporlar/BORSAANALIZ_V11_TAM_19122025.xlsm",
+                size: "2.3 MB"
              },
                {
                 name: "BORSAANALIZ_V11_TAM_18122025.xlsx",
@@ -773,6 +769,95 @@
             document.getElementById('loginBox').style.display = 'none';
             document.getElementById('contentBox').style.display = 'block';
             
+            // === YENİ: MAKRO UYARISI EKLENDİ ===
+            const contentBox = document.getElementById('contentBox');
+            const macroWarningHTML = `
+            <div class="macro-warning" style="
+                background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+                border: 2px solid #ffb300;
+                border-radius: 12px;
+                padding: 20px;
+                margin: 25px 0;
+                box-shadow: 0 4px 12px rgba(255, 179, 0, 0.15);
+            ">
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                    <div style="font-size: 24px;">⚠️</div>
+                    <h3 style="margin: 0; color: #ff6f00;">EXCEL DOSYASI KULLANIM TALİMATI</h3>
+                </div>
+                
+                <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <p style="margin: 0 0 15px 0; color: #333;">
+                        <strong>Analiz yapmak için lütfen şu 4 adımı izleyin:</strong>
+                    </p>
+                    
+                    <div style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px; padding: 10px; background: #f9f9f9; border-radius: 6px;">
+                        <div style="background: #4caf50; color: white; min-width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">1</div>
+                        <div>
+                            <strong style="color: #2e7d32;">Dosyayı İndirin</strong>
+                            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">(.xlsm uzantılı Excel dosyası)</p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px; padding: 10px; background: #f9f9f9; border-radius: 6px;">
+                        <div style="background: #2196f3; color: white; min-width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">2</div>
+                        <div>
+                            <strong style="color: #1565c0;">Sağ Tık → Özellikler</strong>
+                            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">İndirilen dosyaya sağ tıklayın</p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px; padding: 10px; background: #f9f9f9; border-radius: 6px;">
+                        <div style="background: #9c27b0; color: white; min-width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">3</div>
+                        <div>
+                            <strong style="color: #6a1b9a;">"Engellemeyi Kaldır"ı İşaretleyin</strong>
+                            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Özellikler penceresinin en altında</p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: start; gap: 12px; padding: 10px; background: #f9f9f9; border-radius: 6px;">
+                        <div style="background: #ff9800; color: white; min-width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">4</div>
+                        <div>
+                            <strong style="color: #ef6c00;">Excel'de Aç ve "Makroları Etkinleştir"</strong>
+                            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Üstte çıkan sarı uyarı butonuna tıklayın</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #e8f5e9; padding: 12px; border-radius: 8px; border-left: 4px solid #4caf50; margin-bottom: 15px;">
+                    <p style="margin: 0; font-size: 14px; color: #2e7d32;">
+                        <strong>✅ Hazır!</strong> Artık tüm analiz araçlarına erişebilirsiniz. 
+                        Sembol bazlı filtreleme ve özel analizler aktif.
+                    </p>
+                </div>
+                
+                <div style="text-align: center;">
+                    <button onclick="this.parentElement.style.display='none'" style="
+                        background: #616161;
+                        color: white;
+                        border: none;
+                        padding: 10px 24px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-weight: bold;
+                        font-size: 14px;
+                        transition: background 0.3s;
+                    " onmouseover="this.style.background='#424242'" onmouseout="this.style.background='#616161'">
+                        Tamam, Anladım
+                    </button>
+                    <p style="margin: 10px 0 0 0; font-size: 12px; color: #757575;">
+                        (Bu uyarıyı kapatmak için)
+                    </p>
+                </div>
+            </div>
+            `;
+            
+            // Uyarıyı "welcome" div'inden sonra ekle
+            const welcomeDiv = contentBox.querySelector('.welcome');
+            if (welcomeDiv) {
+                welcomeDiv.insertAdjacentHTML('afterend', macroWarningHTML);
+            }
+            // === MAKRO UYARISI SONU ===
+            
             document.getElementById('totalReports').textContent = files.length;
             
             const fileList = document.getElementById('fileList');
@@ -796,12 +881,24 @@
                             📅 ${file.date} • 💾 ${file.size} • 🔢 9 Sayfa Analiz
                         </div>
                     </div>
-                    <span class="download-btn" onclick="downloadFile('${file.url}', '${file.name}')">  f
+                    <span class="download-btn" onclick="downloadFile('${file.url}', '${file.name}')">
                         ⬇️ İndir
                     </span>
                 `;
                 fileList.appendChild(fileItem);
             });
+        }
+        
+        // YENİ: Dosya indirme fonksiyonu
+        function downloadFile(url, filename) {
+            // Gizli link oluştur
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
         
         function logout() {
@@ -813,17 +910,7 @@
                 location.reload();
             }
         }
-        // logout() fonksiyonundan SONRA ekle (~450. satır)
-        function downloadFile(url, filename) {
-        // Gizli link oluştur
-        const link = document.createElement('a');
-          link.href = url;
-       link.download = filename;
-       link.style.display = 'none';
-       document.body.appendChild(link);
-       link.click();
-       document.body.removeChild(link);
-       }
+        
         // PERFORMANS İÇİN EK OPTİMİZASYON
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
@@ -847,17 +934,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
