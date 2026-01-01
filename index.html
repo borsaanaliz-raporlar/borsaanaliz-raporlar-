@@ -789,8 +789,59 @@
              }
         ];
         
+        // OTURUM KONTROL FONKSİYONLARI
+        function checkSessionValidity() {
+            const loginTime = sessionStorage.getItem('loginTime');
+            const currentTime = new Date().getTime();
+            
+            if (loginTime) {
+                // Gün kontrolü (saat 00:00'dan itibaren)
+                const loginDate = new Date(parseInt(loginTime));
+                const currentDate = new Date();
+                
+                // Tarihleri sadece gün olarak karşılaştır
+                const isDifferentDay = 
+                    loginDate.getDate() !== currentDate.getDate() ||
+                    loginDate.getMonth() !== currentDate.getMonth() ||
+                    loginDate.getFullYear() !== currentDate.getFullYear();
+                
+                if (isDifferentDay) {
+                    // Gün değişmişse oturumu sonlandır
+                    forceLogout();
+                    return false;
+                }
+                
+                // Alternatif: 24 saat geçtiyse oturumu sonlandır
+                if ((currentTime - parseInt(loginTime)) > 24 * 60 * 60 * 1000) {
+                    forceLogout();
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        function forceLogout() {
+            sessionStorage.removeItem('authenticated');
+            sessionStorage.removeItem('loginTime');
+            
+            // Eğer içerik görünüyorsa gizle
+            if (document.getElementById('contentBox').style.display === 'block') {
+                document.getElementById('loginBox').style.display = 'block';
+                document.getElementById('contentBox').style.display = 'none';
+                document.body.classList.remove('content-visible');
+                startMatrix();
+            }
+            
+            // Şifre alanını temizle ve odakla
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('passwordInput').focus();
+            
+            alert('Oturum süreniz doldu. Lütfen tekrar giriş yapın.');
+        }
+        
         window.onload = function() {
-            if (sessionStorage.getItem('authenticated') === 'true') {
+            // Önce oturum kontrolü yap
+            if (checkSessionValidity() && sessionStorage.getItem('authenticated') === 'true') {
                 showContent();
             }
         };
@@ -800,6 +851,8 @@
             const errorMsg = document.getElementById('errorMsg');
             
             if (input === correctPassword) {
+                // Giriş zamanını kaydet
+                sessionStorage.setItem('loginTime', new Date().getTime());
                 sessionStorage.setItem('authenticated', 'true');
                 errorMsg.classList.remove('show');
                 
@@ -960,12 +1013,39 @@
         function logout() {
             if (confirm('Çıkış yapmak istediğinizden emin misiniz?')) {
                 sessionStorage.removeItem('authenticated');
+                sessionStorage.removeItem('loginTime');
                 // Logout yapınca Matrix'i tekrar başlat
                 document.body.classList.remove('content-visible');
                 startMatrix();
                 location.reload();
             }
         }
+        
+        // SAYFA YENİLEME VE GÖRÜNÜRLÜK KONTROLLERİ
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                checkSessionValidity();
+            }
+        });
+        
+        window.addEventListener('pageshow', function(event) {
+            // Eğer sayfa geri dönüşten geliyorsa (back/forward cache)
+            if (event.persisted) {
+                checkSessionValidity();
+            }
+        });
+        
+        // Sayfa yüklendiğinde de kontrol et
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                checkSessionValidity();
+            }, 1000);
+        });
+        
+        // Her 5 dakikada bir oturum kontrolü yap
+        setInterval(function() {
+            checkSessionValidity();
+        }, 5 * 60 * 1000); // 5 dakika
         
         // PERFORMANS İÇİN EK OPTİMİZASYON
         document.addEventListener('visibilitychange', function() {
@@ -981,6 +1061,7 @@
             fontSize = 16;
         }
         
+        // 2 saat sonra oturumu sonlandır (eski güvenlik önlemi)
         setTimeout(function() {
             if (sessionStorage.getItem('authenticated') === 'true') {
                 alert('Oturumunuz güvenlik nedeniyle sonlandırıldı. Lütfen tekrar giriş yapın.');
@@ -990,13 +1071,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
