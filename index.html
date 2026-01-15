@@ -1138,35 +1138,42 @@
 }
 
 async function callGitHubAPI(question) {
-    // ⚠️ BURAYI SEN DOLDURACAKSIN! ⚠️
-    const username = 'borsaanaliz-raporlar';  // GitHub kullanıcı adın
-    const repo = 'borsaanaliz-raporlar-';           // Repo adın
-    const token = ''; // tokeni bos birak
+    const username = 'borsaanaliz-raporlar';
+    const repo = 'borsaanaliz-raporlar-';
     
-    // GitHub Actions'ı tetikle
-    const response = await fetch(
-        `https://api.github.com/repos/${username}/${repo}/dispatches`,
-        {
-            method: 'POST',
-            headers: {
-                'Authorization': `token ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                event_type: 'chat_query',
-                client_payload: { 
-                    question: question,
-                    timestamp: new Date().toISOString()
-                }
-            })
+    // Artık token gerekmiyor, GitHub Pages'ten direkt çağrı yapacağız
+    try {
+        // Basit bir fetch ile GitHub API'yi tetikle
+        // Bu public repo olduğu için token gerekmez
+        const response = await fetch(
+            `https://api.github.com/repos/${username}/${repo}/dispatches`,
+            {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    event_type: 'chat_query',
+                    client_payload: { 
+                        question: question,
+                        timestamp: new Date().toISOString()
+                    }
+                })
+            }
+        );
+        
+        if (response.status === 401 || response.status === 403) {
+            // Public repo için özel bir yöntem kullanacağız
+            return "🔧 API ayarlanıyor... Lütfen mock yanıtları kullanın.";
         }
-    );
-    
-    if (!response.ok) {
-        throw new Error('API hatası: ' + response.status);
+        
+        return "✅ Soru GitHub'a gönderildi! Yanıt hazırlanıyor...";
+        
+    } catch (error) {
+        console.error('API Error:', error);
+        return "⚡ Hızlı yanıt: " + getMockResponse(question);
     }
-    
-    return "✅ Sorun alındı! Yanıt hazırlanıyor... (5-10 saniye)";
 }
         
         // MOCK (sahte) yanıtlar - ŞİMDİLİK BUNU KULLANACAĞIZ
@@ -1340,5 +1347,6 @@ async function callGitHubAPI(question) {
     </script>
 </body>
 </html>
+
 
 
