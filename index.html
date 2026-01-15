@@ -409,6 +409,166 @@
             word-break: break-all;
         }
         
+        /* YENİ: DEEPSEEK CHAT STYLES */
+        .ai-assistant {
+            margin: 40px 0 30px 0;
+            background: linear-gradient(135deg, #f5f7ff 0%, #e3e6ff 100%);
+            border-radius: 20px;
+            padding: 30px;
+            border: 3px solid #667eea;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
+        }
+        
+        .chat-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            height: 320px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 2px solid #e1e5ff;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .chat-input-container {
+            background: white;
+            border-radius: 15px;
+            padding: 5px;
+            border: 2px solid #e1e5ff;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 18px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            outline: none;
+            background: transparent;
+        }
+        
+        .chat-send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0 30px;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .chat-send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .quick-questions {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .quick-btn {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: 0 5px 10px 5px;
+            display: inline-block;
+        }
+        
+        .quick-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .quick-btn.rsi {
+            background: #e3f2fd;
+            color: #1565c0;
+            border-color: #90caf9;
+        }
+        
+        .quick-btn.hisse {
+            background: #f3e5f5;
+            color: #7b1fa2;
+            border-color: #ce93d8;
+        }
+        
+        .chat-info {
+            margin-top: 25px;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.08);
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            font-size: 13px;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 15px;
+            max-width: 85%;
+            animation: fadeIn 0.3s ease-out;
+            word-wrap: break-word;
+        }
+        
+        .message.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            align-self: flex-end;
+            border: 1px solid #5566cc;
+        }
+        
+        .message.bot {
+            background: #f0f2ff;
+            color: #333;
+            align-self: flex-start;
+            border: 1px solid #d0d5ff;
+        }
+        
+        .typing-indicator {
+            display: inline-flex;
+            gap: 4px;
+            margin-left: 10px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
         @media (max-width: 600px) {
             .container {
                 padding: 25px;
@@ -431,6 +591,25 @@
             .download-btn {
                 width: 100%;
                 justify-content: center;
+            }
+            
+            .ai-assistant {
+                padding: 20px;
+            }
+            
+            .chat-container {
+                height: 280px;
+                padding: 15px;
+            }
+            
+            .chat-send-btn {
+                padding: 0 20px;
+            }
+            
+            .quick-btn {
+                display: block;
+                width: 100%;
+                margin: 5px 0;
             }
         }
     </style>
@@ -503,6 +682,102 @@
             
             <div class="file-list" id="fileList">
             </div>
+            
+            <!-- YENİ: DEEPSEEK CHAT BÖLÜMÜ -->
+            <div class="ai-assistant">
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
+                    <div style="
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        width: 50px;
+                        height: 50px;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 24px;
+                        color: white;
+                    ">
+                        🤖
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; color: #333; font-size: 22px;">DeepSeek Analiz Asistanı</h3>
+                        <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">
+                            Excel raporları hakkında soru sorun, teknik analizde yardım alın
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="chat-container" id="chatContainer">
+                    <div class="message bot">
+                        <div style="display: flex; align-items: start; gap: 10px;">
+                            <div style="
+                                background: #667eea;
+                                color: white;
+                                width: 32px;
+                                height: 32px;
+                                border-radius: 50%;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-size: 14px;
+                                flex-shrink: 0;
+                                font-weight: bold;
+                            ">
+                                AI
+                            </div>
+                            <div>
+                                <strong style="color: #4455aa;">DeepSeek Asistan:</strong>
+                                <p style="margin: 8px 0 0 0; color: #333; line-height: 1.5;">
+                                    Merhaba! Ben BORSAANALIZ V11'in yapay zeka asistanıyım. 
+                                    Excel raporları, teknik analiz göstergeleri, MACRO ayarları 
+                                    veya yatırım stratejileri hakkında sorularınızı yanıtlayabilirim.
+                                    Size nasıl yardımcı olabilirim? 📊
+                                </p>
+                                <div style="margin-top: 10px; font-size: 12px; color: #888;">
+                                    💡 <em>Örnek: "MACRO nasıl etkinleştirilir?", "RSI değerini nasıl yorumlamalıyım?"</em>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-input-container">
+                    <input type="text" 
+                           class="chat-input"
+                           id="userInput" 
+                           placeholder="Analizle ilgili sorunuzu yazın..." 
+                           onkeypress="if(event.key === 'Enter') sendMessage()">
+                    
+                    <button class="chat-send-btn" onclick="sendMessage()">
+                        <span>📨</span> Gönder
+                    </button>
+                </div>
+                
+                <div class="quick-questions">
+                    <p style="margin-bottom: 10px; color: #666; font-size: 13px;">
+                        Hızlı sorular:
+                    </p>
+                    <button class="quick-btn" onclick="quickQuestion('MACRO nasıl etkinleştirilir?')">
+                        🔓 MACRO Açma
+                    </button>
+                    <button class="quick-btn rsi" onclick="quickQuestion('RSI değeri nasıl yorumlanır?')">
+                        📈 RSI Analizi
+                    </button>
+                    <button class="quick-btn hisse" onclick="quickQuestion('Hangi hisseleri analiz etmeliyim?')">
+                        💼 Hisse Önerisi
+                    </button>
+                </div>
+                
+                <div class="chat-info">
+                    <span style="font-size: 16px;">ℹ️</span>
+                    <div>
+                        <strong style="color: #4455aa;">Not:</strong> Yanıtlar yapay zeka tarafından üretilir. 
+                        Yatırım tavsiyesi değildir. Her zaman kendi araştırmanızı yapın. 
+                        Gerçek API bağlantısı yakında aktif olacak.
+                    </div>
+                </div>
+            </div>
+            <!-- CHAT SONU -->
             
             <div class="warning">
                 <strong>⚠️ Önemli Uyarılar:</strong>
@@ -622,7 +897,7 @@
         window.addEventListener('load', startMatrix);
         window.addEventListener('resize', resizeCanvas);
 
-        // ORJINAL APP CODE
+        // ORJİNAL APP CODE
         const correctPassword = "ba";
         
         const files = [
@@ -660,7 +935,7 @@
                 dateObj: new Date("2026-01-09"),
                 url: "raporlar/BORSAANALIZ_V11_TAM_09012026.xlsm",
                 size: "1.1 MB"
-             } 
+             }
                
         ];
         
@@ -753,95 +1028,6 @@
             document.getElementById('loginBox').style.display = 'none';
             document.getElementById('contentBox').style.display = 'block';
             
-            // === YENİ: MAKRO UYARISI EKLENDİ ===
-            const contentBox = document.getElementById('contentBox');
-            const macroWarningHTML = `
-            <div class="macro-warning" style="
-                background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
-                border: 2px solid #ffb300;
-                border-radius: 12px;
-                padding: 20px;
-                margin: 25px 0;
-                box-shadow: 0 4px 12px rgba(255, 179, 0, 0.15);
-            ">
-                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
-                    <div style="font-size: 24px;">⚠️</div>
-                    <h3 style="margin: 0; color: #ff6f00;">EXCEL DOSYASI KULLANIM TALİMATI</h3>
-                </div>
-                
-                <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                    <p style="margin: 0 0 15px 0; color: #333;">
-                        <strong>Eğer sembol bazlı analiz yapmak isterseniz lütfen şu 4 adımı izleyin:</strong>
-                    </p>
-                    
-                    <div style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px; padding: 10px; background: #f9f9f9; border-radius: 6px;">
-                        <div style="background: #4caf50; color: white; min-width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">1</div>
-                        <div>
-                            <strong style="color: #2e7d32;">Dosyayı İndirin</strong>
-                            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">(.xlsm uzantılı Excel dosyası)</p>
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px; padding: 10px; background: #f9f9f9; border-radius: 6px;">
-                        <div style="background: #2196f3; color: white; min-width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">2</div>
-                        <div>
-                            <strong style="color: #1565c0;">Sağ Tık → Özellikler</strong>
-                            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">İndirilen dosyaya sağ tıklayın</p>
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px; padding: 10px; background: #f9f9f9; border-radius: 6px;">
-                        <div style="background: #9c27b0; color: white; min-width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">3</div>
-                        <div>
-                            <strong style="color: #6a1b9a;">"Engellemeyi Kaldır"ı İşaretleyin</strong>
-                            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Özellikler penceresinin en altında</p>
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; align-items: start; gap: 12px; padding: 10px; background: #f9f9f9; border-radius: 6px;">
-                        <div style="background: #ff9800; color: white; min-width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">4</div>
-                        <div>
-                            <strong style="color: #ef6c00;">Excel'de Aç ve "Makroları Etkinleştir"</strong>
-                            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Üstte çıkan sarı uyarı butonuna tıklayın</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div style="background: #e8f5e9; padding: 12px; border-radius: 8px; border-left: 4px solid #4caf50; margin-bottom: 15px;">
-                    <p style="margin: 0; font-size: 14px; color: #2e7d32;">
-                        <strong>✅ Hazır!</strong> Artık tüm analiz araçlarına erişebilirsiniz. 
-                        Sembol bazlı filtreleme ve özel analizler aktif.
-                    </p>
-                </div>
-                
-                <div style="text-align: center;">
-                    <button onclick="this.parentElement.style.display='none'" style="
-                        background: #616161;
-                        color: white;
-                        border: none;
-                        padding: 10px 24px;
-                        border-radius: 6px;
-                        cursor: pointer;
-                        font-weight: bold;
-                        font-size: 14px;
-                        transition: background 0.3s;
-                    " onmouseover="this.style.background='#424242'" onmouseout="this.style.background='#616161'">
-                        Tamam, Anladım
-                    </button>
-                    <p style="margin: 10px 0 0 0; font-size: 12px; color: #757575;">
-                        (Bu uyarıyı kapatmak için)
-                    </p>
-                </div>
-            </div>
-            `;
-            
-            // Uyarıyı "welcome" div'inden sonra ekle
-            const welcomeDiv = contentBox.querySelector('.welcome');
-            if (welcomeDiv) {
-                welcomeDiv.insertAdjacentHTML('afterend', macroWarningHTML);
-            }
-            // === MAKRO UYARISI SONU ===
-            
             document.getElementById('totalReports').textContent = files.length;
             
             const fileList = document.getElementById('fileList');
@@ -871,6 +1057,14 @@
                 `;
                 fileList.appendChild(fileItem);
             });
+            
+            // Chat input'una odaklan
+            setTimeout(() => {
+                const userInput = document.getElementById('userInput');
+                if (userInput) {
+                    userInput.focus();
+                }
+            }, 500);
         }
         
         // YENİ: Dosya indirme fonksiyonu
@@ -895,6 +1089,181 @@
                 location.reload();
             }
         }
+        
+        // ==================== YENİ: DEEPSEEK CHAT FONKSİYONLARI ====================
+        
+        let chatHistory = [
+            { 
+                role: "assistant", 
+                content: "Merhaba! Ben BORSAANALIZ V11'in yapay zeka asistanıyım. Excel raporları, teknik analiz göstergeleri, MACRO ayarları veya yatırım stratejileri hakkında sorularınızı yanıtlayabilirim. Size nasıl yardımcı olabilirim? 📊" 
+            }
+        ];
+        
+        // Hızlı soru butonları için
+        function quickQuestion(question) {
+            document.getElementById('userInput').value = question;
+            sendMessage();
+        }
+        
+        // Mesaj gönderme
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Kullanıcı mesajını ekle
+            addMessage('user', message);
+            input.value = '';
+            input.focus();
+            
+            // Typing indicator ekle
+            addTypingIndicator();
+            
+            try {
+                // 1.5 saniye bekle (simülasyon)
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // Typing indicator'ı kaldır
+                removeTypingIndicator();
+                
+                // Yanıtı al (MOCK fonksiyonu)
+                const response = getMockResponse(message);
+                
+                // Yanıtı ekle
+                addMessage('assistant', response);
+                
+                // Geçmişi güncelle
+                chatHistory.push({ role: "user", content: message });
+                chatHistory.push({ role: "assistant", content: response });
+                
+            } catch (error) {
+                console.error('Error:', error);
+                removeTypingIndicator();
+                addMessage('assistant', "Üzgünüm, şu anda yanıt veremiyorum. Lütfen daha sonra tekrar deneyin veya sorunuzu iletisimborsaanaliz@gmail.com adresine yazın.");
+            }
+        }
+        
+        // MOCK (sahte) yanıtlar - ŞİMDİLİK BUNU KULLANACAĞIZ
+        function getMockResponse(question) {
+            const q = question.toLowerCase();
+            
+            // MACRO soruları
+            if (q.includes('macro') || q.includes('makro') || q.includes('açma') || q.includes('etkin')) {
+                return `🔓 **MACRO ETKİNLEŞTİRME REHBERİ:**\n\n1. **İndirilen dosyaya sağ tıklayın** → "Özellikler"\n2. **"Genel" sekmesinde** en altta "Engellemeyi Kaldır" kutusunu işaretleyin ✓\n3. **"Uygula"** ve **"Tamam"** butonlarına tıklayın\n4. **Excel'i açın**, üstte "GÜVENLİK UYARISI" çıkacak\n5. **"Makroları Etkinleştir"** butonuna tıklayın\n6. ✅ **Hazır!** Artık tüm analiz araçları aktif.\n\n💡 **Not:** .xlsm uzantılı dosyalar makro içerir. Yukarıdaki adımlar güvenlidir.`;
+            }
+            
+            // RSI soruları
+            if (q.includes('rsi') || q.includes('göreceli')) {
+                return `📈 **RSI (Göreceli Güç Endeksi) ANALİZİ:**\n\n• **RSI Aralığı:** 0-100\n• **0-30:** Aşırı Satım Bölgesi → Potansiyel ALIM sinyali\n• **30-70:** Nötr Bölge\n• **70-100:** Aşırı Alım Bölgesi → Potansiyel SATIM sinyali\n\n**BORSAANALIZ V11'de RSI:**\n- Otomatik hesaplanır\n- Renk kodludur (Kırmızı: Yüksek, Yeşil: Düşük)\n- 9 farklı zaman diliminde gösterilir\n\n**Kullanım İpuçları:**\n1. RSI < 30 + Hacim artışı = Güçlü alım sinyali\n2. RSI > 70 + Fiyat düşüşü = Satış zamanı`;
+            }
+            
+            // Hisse seçimi
+            if (q.includes('hisse') || q.includes('seçim') || q.includes('öneri')) {
+                return `💼 **HİSSE SEÇİM STRATEJİLERİ:**\n\n**BORSAANALIZ V11 FİLTRELERİ:**\n1. **TEKNİK FİLTRELER:**\n   - RSI < 35 (Aşırı satım)\n   - MACD pozitif crossover\n   - Hacim > 20-gün ortalaması\n   - Fiyat > 50-gün MA\n\n2. **TEMEL FİLTRELER** (Excel'de Sayfa 2):\n   - Düşük P/E oranı\n   - Yüksek kar marjı\n\n**ÖNERİLEN ANALİZ SIRASI:**\n1. Sayfa 3 → Teknik göstergeler\n2. Sayfa 6 → Destek-direnç seviyeleri\n3. Sayfa 9 → Özel filtrelerinizi uygulayın`;
+            }
+            
+            // Analiz sayfaları
+            if (q.includes('analiz') || q.includes('sayfa') || q.includes('borsaanaliz')) {
+                return `📚 **BORSAANALIZ V11 ANALİZ SİSTEMİ:**\n\n**9 ANA SAYFA:**\n\n1. 📊 **GENEL BAKIŞ** - Piyasa özeti\n2. 🏢 **SEKTÖR ANALİZİ** - 28 sektör performansı\n3. 📈 **TEKNİK GÖSTERGELER** - RSI, MACD, Stokastik\n4. 🕯️ **MUM GRAFİKLERİ** - Günlük/Haftalık/Aylık\n5. 📊 **HACİM ANALİZİ** - Hacim trendleri\n6. ⚖️ **DESTEK-DİRENÇ** - Fibonacci, Pivot noktaları\n7. 📉 **TREND ANALİZİ** - MA'lar, Trend çizgileri\n8. 🌊 **VOLATİLİTE** - ATR, Beta, Standart sapma\n9. 🔍 **ÖZEL FİLTRELER** - Kişisel stratejinize göre`;
+            }
+            
+            // Yardım soruları
+            if (q.includes('yardım') || q.includes('nasıl') || q.includes('problem')) {
+                return `🆘 **YARDIM MERKEZİ:**\n\n**SIK SORULAN SORULAR:**\n\n**Q: Excel dosyası açılmıyor?**\nA: .xlsm uzantılı dosyalar için Excel 2010 veya üstü gerekir.\n\n**Q: Makrolar çalışmıyor?**\nA: Dosya özelliklerinden "Engellemeyi Kaldır" seçeneğini işaretleyin.\n\n**Q: Hangi hisseleri analiz etmeliyim?**\nA: Sayfa 9'daki özel filtreleri kullanın veya RSI < 30 + yüksek hacim olanları seçin.\n\n**İLETİŞİM:** \n• E-posta: iletisimborsaanaliz@gmail.com`;
+            }
+            
+            // Genel yanıt
+            return `🤖 **DeepSeek Asistan Yanıtlıyor:**\n\nSorunuzu aldım: **"${question}"**\n\n**Size nasıl yardımcı olabilirim?**\n\n📊 **Excel Raporları Hakkında:**\n• MACRO etkinleştirme\n• Teknik gösterge açıklamaları\n• Analiz sayfaları kullanımı\n• Filtreleme teknikleri\n\n💡 **Örnek Sorular:**\n• "MACRO nasıl açılır?"\n• "RSI değerini nasıl yorumlarım?"\n• "3. sayfadaki MACD nedir?"\n\n📍 **Detaylı yardım için:** \nE-posta: iletisimborsaanaliz@gmail.com\n\n*Yapay zeka tarafından üretilmiş yanıttır. Yatırım tavsiyesi değildir.*`;
+        }
+        
+        // Mesaj ekleme fonksiyonu
+        function addMessage(role, content) {
+            const container = document.getElementById('chatContainer');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const icon = role === 'user' ? '👤' : '🤖';
+            const name = role === 'user' ? 'Siz:' : 'DeepSeek:';
+            
+            messageDiv.innerHTML = `
+                <div style="display: flex; align-items: start; gap: 10px;">
+                    <div style="
+                        background: ${role === 'user' ? 'white' : '#667eea'};
+                        color: ${role === 'user' ? '#667eea' : 'white'};
+                        width: 32px;
+                        height: 32px;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 14px;
+                        flex-shrink: 0;
+                        font-weight: bold;
+                    ">
+                        ${icon}
+                    </div>
+                    <div style="flex: 1;">
+                        <strong style="color: ${role === 'user' ? 'white' : '#4455aa'};">${name}</strong>
+                        <div style="margin-top: 8px; line-height: 1.5; white-space: pre-line;">${content}</div>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        // Typing indicator ekle
+        function addTypingIndicator() {
+            const container = document.getElementById('chatContainer');
+            
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typingIndicator';
+            typingDiv.className = 'message bot';
+            
+            typingDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="
+                        background: #667eea;
+                        color: white;
+                        width: 32px;
+                        height: 32px;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 14px;
+                        flex-shrink: 0;
+                        font-weight: bold;
+                    ">
+                        AI
+                    </div>
+                    <div>
+                        <strong style="color: #4455aa;">DeepSeek:</strong>
+                        <div class="typing-indicator" style="margin-top: 8px;">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(typingDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        // Typing indicator'ı kaldır
+        function removeTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+        
+        // ==================== CHAT FONKSİYONLARI SONU ====================
         
         // SAYFA YENİLEME VE GÖRÜNÜRLÜK KONTROLLERİ
         document.addEventListener('visibilitychange', function() {
@@ -946,14 +1315,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
