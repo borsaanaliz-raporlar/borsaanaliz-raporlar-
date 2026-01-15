@@ -1,0 +1,29 @@
+name: DeepSeek Chat
+on:
+  repository_dispatch:
+    types: [chat_query]
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install axios
+        run: npm install axios
+      
+      - name: Run API
+        env:
+          DEEPSEEK_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          node .github/deepseek-api.js
+      
+      - name: Save response
+        run: |
+          echo "Response saved"
