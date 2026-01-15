@@ -1107,42 +1107,67 @@
         
         // Mesaj gönderme
         async function sendMessage() {
-            const input = document.getElementById('userInput');
-            const message = input.value.trim();
-            
-            if (!message) return;
-            
-            // Kullanıcı mesajını ekle
-            addMessage('user', message);
-            input.value = '';
-            input.focus();
-            
-            // Typing indicator ekle
-            addTypingIndicator();
-            
-            try {
-                // 1.5 saniye bekle (simülasyon)
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                // Typing indicator'ı kaldır
-                removeTypingIndicator();
-                
-                // Yanıtı al (MOCK fonksiyonu)
-                const response = getMockResponse(message);
-                
-                // Yanıtı ekle
-                addMessage('assistant', response);
-                
-                // Geçmişi güncelle
-                chatHistory.push({ role: "user", content: message });
-                chatHistory.push({ role: "assistant", content: response });
-                
-            } catch (error) {
-                console.error('Error:', error);
-                removeTypingIndicator();
-                addMessage('assistant', "Üzgünüm, şu anda yanıt veremiyorum. Lütfen daha sonra tekrar deneyin veya sorunuzu iletisimborsaanaliz@gmail.com adresine yazın.");
-            }
+    const input = document.getElementById('userInput');
+    const message = input.value.trim();
+    
+    if (!message) return;
+    
+    // Mesajı göster
+    addMessage('user', message);
+    input.value = '';
+    input.focus();
+    
+    // Typing göster
+    addTypingIndicator();
+    
+    try {
+        // GitHub API'yi çağır
+        const response = await callGitHubAPI(message);
+        
+        // Typing kaldır
+        removeTypingIndicator();
+        
+        // Yanıtı göster
+        addMessage('assistant', response);
+        
+    } catch (error) {
+        console.error('Hata:', error);
+        removeTypingIndicator();
+        addMessage('assistant', 'Bağlantı hatası. Lütfen tekrar deneyin.');
+    }
+}
+
+async function callGitHubAPI(question) {
+    // ⚠️ BURAYI SEN DOLDURACAKSIN! ⚠️
+    const username = 'KULLANICI_ADIN';  // GitHub kullanıcı adın
+    const repo = 'REPO_ADIN';           // Repo adın
+    const token = 'GITHUB_TOKEN_DEGERI'; // ADIM 1'deki token
+    
+    // GitHub Actions'ı tetikle
+    const response = await fetch(
+        `https://api.github.com/repos/${username}/${repo}/dispatches`,
+        {
+            method: 'POST',
+            headers: {
+                'Authorization': `token ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                event_type: 'chat_query',
+                client_payload: { 
+                    question: question,
+                    timestamp: new Date().toISOString()
+                }
+            })
         }
+    );
+    
+    if (!response.ok) {
+        throw new Error('API hatası: ' + response.status);
+    }
+    
+    return "✅ Sorun alındı! Yanıt hazırlanıyor... (5-10 saniye)";
+}
         
         // MOCK (sahte) yanıtlar - ŞİMDİLİK BUNU KULLANACAĞIZ
         function getMockResponse(question) {
@@ -1315,3 +1340,4 @@
     </script>
 </body>
 </html>
+
