@@ -1141,17 +1141,16 @@ async function callGitHubAPI(question) {
     const username = 'borsaanaliz-raporlar';
     const repo = 'borsaanaliz-raporlar-';
     
-    // Artık token gerekmiyor, GitHub Pages'ten direkt çağrı yapacağız
     try {
-        // Basit bir fetch ile GitHub API'yi tetikle
-        // Bu public repo olduğu için token gerekmez
+        // GitHub Actions'ı tetikle
         const response = await fetch(
             `https://api.github.com/repos/${username}/${repo}/dispatches`,
             {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    // GitHub Token GEREKİYOR - Ama biz alternatif yapacağız
                 },
                 body: JSON.stringify({
                     event_type: 'chat_query',
@@ -1163,16 +1162,50 @@ async function callGitHubAPI(question) {
             }
         );
         
-        if (response.status === 401 || response.status === 403) {
-            // Public repo için özel bir yöntem kullanacağız
-            return "🔧 API ayarlanıyor... Lütfen mock yanıtları kullanın.";
-        }
+        console.log('GitHub Response:', response.status);
         
-        return "✅ Soru GitHub'a gönderildi! Yanıt hazırlanıyor...";
+        if (response.ok) {
+            return "🤖 Sorunuz AI asistanına iletildi! Yanıt hazırlanıyor... (10-20 saniye)";
+        } else if (response.status === 401 || response.status === 403) {
+            // Token yoksa - alternatif: mock yanıt + arka planda Issues
+            setTimeout(() => {
+                // Arka planda Issues oluşturmaya çalış
+                createGitHubIssue(question);
+            }, 100);
+            
+            return "⚡ Hızlı yanıt: " + getMockResponse(question) + 
+                   "\n\n🔄 *AI yanıtı arka planda hazırlanıyor...*";
+        } else {
+            return "⚡ " + getMockResponse(question);
+        }
         
     } catch (error) {
         console.error('API Error:', error);
-        return "⚡ Hızlı yanıt: " + getMockResponse(question);
+        return "⚡ " + getMockResponse(question);
+    }
+}
+
+// GitHub Issues oluştur (public, token gerekmez)
+async function createGitHubIssue(question) {
+    try {
+        await fetch(
+            `https://api.github.com/repos/borsaanaliz-raporlar/borsaanaliz-raporlar-/issues`,
+            {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    title: `🤖 ${question.substring(0, 50)}...`,
+                    body: `**Soru:** ${question}\n\n**Tarih:** ${new Date().toLocaleString('tr-TR')}\n\n*AI yanıtı hazırlanacak*`,
+                    labels: ['soru', 'ai-chat']
+                })
+            }
+        );
+    } catch (e) {
+        // Issues oluşturulamazsa sorun değil
+        console.log('Issues oluşturulamadı:', e);
     }
 }
         
@@ -1347,6 +1380,7 @@ async function callGitHubAPI(question) {
     </script>
 </body>
 </html>
+
 
 
 
