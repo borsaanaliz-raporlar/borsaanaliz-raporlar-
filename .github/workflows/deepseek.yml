@@ -1,41 +1,33 @@
-name: DeepSeek Chat API
+name: DeepSeek Chat
 on:
   repository_dispatch:
     types: [chat_query]
-
-permissions:
-  contents: write
-  actions: write
 
 jobs:
   process:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          token: ${{ secrets.GH_TOKEN }}
+          python-version: '3.10'
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
+      - name: Install requests
+        run: pip install requests
       
-      - name: Install dependencies
-        run: npm install axios
-      
-      - name: Process chat query
+      - name: Run DeepSeek
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-        run: |
-          # API scriptini çalıştır
-          node .github/deepseek-api.js
+        run: python .github/deepseek.py
       
-      - name: Create PR with response
+      - name: Save response
         run: |
-          # Yanıtı dosyaya yaz
-          if [ -f response.txt ]; then
-            echo "Response processed"
+          if [ -f answer.txt ]; then
+            echo "✅ Yanıt oluşturuldu"
+            cat answer.txt
           else
-            echo "No response file found"
+            echo "❌ Yanıt dosyası oluşturulamadı"
           fi
