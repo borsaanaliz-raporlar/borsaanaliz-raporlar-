@@ -1,14 +1,14 @@
-name: DeepSeek Chat
+name: AI Chat Assistant
 on:
-  workflow_dispatch:       # ⬅️ MANUEL ÇALIŞTIRMA İÇİN
-  repository_dispatch:     # ⬅️ API İLE TETİKLEME İÇİN
+  workflow_dispatch:
+  repository_dispatch:
     types: [chat_query]
 
 jobs:
   process:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v3
       
       - name: Setup Python
@@ -19,16 +19,20 @@ jobs:
       - name: Install requests
         run: pip install requests
       
-      - name: Run DeepSeek
+      - name: Run AI Assistant
         env:
-          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-        run: python .github/deepseek.py
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: python .github/openrouter.py
       
-      - name: Save response
+      - name: Show response
         run: |
+          echo "📊 İŞLEM SONUÇLARI:"
           if [ -f answer.txt ]; then
-            echo "✅ Yanıt oluşturuldu"
-            cat answer.txt
+            echo "✅ Yanıt başarıyla oluşturuldu!"
+            echo "--- YANIT BAŞLANGICI ---"
+            head -c 500 answer.txt
+            echo ""
+            echo "--- YANIT SONU ---"
           else
             echo "❌ Yanıt dosyası oluşturulamadı"
           fi
