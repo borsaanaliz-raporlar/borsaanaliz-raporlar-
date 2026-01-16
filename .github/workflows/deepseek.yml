@@ -1,6 +1,7 @@
 name: DeepSeek Chat
 on:
-  repository_dispatch:
+  workflow_dispatch:       # ⬅️ MANUEL ÇALIŞTIRMA İÇİN
+  repository_dispatch:     # ⬅️ API İLE TETİKLEME İÇİN
     types: [chat_query]
 
 jobs:
