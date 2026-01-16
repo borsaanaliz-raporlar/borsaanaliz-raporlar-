@@ -46,7 +46,7 @@ Türkçe, kısa, net, yardımsever ol.
 Yatırım tavsiyesi VERME."""
 
 data = {
-    "model": "llama3-8b-8192",  # Groq'un ücretsiz, hızlı modeli
+    "model": "llama-3.1-8b-instant",  # Groq'un ücretsiz, hızlı modeli
     "messages": [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": question}
