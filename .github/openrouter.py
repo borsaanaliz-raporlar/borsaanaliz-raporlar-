@@ -48,7 +48,7 @@ Türkçe, kısa, net, yardımsever ol.
 Yatırım tavsiyesi VERME."""
 
 data = {
-    "model": "google/gemini-2.0-flash-exp:free",  # ÜCRETSİZ MODEL
+    "model": "meta-llama/llama-3.2-3b-instruct:free"
     "messages": [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": question}
