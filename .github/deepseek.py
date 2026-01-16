@@ -1,7 +1,7 @@
 import os
 import json
 import requests
-from datetime import datetime
+import time
 
 # GitHub'dan gelen soruyu al
 event_path = os.environ.get('GITHUB_EVENT_PATH', '')
@@ -14,83 +14,101 @@ else:
 
 print(f"🔍 Soru: {question}")
 
+# Rate limit koruması - 1 saniye bekle
+time.sleep(1)
+
 # DEEPSEEK API
 api_key = os.environ.get('DEEPSEEK_API_KEY', '')
 if not api_key:
     print("❌ API anahtarı bulunamadı!")
     exit(1)
 
-url = "https://api.deepseek.com/chat/completions"
+# DOĞRU ENDPOINT
+url = "https://api.deepseek.com/v1/chat/completions"
 
 headers = {
     "Authorization": f"Bearer {api_key}",
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
+    "User-Agent": "BORSAANALIZ-V11/1.0"
 }
 
-# SYSTEM PROMPT - BORSAANALIZ V11 UZMANI
-system_prompt = """
-Sen BORSAANALIZ V11 Excel raporlarının uzman asistanısın.
+# KISA ve ÖZ SYSTEM PROMPT
+system_prompt = """Sen BORSAANALIZ V11 Excel asistanısın. 
+Excel'de 9 sayfa var: 1. Genel, 2. Sektör, 3. Teknik Göstergeler, 
+4. Mumlar, 5. Hacim, 6. Destek-Direnç, 7. Trend, 8. Volatilite, 9. Filtreler.
 
-📁 MEVCUT DOSYALAR (sitede görünen):
-1. BORSAANALIZ_V11_TAM_15012026.xlsm - 15 Ocak 2026 (EN GÜNCEL)
-2. BORSAANALIZ_V11_TAM_14012026.xlsm - 14 Ocak 2026
-3. BORSAANALIZ_V11_TAM_13012026.xlsm - 13 Ocak 2026
-4. BORSAANALIZ_V11_TAM_12012026.xlsm - 12 Ocak 2026
-5. BORSAANALIZ_V11_TAM_09012026.xlsm - 09 Ocak 2026
-
-📊 EXCEL'DE 9 SAYFA:
-1. GENEL BAKIŞ - Piyasa özeti, endeksler
-2. SEKTÖR ANALİZİ - 28 sektör performansı
-3. TEKNİK GÖSTERGELER - RSI, MACD, Stokastik, CCI, Bollinger
-4. MUM GRAFİKLERİ - Günlük/Haftalık/Aylık
-5. HACİM ANALİZİ - Hacim trendleri, anormal hacim
-6. DESTEK-DİRENÇ - Fibonacci, Pivot, önemli seviyeler
-7. TREND ANALİZİ - MA'lar, trend çizgileri
-8. VOLATİLİTE - ATR, Beta, standart sapma
-9. ÖZEL FİLTRELER - Kişisel stratejiler, özel taramalar
-
-💡 YANIT FORMATI:
-1. Soruyu anladığını belirt
-2. Hangi Excel sayfasında olduğunu söyle (örn: "3. sayfada RSI...")
-3. Pratik adımlar ver
-4. Excel'deki konumunu belirt (sütun, satır)
-5. Türkçe, net, yardımsever ol
-
-🚫 YAPMA: Yatırım tavsiyesi verme, kesin öngörüde bulunma.
-"""
+Kısa ve net cevap ver. Max 3 cümle. Excel'de hangi sayfada olduğunu söyle."""
 
 data = {
-    "model": "deepseek-chat",
+    "model": "deepseek-chat",  # Temel model
     "messages": [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": question}
     ],
-    "max_tokens": 1500,
-    "temperature": 0.7
+    "max_tokens": 500,  # AZ TOKEN KULLAN
+    "temperature": 0.7,
+    "stream": False
 }
 
 try:
     print("🤖 DeepSeek'e bağlanıyor...")
     response = requests.post(url, headers=headers, json=data, timeout=30)
     
+    print(f"📊 Status Code: {response.status_code}")
+    
     if response.status_code == 200:
-        answer = response.json()['choices'][0]['message']['content']
-        print(f"✅ Yanıt: {answer[:200]}...")
+        result = response.json()
+        answer = result['choices'][0]['message']['content']
+        print(f"✅ Yanıt: {answer[:150]}...")
+        
+        # Token kullanımı
+        usage = result.get('usage', {})
+        print(f"📈 Token kullanımı: {usage.get('total_tokens', 0)}")
         
         # Yanıtı dosyaya yaz
         with open('answer.txt', 'w', encoding='utf-8') as f:
             f.write(answer)
         
         print("📁 answer.txt dosyası oluşturuldu")
+        
+    elif response.status_code == 429:
+        print("⚠️ Rate limit aşıldı! 60 saniye bekle...")
+        time.sleep(60)
+        print("⏳ Yeniden deniyor...")
+        # Yeniden dene
+        response = requests.post(url, headers=headers, json=data, timeout=30)
+        if response.status_code == 200:
+            answer = response.json()['choices'][0]['message']['content']
+            with open('answer.txt', 'w', encoding='utf-8') as f:
+                f.write(answer)
+            print("✅ İkinci deneme başarılı!")
+        else:
+            print(f"❌ İkinci deneme de başarısız: {response.status_code}")
+            raise Exception(f"API Error: {response.status_code}")
+            
     else:
         print(f"❌ API hatası: {response.status_code}")
-        print(response.text)
+        print(f"📝 Hata detayı: {response.text[:200]}")
         
-        # Hata durumunda basit yanıt
-        with open('answer.txt', 'w', encoding='utf-8') as f:
-            f.write(f"Üzgünüm, şu anda teknik bir sorun var. Sorunuz: '{question}'")
+        # Alternatif model dene
+        print("🔄 Alternatif model deneniyor...")
+        data["model"] = "deepseek-reasoner"
+        response2 = requests.post(url, headers=headers, json=data, timeout=30)
+        
+        if response2.status_code == 200:
+            answer = response2.json()['choices'][0]['message']['content']
+            with open('answer.txt', 'w', encoding='utf-8') as f:
+                f.write(answer)
+            print("✅ Alternatif model çalıştı!")
+        else:
+            # Son çare: basit yanıt
+            with open('answer.txt', 'w', encoding='utf-8') as f:
+                f.write(f"Üzgünüm, teknik bir sorun var. Sorunuz: '{question}'. Lütfen daha sonra tekrar deneyin.")
             
 except Exception as e:
-    print(f"❌ Hata: {str(e)}")
+    print(f"❌ Beklenmeyen hata: {str(e)}")
+    import traceback
+    traceback.print_exc()
+    
     with open('answer.txt', 'w', encoding='utf-8') as f:
         f.write("Teknik bir hata oluştu. Lütfen daha sonra tekrar deneyin.")
