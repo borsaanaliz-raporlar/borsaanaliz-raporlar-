@@ -7,7 +7,8 @@ on:
 
 jobs:
   excel-ai:
-    if: contains(github.event.issue.labels.*.name, 'excel-ai')
+    # "if" koşulunu SİLİN veya yorum satırı yapın. İş akışı her Issue açılışında çalışsın.
+    # if: contains(github.event.issue.labels.*.name, 'excel-ai')
     
     runs-on: ubuntu-latest
     
@@ -39,8 +40,23 @@ jobs:
         GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
       run: python .github/excel_ai_analyzer.py "${{ github.event.issue.body }}"
       
+    - name: 📝 Yanıt dosyasını kontrol et (YENİ EKLENDİ)
+      id: check-response
+      run: |
+        if [ -f "ai_response.txt" ]; then
+          echo "✅ Yanıt dosyası bulundu."
+          echo "has_response=true" >> $GITHUB_OUTPUT
+        else
+          echo "❌ Hata: ai_response.txt bulunamadı!"
+          echo "has_response=false" >> $GITHUB_OUTPUT
+          # Acil durum yanıtı oluştur
+          echo "Üzgünüm, Excel AI yanıtı şu anda oluşturulamadı. Lütfen daha sonra tekrar deneyin veya soruyu manuel kontrol edin." > ai_response.txt
+        fi
+      
     - name: 💬 Yanıtı Issue'a ekle
       uses: actions/github-script@v6
+      env:
+        AI_RESPONSE: ${{ steps.check-response.outputs.has_response }}
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
@@ -50,9 +66,10 @@ jobs:
           try {
             response = fs.readFileSync('ai_response.txt', 'utf8');
           } catch (e) {
-            response = `⚠️ Hata: ${e.message}`;
+            response = `⚠️ Teknik bir hata oluştu: ${e.message}. Lütfen daha sonra tekrar deneyin.`;
           }
           
+          // Yanıtı Issue'a yorum olarak ekle
           await github.rest.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
@@ -60,4 +77,16 @@ jobs:
             body: `## 📈 EXCEL AI ANALİZ RAPORU\n\n${response}\n\n---\n⚡ **Sistem:** Otomatik Excel Okuyucu AI\n📅 **Analiz Tarihi:** ${new Date().toLocaleString('tr-TR')}\n🤖 **AI Model:** Groq Llama 3.1`
           });
           
-          console.log("✅ Excel AI yanıtı eklendi!");
+          // İsteğe bağlı: Issue'ya otomatik olarak bir label ekleyin
+          try {
+            await github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['excel-ai-cevaplandı']
+            });
+          } catch (error) {
+            console.log("Label eklenemedi, önemli değil.");
+          }
+          
+          console.log("✅ Excel AI yanıtı Issue'a eklendi!");
