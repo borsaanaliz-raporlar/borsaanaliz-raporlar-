@@ -1,0 +1,63 @@
+name: 🤖 Excel-Okuyan AI Yanıt
+
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+
+jobs:
+  excel-ai:
+    if: contains(github.event.issue.labels.*.name, 'excel-ai')
+    
+    runs-on: ubuntu-latest
+    
+    permissions:
+      issues: write
+      contents: read
+    
+    steps:
+    - name: 📥 Repository'yi çek
+      uses: actions/checkout@v3
+      
+    - name: 🐍 Python kur
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+      
+    - name: 📦 Kütüphaneleri kur
+      run: |
+        pip install pandas openpyxl requests
+        echo "✅ Kütüphaneler kuruldu"
+      
+    - name: 🔍 Excel dosyalarını kontrol et
+      run: |
+        echo "📂 Mevcut dosyalar:"
+        ls -la *.xls* || echo "Excel dosyası yok"
+      
+    - name: 🤖 Excel AI analizini çalıştır
+      env:
+        GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      run: python .github/excel_ai_analyzer.py "${{ github.event.issue.body }}"
+      
+    - name: 💬 Yanıtı Issue'a ekle
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const fs = require('fs');
+          let response = "AI yanıtı oluşturulamadı.";
+          
+          try {
+            response = fs.readFileSync('ai_response.txt', 'utf8');
+          } catch (e) {
+            response = `⚠️ Hata: ${e.message}`;
+          }
+          
+          await github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `## 📈 EXCEL AI ANALİZ RAPORU\n\n${response}\n\n---\n⚡ **Sistem:** Otomatik Excel Okuyucu AI\n📅 **Analiz Tarihi:** ${new Date().toLocaleString('tr-TR')}\n🤖 **AI Model:** Groq Llama 3.1`
+          });
+          
+          console.log("✅ Excel AI yanıtı eklendi!");
