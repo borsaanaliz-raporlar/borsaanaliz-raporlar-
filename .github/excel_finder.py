@@ -13,8 +13,8 @@ def find_latest_excel():
     # Tüm Excel dosyalarını bul
     excel_files = []
     
-    for pattern in ['*.xlsm', '*.xlsx', 'BORSAANALIZ*.xlsm']:
-        for file_path in glob.glob(pattern):
+    for pattern in ['*.xlsm', '*.xlsx', '**/*.xlsm', '**/*.xlsx', 'raporlar/*.xlsm']:
+        for file_path in glob.glob(pattern, recursive=True):
             if 'BORSAANALIZ' in file_path.upper():
                 stat = os.stat(file_path)
                 mod_time = datetime.fromtimestamp(stat.st_mtime)
