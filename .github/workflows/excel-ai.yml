@@ -7,8 +7,6 @@ on:
 
 jobs:
   excel-ai:
-    # "if" koşulunu SİLİN veya yorum satırı yapın. İş akışı her Issue açılışında çalışsın.
-    # if: contains(github.event.issue.labels.*.name, 'excel-ai')
     
     runs-on: ubuntu-latest
     
