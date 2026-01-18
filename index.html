@@ -1490,8 +1490,195 @@
             }
         }, 2 * 60 * 60 * 1000);
     </script>
+    <script>
+    // GÜVENLİ AI SORU SORMA SİSTEMİ
+    function askAI(question) {
+        if (!question.trim()) {
+            showMessage('⚠️ Lütfen bir soru yazın!', 'error');
+            return;
+        }
+        
+        // GitHub Issues formunu hazırla
+        const title = `🤖 ${question.substring(0, 50)}${question.length > 50 ? '...' : ''}`;
+        const body = `## 📝 AI Sorusu\n\n${question}\n\n---\n📅 **Gönderim Zamanı:** ${new Date().toLocaleString('tr-TR')}\n🌐 **Kaynak:** BorsaAnaliz Web Sitesi`;
+        const labels = 'excel-ai,web-form';
+        
+        // URL encode
+        const issueUrl = `https://github.com/borsaanaliz-raporlar/borsaanaliz-raporlar-/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}&labels=${encodeURIComponent(labels)}`;
+        
+        // Yeni sekmede aç
+        const newWindow = window.open(issueUrl, '_blank');
+        
+        // Kullanıcıya bilgi ver
+        showMessage('✅ <strong>GitHub Issues sayfası açıldı!</strong><br>1. "Submit new issue" butonuna tıklayın<br>2. AI 2 dakika içinde yanıtlayacak', 'success');
+        
+        // Input'u temizle
+        document.querySelector('.chat-input').value = '';
+        
+        // Pencere açıldı mı kontrol et
+        setTimeout(() => {
+            if (!newWindow || newWindow.closed) {
+                showMessage('⚠️ <strong>Pencere engellendi!</strong><br>Lütfen <a href="' + issueUrl + '" target="_blank">buraya tıklayarak</a> manuel açın.', 'warning');
+            }
+        }, 1000);
+    }
+    
+    // Mesaj gösterme fonksiyonu
+    function showMessage(text, type) {
+        // Eski mesajları temizle
+        const oldMsg = document.getElementById('aiAlert');
+        if (oldMsg) oldMsg.remove();
+        
+        // Yeni mesaj oluştur
+        const alertDiv = document.createElement('div');
+        alertDiv.id = 'aiAlert';
+        alertDiv.innerHTML = `
+            <div class="alert-content">
+                ${text}
+                <button class="alert-close">&times;</button>
+            </div>
+        `;
+        
+        // CSS class ekle
+        alertDiv.className = `ai-alert ai-alert-${type}`;
+        
+        // Sayfaya ekle
+        document.querySelector('.ai-assistant').appendChild(alertDiv);
+        
+        // Kapat butonu
+        alertDiv.querySelector('.alert-close').addEventListener('click', function() {
+            alertDiv.remove();
+        });
+        
+        // 15 saniye sonra otomatik kapat (success için)
+        if (type === 'success') {
+            setTimeout(() => {
+                if (alertDiv.parentNode) alertDiv.remove();
+            }, 15000);
+        }
+    }
+    
+    // Sayfa yüklendiğinde
+    document.addEventListener('DOMContentLoaded', function() {
+        // Gönder butonu
+        const sendBtn = document.getElementById('sendQuestion');
+        if (sendBtn) {
+            sendBtn.addEventListener('click', function() {
+                const question = document.querySelector('.chat-input').value;
+                askAI(question);
+            });
+        }
+        
+        // Enter tuşu
+        const chatInput = document.querySelector('.chat-input');
+        if (chatInput) {
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendBtn.click();
+                }
+            });
+        }
+        
+        // Hızlı soru butonları
+        const quickQuestions = {
+            'RSI nedir?': "Excel'de RSI göstergesi nasıl yorumlanır?",
+            'MACRO açma': "Excel'de MACRO nasıl açılır?",
+            'Hangi hisse?': "Bugün öne çıkan hisseler hangileri?",
+            'Teknik analiz': "Excel'de teknik analiz nasıl yapılır?"
+        };
+        
+        document.querySelectorAll('.quick-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const qText = this.textContent;
+                if (quickQuestions[qText]) {
+                    document.querySelector('.chat-input').value = quickQuestions[qText];
+                    document.querySelector('.chat-input').focus();
+                }
+            });
+        });
+    });
+    
+    // Stil ekle
+    const style = document.createElement('style');
+    style.textContent = `
+        .ai-alert {
+            margin-top: 15px;
+            padding: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            animation: slideDown 0.3s ease-out;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .ai-alert-success {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        }
+        
+        .ai-alert-error {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+        }
+        
+        .ai-alert-warning {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+        }
+        
+        .alert-content {
+            padding: 15px 40px 15px 20px;
+            color: white;
+            position: relative;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .alert-content strong {
+            font-size: 15px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .alert-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            padding: 0;
+        }
+        
+        .alert-close:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .ai-alert a {
+            color: white;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    </script>
 </body>
 </html>
+
 
 
 
