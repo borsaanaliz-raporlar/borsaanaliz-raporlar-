@@ -409,183 +409,6 @@
             word-break: break-all;
         }
         
-        /* YENİ: DEEPSEEK CHAT STYLES */
-        .ai-assistant {
-            margin: 40px 0 30px 0;
-            background: linear-gradient(135deg, #f5f7ff 0%, #e3e6ff 100%);
-            border-radius: 20px;
-            padding: 30px;
-            border: 3px solid #667eea;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
-        }
-        
-        .chat-container {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            height: 320px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-            border: 2px solid #e1e5ff;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .chat-input-container {
-            background: white;
-            border-radius: 15px;
-            padding: 5px;
-            border: 2px solid #e1e5ff;
-            display: flex;
-            gap: 10px;
-        }
-        
-        .chat-input {
-            flex: 1;
-            padding: 18px 20px;
-            border: none;
-            border-radius: 12px;
-            font-size: 15px;
-            outline: none;
-            background: transparent;
-        }
-        
-        .chat-send-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 0 30px;
-            border-radius: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-            white-space: nowrap;
-        }
-        
-        .chat-send-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        .quick-questions {
-            margin-top: 20px;
-            text-align: center;
-        }
-        
-        .quick-btn {
-            background: #e8f5e9;
-            color: #2e7d32;
-            border: 1px solid #a5d6a7;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin: 0 5px 10px 5px;
-            display: inline-block;
-        }
-        
-        .quick-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-        }
-        
-        .quick-btn.rsi {
-            background: #e3f2fd;
-            color: #1565c0;
-            border-color: #90caf9;
-        }
-        
-        .quick-btn.hisse {
-            background: #f3e5f5;
-            color: #7b1fa2;
-            border-color: #ce93d8;
-        }
-        
-        .quick-btn.excel {
-            background: #fff3cd;
-            color: #856404;
-            border-color: #ffeaa7;
-        }
-        
-        .chat-info {
-            margin-top: 25px;
-            padding: 15px;
-            background: rgba(102, 126, 234, 0.08);
-            border-radius: 12px;
-            border-left: 4px solid #667eea;
-            font-size: 13px;
-            color: #555;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .message {
-            padding: 15px;
-            border-radius: 15px;
-            max-width: 85%;
-            animation: fadeIn 0.3s ease-out;
-            word-wrap: break-word;
-        }
-        
-        .message.user {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            align-self: flex-end;
-            border: 1px solid #5566cc;
-        }
-        
-        .message.bot {
-            background: #f0f2ff;
-            color: #333;
-            align-self: flex-start;
-            border: 1px solid #d0d5ff;
-        }
-        
-        .typing-indicator {
-            display: inline-flex;
-            gap: 4px;
-            margin-left: 10px;
-        }
-        
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            background: #667eea;
-            border-radius: 50%;
-            animation: typing 1.4s infinite;
-        }
-        
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-        
-        @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-10px); }
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* YENİ: NOTIFICATION STYLES */
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        @keyframes slideOutRight {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
-        
         @media (max-width: 600px) {
             .container {
                 padding: 25px;
@@ -609,25 +432,6 @@
                 width: 100%;
                 justify-content: center;
             }
-            
-            .ai-assistant {
-                padding: 20px;
-            }
-            
-            .chat-container {
-                height: 280px;
-                padding: 15px;
-            }
-            
-            .chat-send-btn {
-                padding: 0 20px;
-            }
-            
-            .quick-btn {
-                display: block;
-                width: 100%;
-                margin: 5px 0;
-            }
         }
     </style>
 </head>
@@ -641,7 +445,7 @@
             <h1>📊 BORSAANALIZ V11</h1>
             <div class="tagline">Kazananlar Kulübüne Açılan Dünya</div>
             <p>Günlük Teknik Analiz Raporları</p>
-            <span class="version-badge">VERSION 11.0 + Excel AI</span>
+            <span class="version-badge">VERSION 11.0</span>
         </div>
         
         <div id="loginBox">
@@ -699,60 +503,6 @@
             
             <div class="file-list" id="fileList">
             </div>
-            
-           <!-- 🤖 BORSAANALIZ AI CHAT ASİSTANI -->
-<div class="ai-assistant">
-    <h3>🤖 BORSAANALIZ AI ASİSTAN</h3>
-    <p class="ai-subtitle">Excel raporlarınız hakkında anında soru sorun</p>
-    
-    <!-- Chat Mesajları -->
-    <div class="chat-container" id="chatContainer">
-        <!-- AI Hoşgeldin Mesajı -->
-        <div class="message ai-message">
-            <div class="message-avatar">🤖</div>
-            <div class="message-content">
-                <strong>Merhaba! Ben BORSAANALIZ AI asistanıyım.</strong><br>
-                Excel raporlarınız hakkında sorularınızı buradan sorabilirsiniz.
-                Yanıtlar 1-2 dakika içinde bu ekranda belirecek.<br><br>
-                <em>Örnek sorular:</em><br>
-                • "RSI göstergesi nasıl yorumlanır?"<br>
-                • "Bugün öne çıkan hisseler hangileri?"<br>
-                • "Excel'de MACRO nasıl açılır?"
-            </div>
-            <div class="message-time">Şimdi</div>
-        </div>
-    </div>
-    
-    <!-- Chat Input -->
-    <div class="chat-input-container">
-        <input type="text" 
-               class="chat-input" 
-               id="chatInput"
-               placeholder="Excel hakkında soru sorun... (Enter ile gönder)"
-               autocomplete="off">
-        <button class="chat-send-btn" id="sendQuestion">
-            <span>Gönder</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M22 2L11 13" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </button>
-    </div>
-    
-    <!-- Hızlı Sorular -->
-    <div class="quick-questions">
-        <button class="quick-btn rsi">RSI nedir?</button>
-        <button class="quick-btn hisse">Hangi hisse?</button>
-        <button class="quick-btn excel">MACRO açma</button>
-        <button class="quick-btn">Teknik analiz</button>
-    </div>
-    
-    <!-- Chat Bilgi -->
-    <div class="chat-info">
-        ⚡ <strong>Gerçek AI analizi:</strong> Sorunuz Excel dosyası okunarak yanıtlanır.
-        Yanıt süresi: 1-2 dakika.
-    </div>
-</div>
             
             <div class="warning">
                 <strong>⚠️ Önemli Uyarılar:</strong>
@@ -872,8 +622,8 @@
         window.addEventListener('load', startMatrix);
         window.addEventListener('resize', resizeCanvas);
 
-        // ORJİNAL APP CODE
-        const correctPassword = "baba";
+        // ORJINAL APP CODE
+        const correctPassword = "ba";
         
         const files = [
                {
@@ -1003,6 +753,95 @@
             document.getElementById('loginBox').style.display = 'none';
             document.getElementById('contentBox').style.display = 'block';
             
+            // === YENİ: MAKRO UYARISI EKLENDİ ===
+            const contentBox = document.getElementById('contentBox');
+            const macroWarningHTML = `
+            <div class="macro-warning" style="
+                background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+                border: 2px solid #ffb300;
+                border-radius: 12px;
+                padding: 20px;
+                margin: 25px 0;
+                box-shadow: 0 4px 12px rgba(255, 179, 0, 0.15);
+            ">
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                    <div style="font-size: 24px;">⚠️</div>
+                    <h3 style="margin: 0; color: #ff6f00;">EXCEL DOSYASI KULLANIM TALİMATI</h3>
+                </div>
+                
+                <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <p style="margin: 0 0 15px 0; color: #333;">
+                        <strong>Eğer sembol bazlı analiz yapmak isterseniz lütfen şu 4 adımı izleyin:</strong>
+                    </p>
+                    
+                    <div style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px; padding: 10px; background: #f9f9f9; border-radius: 6px;">
+                        <div style="background: #4caf50; color: white; min-width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">1</div>
+                        <div>
+                            <strong style="color: #2e7d32;">Dosyayı İndirin</strong>
+                            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">(.xlsm uzantılı Excel dosyası)</p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px; padding: 10px; background: #f9f9f9; border-radius: 6px;">
+                        <div style="background: #2196f3; color: white; min-width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">2</div>
+                        <div>
+                            <strong style="color: #1565c0;">Sağ Tık → Özellikler</strong>
+                            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">İndirilen dosyaya sağ tıklayın</p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px; padding: 10px; background: #f9f9f9; border-radius: 6px;">
+                        <div style="background: #9c27b0; color: white; min-width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">3</div>
+                        <div>
+                            <strong style="color: #6a1b9a;">"Engellemeyi Kaldır"ı İşaretleyin</strong>
+                            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Özellikler penceresinin en altında</p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: start; gap: 12px; padding: 10px; background: #f9f9f9; border-radius: 6px;">
+                        <div style="background: #ff9800; color: white; min-width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">4</div>
+                        <div>
+                            <strong style="color: #ef6c00;">Excel'de Aç ve "Makroları Etkinleştir"</strong>
+                            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Üstte çıkan sarı uyarı butonuna tıklayın</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #e8f5e9; padding: 12px; border-radius: 8px; border-left: 4px solid #4caf50; margin-bottom: 15px;">
+                    <p style="margin: 0; font-size: 14px; color: #2e7d32;">
+                        <strong>✅ Hazır!</strong> Artık tüm analiz araçlarına erişebilirsiniz. 
+                        Sembol bazlı filtreleme ve özel analizler aktif.
+                    </p>
+                </div>
+                
+                <div style="text-align: center;">
+                    <button onclick="this.parentElement.style.display='none'" style="
+                        background: #616161;
+                        color: white;
+                        border: none;
+                        padding: 10px 24px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-weight: bold;
+                        font-size: 14px;
+                        transition: background 0.3s;
+                    " onmouseover="this.style.background='#424242'" onmouseout="this.style.background='#616161'">
+                        Tamam, Anladım
+                    </button>
+                    <p style="margin: 10px 0 0 0; font-size: 12px; color: #757575;">
+                        (Bu uyarıyı kapatmak için)
+                    </p>
+                </div>
+            </div>
+            `;
+            
+            // Uyarıyı "welcome" div'inden sonra ekle
+            const welcomeDiv = contentBox.querySelector('.welcome');
+            if (welcomeDiv) {
+                welcomeDiv.insertAdjacentHTML('afterend', macroWarningHTML);
+            }
+            // === MAKRO UYARISI SONU ===
+            
             document.getElementById('totalReports').textContent = files.length;
             
             const fileList = document.getElementById('fileList');
@@ -1032,14 +871,6 @@
                 `;
                 fileList.appendChild(fileItem);
             });
-            
-            // Chat input'una odaklan
-            setTimeout(() => {
-                const userInput = document.getElementById('userInput');
-                if (userInput) {
-                    userInput.focus();
-                }
-            }, 500);
         }
         
         // YENİ: Dosya indirme fonksiyonu
@@ -1064,335 +895,6 @@
                 location.reload();
             }
         }
-        
-        // ==================== YENİ: EXCEL OKUYAN AI SİSTEMİ ====================
-        
-        let chatHistory = [
-            { 
-                role: "assistant", 
-                content: "🚀 **YENİ! Excel-Okuyan AI Aktif!**\n\nArtık sorularınız **EN SON Excel dosyasından** gerçek verilerle yanıtlanıyor!\n\n📊 **Sistem:** GitHub Issues + Otomatik Workflow\n⏱️ **Süre:** 15-30 saniye\n📈 **Analiz:** 9 sayfa, 500+ hisse\n\nSize nasıl yardımcı olabilirim?" 
-            }
-        ];
-        
-        // Hızlı soru butonları için
-        function quickQuestion(question) {
-            document.getElementById('userInput').value = question;
-            sendMessage();
-        }
-        
-        // Mesaj gönderme - EXCEL AI SİSTEMİ
-        async function sendMessage() {
-            const input = document.getElementById('userInput');
-            const message = input.value.trim();
-            
-            if (!message) return;
-            
-            // Mesajı göster
-            addMessage('user', message);
-            input.value = '';
-            input.focus();
-            
-            // Typing göster
-            addTypingIndicator();
-            
-            try {
-                // Excel AI sistemini çağır
-                const response = await callGitHubAPI(message);
-                
-                // Typing kaldır
-                removeTypingIndicator();
-                
-                // Yanıtı göster
-                addMessage('assistant', response);
-                
-            } catch (error) {
-                console.error('Hata:', error);
-                removeTypingIndicator();
-                addMessage('assistant', 'Bağlantı hatası. Lütfen tekrar deneyin.');
-            }
-        }
-        
-        // YENİ: EXCEL OKUYAN AI SİSTEMİ
-        async function callGitHubAPI(question) {
-            console.log("📤 Excel AI sistemi çağrılıyor:", question);
-            
-            try {
-                // 1. ÖNCE HIZLI MOCK YANIT
-                const quickAnswer = getMockResponse(question);
-                
-                // 2. ARKA PLANDA GİTHUB ISSUE AÇ (EXCEL OKUYAN)
-                setTimeout(async () => {
-                    try {
-                        const issueResponse = await fetch(
-                            'https://api.github.com/repos/borsaanaliz-raporlar/borsaanaliz-raporlar-/issues',
-                            {
-                                method: 'POST',
-                                headers: {
-                                    'Accept': 'application/vnd.github.v3+json',
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    title: `🤖 Excel AI: ${question.substring(0, 40)}...`,
-                                    body: `## ❓ Kullanıcı Sorusu\n${question}\n\n## 📊 İstenen Analiz\n- EN SON Excel dosyasından gerçek verilerle analiz\n- Excel sayfalarına göre yanıt\n- Pratik Excel yönlendirmeleri\n\n**Tarih:** ${new Date().toLocaleString('tr-TR')}\n*Bu soru Excel-okuyan AI tarafından otomatik yanıtlanacaktır.*`,
-                                    labels: ['excel-ai', 'soru', 'auto-respond']
-                                })
-                            }
-                        );
-                        
-                        if (issueResponse.ok) {
-                            const issueData = await issueResponse.json();
-                            console.log("✅ Excel AI Issue açıldı:", issueData.number);
-                            
-                            // Issue numarasını sakla
-                            localStorage.setItem('lastExcelIssue', issueData.number);
-                            
-                            // 15 saniye sonra yanıtı kontrol et
-                            setTimeout(() => checkExcelAIResponse(issueData.number), 15000);
-                            
-                            // Bildirim göster
-                            showNotification('🚀 Excel AI analizi başladı! (15-30 saniye)');
-                        }
-                        
-                    } catch (issueError) {
-                        console.log("Excel Issue hatası:", issueError);
-                    }
-                }, 500);
-                
-                // 3. KULLANICIYA HEMEN DÖN
-                return quickAnswer + "\n\n🔄 **AI EXCEL ANALİZİ BAŞLADI!**\n\n" +
-                       "📊 **EN SON Excel dosyası otomatik okunuyor...**\n" +
-                       "⏳ **Yanıt hazırlanıyor (15-30 saniye)**\n" +
-                       "💡 *Sayfayı kapatmadan bekleyin, yanıt otomatik gelecek*";
-                
-            } catch (error) {
-                console.error('Excel AI sistem hatası:', error);
-                return getMockResponse(question);
-            }
-        }
-        
-        // EXCEL AI YANIT KONTROL FONKSİYONU
-        async function checkExcelAIResponse(issueNumber) {
-            console.log(`🔍 Excel AI yanıtı kontrol ediliyor: Issue #${issueNumber}`);
-            
-            try {
-                const response = await fetch(
-                    `https://api.github.com/repos/borsaanaliz-raporlar/borsaanaliz-raporlar-/issues/${issueNumber}/comments`,
-                    {
-                        headers: {
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    }
-                );
-                
-                if (response.ok) {
-                    const comments = await response.json();
-                    console.log(`📝 Issue'da ${comments.length} yorum bulundu`);
-                    
-                    if (comments.length > 0) {
-                        // Excel AI yanıtını bul (özel format)
-                        const excelAIComment = comments.find(c => 
-                            c.body.includes('EXCEL AI ANALİZ') || 
-                            c.body.includes('Excel Tarihi:') ||
-                            c.body.includes('Gerçek Excel verileri')
-                        );
-                        
-                        if (excelAIComment) {
-                            // Yanıtı chat'te göster
-                            const cleanResponse = excelAIComment.body
-                                .replace(/## 📈 EXCEL AI ANALİZ RAPORU/g, '')
-                                .replace(/---[\s\S]*$/g, '')
-                                .trim();
-                            
-                            addMessage('assistant', `🤖 **EXCEL AI ANALİZ SONUCU:**\n\n${cleanResponse}`);
-                            
-                            // Başarı mesajı
-                            showNotification('✅ Excel AI analizi tamamlandı!');
-                            return;
-                        }
-                    }
-                    
-                    // 10 saniye daha bekle (max 60 saniye)
-                    const retryCount = localStorage.getItem(`retry_${issueNumber}`) || 0;
-                    if (retryCount < 6) {
-                        localStorage.setItem(`retry_${issueNumber}`, parseInt(retryCount) + 1);
-                        setTimeout(() => checkExcelAIResponse(issueNumber), 10000);
-                    } else {
-                        addMessage('assistant', '⏳ Excel AI yanıtı gecikiyor. GitHub Issues\'dan kontrol edebilirsiniz.');
-                        showNotification('⚠️ AI yanıtı gecikti, Issues\'dan kontrol edin');
-                    }
-                }
-            } catch (e) {
-                console.log("Excel yanıt kontrol hatası:", e);
-                setTimeout(() => checkExcelAIResponse(issueNumber), 10000);
-            }
-        }
-        
-        // BİLDİRİM FONKSİYONU
-        function showNotification(message) {
-            // Basit bildirim
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                padding: 15px 25px;
-                border-radius: 10px;
-                box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-                z-index: 10000;
-                animation: slideInRight 0.3s ease-out;
-                font-weight: bold;
-                max-width: 400px;
-            `;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.style.animation = 'slideOutRight 0.3s ease-out';
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
-        }
-        
-        // GÜNCELLENMİŞ MOCK YANITLAR
-        function getMockResponse(question) {
-            const q = question.toLowerCase();
-            const today = new Date();
-            const excelDate = "16.01.2026";
-            const excelFile = "BORSAANALIZ_V11_TAM_16012026.xlsm";
-            
-            // EXCEL BİLGİSİ EKLE
-            const excelInfo = `📅 **Excel Tarihi:** ${excelDate}\n📊 **Dosya:** ${excelFile}\n\n`;
-            
-            if (q.includes('macro') || q.includes('makro') || q.includes('açma') || q.includes('etkin')) {
-                return excelInfo + `🔓 **MACRO ETKİNLEŞTİRME:**\n\n1. Sağ tık → Özellikler → "Engellemeyi Kaldır" ✓\n2. Excel'de "Makroları Etkinleştir"\n3. ${excelDate} raporunda MACRO hazır\n\n*Excel AI şu anda dosyayı okuyor, detaylı yardım geliyor...*`;
-            }
-            
-            if (q.includes('rsi') || q.includes('göreceli') || q.includes('teknik')) {
-                return excelInfo + `📈 **RSI ANALİZİ (${excelDate}):**\n\n• Sayfa 3'te otomatik hesaplanır\n• Renk kodlu: Kırmızı (>70), Yeşil (<30)\n• 9 zaman dilimi mevcut\n\n*Excel AI şu anda RSI değerlerini okuyor...*`;
-            }
-            
-            if (q.includes('son') || q.includes('güncel') || q.includes('bugün') || q.includes('ne var')) {
-                return `📊 **EN SON EXCEL ANALİZİ:**\n\n` +
-                       `**Dosya:** ${excelFile}\n` +
-                       `**Tarih:** ${excelDate}\n` +
-                       `**Boyut:** 1.1 MB\n` +
-                       `**Sayfa:** 9 analiz sayfası\n\n` +
-                       `🚀 **Excel AI SİSTEMİ ÇALIŞIYOR:**\n` +
-                       `1. Bu dosyayı otomatik okuyor\n` +
-                       `2. Gerçek verileri analiz ediyor\n` +
-                       `3. Size özel yanıt hazırlıyor\n\n` +
-                       `⏳ **15-30 saniye içinde TAM ANALİZ gelecek...**`;
-            }
-            
-            if (q.includes('hisse') || q.includes('seçim') || q.includes('öneri') || q.includes('analiz')) {
-                return excelInfo + `💼 **HİSSE ANALİZİ:**\n\n` +
-                       `Excel AI şu anda analiz ediyor:\n` +
-                       `• 500+ hisse verisi\n` +
-                       `• 9 farklı analiz sayfası\n` +
-                       `• Teknik göstergeler\n` +
-                       `• Sektör performansları\n\n` +
-                       `⏳ **Detaylı analiz hazırlanıyor...**`;
-            }
-            
-            // Genel yanıt
-            return `🤖 **Excel AI Asistan (${excelDate} verileriyle):**\n\n` +
-                   `Soru: **"${question}"**\n\n` +
-                   `📊 **Excel AI Sistemi AKTİF:**\n` +
-                   `• EN SON Excel dosyası otomatik okunuyor\n` +
-                   `• Gerçek veriler analiz ediliyor\n` +
-                   `• Excel sayfalarına göre yanıt hazırlanıyor\n\n` +
-                   `⏳ **Lütfen bekleyin (15-30 sn)...**\n` +
-                   `*Yanıt otomatik olarak bu pencereye gelecek*`;
-        }
-        
-        // Mesaj ekleme fonksiyonu
-        function addMessage(role, content) {
-            const container = document.getElementById('chatContainer');
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${role}`;
-            
-            const icon = role === 'user' ? '👤' : '🤖';
-            const name = role === 'user' ? 'Siz:' : 'Excel AI:';
-            
-            messageDiv.innerHTML = `
-                <div style="display: flex; align-items: start; gap: 10px;">
-                    <div style="
-                        background: ${role === 'user' ? 'white' : '#667eea'};
-                        color: ${role === 'user' ? '#667eea' : 'white'};
-                        width: 32px;
-                        height: 32px;
-                        border-radius: 50%;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-size: 14px;
-                        flex-shrink: 0;
-                        font-weight: bold;
-                    ">
-                        ${icon}
-                    </div>
-                    <div style="flex: 1;">
-                        <strong style="color: ${role === 'user' ? 'white' : '#4455aa'};">${name}</strong>
-                        <div style="margin-top: 8px; line-height: 1.5; white-space: pre-line;">${content}</div>
-                    </div>
-                </div>
-            `;
-            
-            container.appendChild(messageDiv);
-            container.scrollTop = container.scrollHeight;
-        }
-        
-        // Typing indicator ekle
-        function addTypingIndicator() {
-            const container = document.getElementById('chatContainer');
-            
-            const typingDiv = document.createElement('div');
-            typingDiv.id = 'typingIndicator';
-            typingDiv.className = 'message bot';
-            
-            typingDiv.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="
-                        background: #667eea;
-                        color: white;
-                        width: 32px;
-                        height: 32px;
-                        border-radius: 50%;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-size: 14px;
-                        flex-shrink: 0;
-                        font-weight: bold;
-                    ">
-                        AI
-                    </div>
-                    <div>
-                        <strong style="color: #4455aa;">Excel AI:</strong>
-                        <div class="typing-indicator" style="margin-top: 8px;">
-                            <div class="typing-dot"></div>
-                            <div class="typing-dot"></div>
-                            <div class="typing-dot"></div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            container.appendChild(typingDiv);
-            container.scrollTop = container.scrollHeight;
-        }
-        
-        // Typing indicator'ı kaldır
-        function removeTypingIndicator() {
-            const typingIndicator = document.getElementById('typingIndicator');
-            if (typingIndicator) {
-                typingIndicator.remove();
-            }
-        }
-        
-        // ==================== CHAT FONKSİYONLARI SONU ====================
         
         // SAYFA YENİLEME VE GÖRÜNÜRLÜK KONTROLLERİ
         document.addEventListener('visibilitychange', function() {
@@ -1442,505 +944,13 @@
             }
         }, 2 * 60 * 60 * 1000);
     </script>
-    <script>
-    // GÜVENLİ AI SORU SORMA SİSTEMİ
-    function askAI(question) {
-        if (!question.trim()) {
-            showMessage('⚠️ Lütfen bir soru yazın!', 'error');
-            return;
-        }
-        
-        // GitHub Issues formunu hazırla
-        const title = `🤖 ${question.substring(0, 50)}${question.length > 50 ? '...' : ''}`;
-        const body = `## 📝 AI Sorusu\n\n${question}\n\n---\n📅 **Gönderim Zamanı:** ${new Date().toLocaleString('tr-TR')}\n🌐 **Kaynak:** BorsaAnaliz Web Sitesi`;
-        const labels = 'excel-ai,web-form';
-        
-        // URL encode
-        const issueUrl = `https://github.com/borsaanaliz-raporlar/borsaanaliz-raporlar-/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}&labels=${encodeURIComponent(labels)}`;
-        
-        // Yeni sekmede aç
-        const newWindow = window.open(issueUrl, '_blank');
-        
-        // Kullanıcıya bilgi ver
-        showMessage('✅ <strong>GitHub Issues sayfası açıldı!</strong><br>1. "Submit new issue" butonuna tıklayın<br>2. AI 2 dakika içinde yanıtlayacak', 'success');
-        
-        // Input'u temizle
-        document.querySelector('.chat-input').value = '';
-        
-        // Pencere açıldı mı kontrol et
-        setTimeout(() => {
-            if (!newWindow || newWindow.closed) {
-                showMessage('⚠️ <strong>Pencere engellendi!</strong><br>Lütfen <a href="' + issueUrl + '" target="_blank">buraya tıklayarak</a> manuel açın.', 'warning');
-            }
-        }, 1000);
-    }
-    
-    // Mesaj gösterme fonksiyonu
-    function showMessage(text, type) {
-        // Eski mesajları temizle
-        const oldMsg = document.getElementById('aiAlert');
-        if (oldMsg) oldMsg.remove();
-        
-        // Yeni mesaj oluştur
-        const alertDiv = document.createElement('div');
-        alertDiv.id = 'aiAlert';
-        alertDiv.innerHTML = `
-            <div class="alert-content">
-                ${text}
-                <button class="alert-close">&times;</button>
-            </div>
-        `;
-        
-        // CSS class ekle
-        alertDiv.className = `ai-alert ai-alert-${type}`;
-        
-        // Sayfaya ekle
-        document.querySelector('.ai-assistant').appendChild(alertDiv);
-        
-        // Kapat butonu
-        alertDiv.querySelector('.alert-close').addEventListener('click', function() {
-            alertDiv.remove();
-        });
-        
-        // 15 saniye sonra otomatik kapat (success için)
-        if (type === 'success') {
-            setTimeout(() => {
-                if (alertDiv.parentNode) alertDiv.remove();
-            }, 15000);
-        }
-    }
-    
-    // Sayfa yüklendiğinde
-    document.addEventListener('DOMContentLoaded', function() {
-        // Gönder butonu
-        const sendBtn = document.getElementById('sendQuestion');
-        if (sendBtn) {
-            sendBtn.addEventListener('click', function() {
-                const question = document.querySelector('.chat-input').value;
-                askAI(question);
-            });
-        }
-        
-        // Enter tuşu
-        const chatInput = document.querySelector('.chat-input');
-        if (chatInput) {
-            chatInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendBtn.click();
-                }
-            });
-        }
-        
-        // Hızlı soru butonları
-        const quickQuestions = {
-            'RSI nedir?': "Excel'de RSI göstergesi nasıl yorumlanır?",
-            'MACRO açma': "Excel'de MACRO nasıl açılır?",
-            'Hangi hisse?': "Bugün öne çıkan hisseler hangileri?",
-            'Teknik analiz': "Excel'de teknik analiz nasıl yapılır?"
-        };
-        
-        document.querySelectorAll('.quick-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const qText = this.textContent;
-                if (quickQuestions[qText]) {
-                    document.querySelector('.chat-input').value = quickQuestions[qText];
-                    document.querySelector('.chat-input').focus();
-                }
-            });
-        });
-    });
-    
-    // Stil ekle
-    const style = document.createElement('style');
-    style.textContent = `
-        .ai-alert {
-            margin-top: 15px;
-            padding: 0;
-            border-radius: 10px;
-            overflow: hidden;
-            animation: slideDown 0.3s ease-out;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        
-        .ai-alert-success {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-        }
-        
-        .ai-alert-error {
-            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
-        }
-        
-        .ai-alert-warning {
-            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
-        }
-        
-        .alert-content {
-            padding: 15px 40px 15px 20px;
-            color: white;
-            position: relative;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-        
-        .alert-content strong {
-            font-size: 15px;
-            display: block;
-            margin-bottom: 5px;
-        }
-        
-        .alert-close {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 18px;
-            line-height: 1;
-            padding: 0;
-        }
-        
-        .alert-close:hover {
-            background: rgba(255,255,255,0.3);
-        }
-        
-        .ai-alert a {
-            color: white;
-            text-decoration: underline;
-            font-weight: bold;
-        }
-        
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    `;
-    document.head.appendChild(style);
-    </script>
-    <!-- AI Chat JavaScript -->
-<script>
-// BORSAANALIZ AI CHAT SİSTEMİ - KISA VERSİYON
-class AIChatSystem {
-    constructor() {
-        this.apiUrl = 'https://borsaanaliz-raporlar.vercel.app/api/create-issue';
-        this.currentIssue = null;
-    }
-
-    async sendQuestion(question) {
-        if (!question.trim()) {
-            this.showMessage('Lütfen bir soru yazın!', 'error');
-            return;
-        }
-
-        // Kullanıcı mesajını göster
-        this.addMessage(question, 'user');
-        this.showTyping();
-
-        try {
-            const response = await fetch(this.apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ question })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                this.hideTyping();
-                this.currentIssue = data.issueNumber;
-                this.addMessage('✅ Sorunuz AI\'ya iletildi! Yanıt bekleniyor...', 'ai', '⏳');
-                this.startChecking();
-            } else {
-                this.hideTyping();
-                this.showMessage('Hata: ' + (data.error || 'Bilinmeyen hata'), 'error');
-            }
-        } catch (error) {
-            this.hideTyping();
-            this.showMessage('Bağlantı hatası: ' + error.message, 'error');
-        }
-    }
-
-    async startChecking() {
-        let attempts = 0;
-        const maxAttempts = 24; // 2 dakika
-        
-        const checkInterval = setInterval(async () => {
-            attempts++;
-            
-            if (!this.currentIssue) {
-                clearInterval(checkInterval);
-                return;
-            }
-
-            try {
-                const response = await fetch(
-                    `https://api.github.com/repos/borsaanaliz-raporlar/borsaanaliz-raporlar-/issues/${this.currentIssue}/comments`
-                );
-                
-                if (response.ok) {
-                    const comments = await response.json();
-                    const aiComment = comments.find(c => 
-                        c.user.login.includes('github-actions') || 
-                        c.body.includes('EXCEL AI ANALİZ RAPORU')
-                    );
-
-                    if (aiComment) {
-                        clearInterval(checkInterval);
-                        this.hideTyping();
-                        this.showAIResponse(aiComment.body);
-                        return;
-                    }
-                }
-            } catch (error) {
-                // Hata yut
-            }
-
-            if (attempts >= maxAttempts) {
-                clearInterval(checkInterval);
-                this.hideTyping();
-                this.addMessage('⏳ Yanıt gecikiyor, daha sonra tekrar deneyin.', 'ai', '⚠️');
-            }
-        }, 5000);
-    }
-
-    // UI Fonksiyonları
-    addMessage(text, type, avatar = '') {
-        const chatContainer = document.getElementById('chatContainer');
-        const messageDiv = document.createElement('div');
-        
-        if (type === 'user') {
-            messageDiv.className = 'message user-message';
-            messageDiv.innerHTML = `
-                <div class="message-content">${this.escapeHtml(text)}</div>
-                <div class="message-time">${this.getTime()}</div>
-            `;
-        } else {
-            messageDiv.className = 'message ai-message';
-            messageDiv.innerHTML = `
-                <div class="message-avatar">${avatar || '🤖'}</div>
-                <div class="message-content">${text}</div>
-                <div class="message-time">${this.getTime()}</div>
-            `;
-        }
-        
-        chatContainer.appendChild(messageDiv);
-        this.scrollBottom();
-    }
-
-    showTyping() {
-        const chatContainer = document.getElementById('chatContainer');
-        const typingDiv = document.createElement('div');
-        typingDiv.id = 'typingIndicator';
-        typingDiv.className = 'message ai-message typing';
-        typingDiv.innerHTML = `
-            <div class="message-avatar">🤖</div>
-            <div class="message-content">
-                <span class="typing-dots">
-                    <span class="dot"></span>
-                    <span class="dot"></span>
-                    <span class="dot"></span>
-                </span>
-                AI düşünüyor...
-            </div>
-        `;
-        chatContainer.appendChild(typingDiv);
-        this.scrollBottom();
-    }
-
-    hideTyping() {
-        const typing = document.getElementById('typingIndicator');
-        if (typing) typing.remove();
-    }
-
-    showAIResponse(text) {
-        const cleanText = this.escapeHtml(text)
-            .replace(/## 📈 EXCEL AI ANALİZ RAPORU/g, '<strong>📈 EXCEL AI RAPORU</strong>')
-            .replace(/\n\n/g, '<br><br>')
-            .replace(/\n/g, '<br>');
-        
-        this.addMessage(cleanText, 'ai', '📊');
-    }
-
-    showMessage(text, type) {
-        this.addMessage(text, 'ai', type === 'error' ? '❌' : '⚠️');
-    }
-
-    scrollBottom() {
-        const container = document.getElementById('chatContainer');
-        container.scrollTop = container.scrollHeight;
-    }
-
-    getTime() {
-        return new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
-    }
-
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-}
-
-// Sayfa yüklendiğinde
-document.addEventListener('DOMContentLoaded', function() {
-    const aiChat = new AIChatSystem();
-    const sendBtn = document.getElementById('sendQuestion');
-    const chatInput = document.getElementById('chatInput');
-
-    if (sendBtn && chatInput) {
-        sendBtn.addEventListener('click', function() {
-            const question = chatInput.value.trim();
-            if (question) {
-                aiChat.sendQuestion(question);
-                chatInput.value = '';
-            }
-        });
-
-        chatInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendBtn.click();
-            }
-        });
-
-        // Hızlı sorular
-        document.querySelectorAll('.quick-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const questions = {
-                    'RSI nedir?': "RSI göstergesi nasıl yorumlanır?",
-                    'Hangi hisse?': "Bugün öne çıkan hisseler hangileri?",
-                    'MACRO açma': "Excel'de MACRO nasıl açılır?",
-                    'Teknik analiz': "Excel'de teknik analiz nasıl yapılır?"
-                };
-                chatInput.value = questions[this.textContent] || this.textContent;
-                chatInput.focus();
-            });
-        });
-    }
-});
-
-// CSS Stilleri
-const style = document.createElement('style');
-style.textContent = `
-    .chat-container {
-        height: 320px;
-        overflow-y: auto;
-        padding: 15px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        background: #f8f9fa;
-        border-radius: 12px;
-        margin: 15px 0;
-    }
-    
-    .message {
-        max-width: 85%;
-        padding: 12px 16px;
-        border-radius: 18px;
-        position: relative;
-        animation: fadeIn 0.3s;
-    }
-    
-    .user-message {
-        align-self: flex-end;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-bottom-right-radius: 4px;
-    }
-    
-    .ai-message {
-        align-self: flex-start;
-        background: white;
-        color: #333;
-        border: 1px solid #e1e5eb;
-        border-bottom-left-radius: 4px;
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-    }
-    
-    .message-avatar {
-        font-size: 20px;
-        flex-shrink: 0;
-    }
-    
-    .message-content {
-        flex: 1;
-        font-size: 14px;
-        line-height: 1.4;
-    }
-    
-    .message-time {
-        font-size: 11px;
-        opacity: 0.7;
-        margin-top: 5px;
-        text-align: right;
-    }
-    
-    .ai-message .message-time {
-        text-align: left;
-    }
-    
-    .typing-dots {
-        display: inline-flex;
-        gap: 4px;
-        margin-right: 8px;
-    }
-    
-    .typing-dots .dot {
-        width: 6px;
-        height: 6px;
-        background: #667eea;
-        border-radius: 50%;
-        animation: typing 1.4s infinite ease-in-out;
-    }
-    
-    .typing-dots .dot:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dots .dot:nth-child(3) { animation-delay: 0.4s; }
-    
-    @keyframes typing {
-        0%, 60%, 100% { transform: scale(0.8); opacity: 0.5; }
-        30% { transform: scale(1); opacity: 1; }
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .ai-subtitle {
-        text-align: center;
-        color: #666;
-        margin-bottom: 15px;
-        font-size: 14px;
-    }
-    
-    .chat-info {
-        margin-top: 15px;
-        padding: 12px;
-        background: rgba(102, 126, 234, 0.08);
-        border-radius: 10px;
-        font-size: 13px;
-        color: #555;
-        text-align: center;
-    }
-`;
-document.head.appendChild(style);
-</script>
 </body>
 </html>
+
+
+
+
+
 
 
 
