@@ -15,6 +15,56 @@ from excel_finder import find_latest_excel
 # AYARLAR
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
 
+def safe_float(value, default=0):
+    """Güvenli float dönüşümü"""
+    try:
+        if value is None:
+            return default
+        if isinstance(value, (int, float)):
+            return float(value)
+        
+        # Metin ise temizle
+        text = str(value).strip()
+        # Virgülü noktaya çevir
+        text = text.replace(',', '.')
+        # Parantez içindeki sayıları temizle (örn: "NEGATİF (48)" -> "48")
+        if '(' in text and ')' in text:
+            # Sadece parantez içindeki sayıyı al
+            try:
+                number_text = text.split('(')[1].split(')')[0]
+                return float(number_text)
+            except:
+                pass
+        
+        # Diğer karakterleri temizle
+        text = ''.join(c for c in text if c.isdigit() or c == '.' or c == '-')
+        
+        if text == '' or text == '-':
+            return default
+            
+        return float(text)
+    except:
+        return default
+
+def safe_int(value, default=0):
+    """Güvenli int dönüşümü"""
+    try:
+        if value is None:
+            return default
+        if isinstance(value, (int, float)):
+            return int(value)
+        
+        text = str(value).strip()
+        # Sadece sayıları al
+        text = ''.join(c for c in text if c.isdigit() or c == '-')
+        
+        if text == '' or text == '-':
+            return default
+            
+        return int(float(text)) if '.' in text else int(text)
+    except:
+        return default
+
 def extract_smart_data(excel_path):
     """4 ana sayfadan AKILLI veri çek"""
     print("🔍 Akıllı veri çekiliyor...")
@@ -32,31 +82,51 @@ def extract_smart_data(excel_path):
             for row in ws.iter_rows(min_row=2, max_row=100, values_only=True):
                 if row and row[0] and row_count < 25:
                     hisse = str(row[0]).strip()
-                    if hisse and hisse != "None":
-                        vma_raw = str(row[10]) if row[10] else "NÖTR"
-                        vma_direction = "POZİTİF" if "POZİTİF" in vma_raw.upper() else "NEGATİF" if "NEGATİF" in vma_raw.upper() else "NÖTR"
+                    if hisse and hisse != "None" and hisse != "":
+                        # VMA değerini parse et
+                        vma_raw = str(row[10]) if row[10] is not None else "NÖTR"
+                        vma_direction = "NÖTR"
                         vma_days = 0
-                        if "(" in vma_raw and ")" in vma_raw:
-                            try:
-                                vma_days = int(vma_raw.split("(")[1].split(")")[0])
-                            except:
-                                vma_days = 0
+                        
+                        if vma_raw and isinstance(vma_raw, str):
+                            vma_upper = vma_raw.upper()
+                            if "POZİTİF" in vma_upper:
+                                vma_direction = "POZİTİF"
+                            elif "NEGATİF" in vma_upper:
+                                vma_direction = "NEGATİF"
+                            
+                            # Gün sayısını çıkar
+                            if "(" in vma_raw and ")" in vma_raw:
+                                try:
+                                    days_text = vma_raw.split("(")[1].split(")")[0]
+                                    vma_days = safe_int(days_text, 0)
+                                except:
+                                    vma_days = 0
+                        
+                        # WT sinyalini kontrol et
+                        wt_signal = "NÖTR"
+                        if row[1] is not None:
+                            wt_raw = str(row[1]).upper()
+                            if "POZİTİF" in wt_raw:
+                                wt_signal = "POZİTİF"
+                            elif "NEGATİF" in wt_raw:
+                                wt_signal = "NEGATİF"
                         
                         signals_data.append({
                             "HISSE": hisse,
-                            "WT_SINYAL": str(row[1]) if row[1] else "NÖTR",
-                            "WT_SINYAL_FIYAT": float(str(row[2]).replace(',', '.')) if row[2] else 0,
-                            "WT1": float(str(row[3]).replace(',', '.')) if row[3] else 0,
-                            "WT2": float(str(row[4]).replace(',', '.')) if row[4] else 0,
-                            "CLOSE": float(str(row[7]).replace(',', '.')) if row[7] else 0,
-                            "PIVOT": float(str(row[8]).replace(',', '.')) if row[8] else 0,
-                            "LSMA": str(row[9]) if row[9] else "NÖTR",
+                            "WT_SINYAL": wt_signal,
+                            "WT_SINYAL_FIYAT": safe_float(row[2]),
+                            "WT1": safe_float(row[3]),
+                            "WT2": safe_float(row[4]),
+                            "CLOSE": safe_float(row[7]),
+                            "PIVOT": safe_float(row[8]),
+                            "LSMA": str(row[9]) if row[9] is not None else "NÖTR",
                             "VMA": vma_raw,
                             "VMA_YON": vma_direction,
                             "VMA_GUN": vma_days,
-                            "HACIM": int(float(str(row[12]))) if row[12] else 0,
-                            "DURUM": str(row[15]) if row[15] else "NÖTR",
-                            "AI_YORUM": str(row[32])[:100] if row[32] else ""
+                            "HACIM": safe_int(row[12]),
+                            "DURUM": str(row[15]) if row[15] is not None else "NÖTR",
+                            "AI_YORUM": str(row[32])[:100] if row[32] is not None else ""
                         })
                         row_count += 1
             
@@ -72,19 +142,19 @@ def extract_smart_data(excel_path):
             for row in ws.iter_rows(min_row=2, max_row=50, values_only=True):
                 if row and row[0] and row_count < 20:
                     sembol = str(row[0]).strip()
-                    if sembol and sembol != "None":
+                    if sembol and sembol != "None" and sembol != "":
                         pivot_data.append({
                             "SEMBOL": sembol,
-                            "GUNLUK_CLOSE": float(str(row[8]).replace(',', '.')) if row[8] else 0,
-                            "GUNLUK_P": float(str(row[9]).replace(',', '.')) if row[9] else 0,
-                            "GUNLUK_R1": float(str(row[10]).replace(',', '.')) if row[10] else 0,
-                            "GUNLUK_R2": float(str(row[11]).replace(',', '.')) if row[11] else 0,
-                            "GUNLUK_S1": float(str(row[14]).replace(',', '.')) if row[14] else 0,
-                            "GUNLUK_S2": float(str(row[15]).replace(',', '.')) if row[15] else 0,
-                            "HAFTALIK_CLOSE": float(str(row[16]).replace(',', '.')) if row[16] else 0,
-                            "HAFTALIK_P": float(str(row[17]).replace(',', '.')) if row[17] else 0,
-                            "AYLIK_CLOSE": float(str(row[24]).replace(',', '.')) if row[24] else 0,
-                            "AYLIK_P": float(str(row[25]).replace(',', '.')) if row[25] else 0
+                            "GUNLUK_CLOSE": safe_float(row[8]),
+                            "GUNLUK_P": safe_float(row[9]),
+                            "GUNLUK_R1": safe_float(row[10]),
+                            "GUNLUK_R2": safe_float(row[11]),
+                            "GUNLUK_S1": safe_float(row[14]),
+                            "GUNLUK_S2": safe_float(row[15]),
+                            "HAFTALIK_CLOSE": safe_float(row[16]),
+                            "HAFTALIK_P": safe_float(row[17]),
+                            "AYLIK_CLOSE": safe_float(row[24]),
+                            "AYLIK_P": safe_float(row[25])
                         })
                         row_count += 1
             
@@ -98,16 +168,18 @@ def extract_smart_data(excel_path):
             
             for row in ws.iter_rows(min_row=2, max_row=50, values_only=True):
                 if row and row[0]:
-                    sembol = str(row[0]).split()[0] if ' ' in str(row[0]) else str(row[0])
-                    if sembol and sembol != "None":
+                    sembol_raw = str(row[0])
+                    # Tarih kısmını temizle
+                    sembol = sembol_raw.split('(')[0].strip() if '(' in sembol_raw else sembol_raw.strip()
+                    if sembol and sembol != "None" and sembol != "":
                         index_data.append({
                             "ENDEKS": sembol,
-                            "WT_SINYAL": str(row[1]) if row[1] else "NÖTR",
-                            "CLOSE": float(str(row[6]).replace(',', '.')) if row[6] else 0,
-                            "PIVOT": float(str(row[7]).replace(',', '.')) if row[7] else 0,
-                            "LSMA": str(row[8]) if row[8] else "NÖTR",
-                            "VMA": str(row[9]) if row[9] else "NÖTR",
-                            "DURUM": str(row[15]) if row[15] else "NÖTR"
+                            "WT_SINYAL": "POZİTİF" if row[1] and "POZİTİF" in str(row[1]).upper() else "NEGATİF" if row[1] and "NEGATİF" in str(row[1]).upper() else "NÖTR",
+                            "CLOSE": safe_float(row[6]),
+                            "PIVOT": safe_float(row[7]),
+                            "LSMA": str(row[8]) if row[8] is not None else "NÖTR",
+                            "VMA": str(row[9]) if row[9] is not None else "NÖTR",
+                            "DURUM": str(row[15]) if row[15] is not None else "NÖTR"
                         })
             
             all_data["endeksler"] = index_data
@@ -120,17 +192,18 @@ def extract_smart_data(excel_path):
             
             for row in ws.iter_rows(min_row=2, max_row=30, values_only=True):
                 if row and row[0]:
-                    sembol = str(row[0]).split()[0] if ' ' in str(row[0]) else str(row[0])
-                    if sembol and sembol != "None":
+                    sembol_raw = str(row[0])
+                    sembol = sembol_raw.split('(')[0].strip() if '(' in sembol_raw else sembol_raw.strip()
+                    if sembol and sembol != "None" and sembol != "":
                         asset_data.append({
                             "VARLIK": sembol,
-                            "WT_SINYAL": str(row[1]) if row[1] else "NÖTR",
-                            "CLOSE": float(str(row[6]).replace(',', '.')) if row[6] else 0,
-                            "PIVOT": float(str(row[7]).replace(',', '.')) if row[7] else 0,
-                            "LSMA": str(row[8]) if row[8] else "NÖTR",
-                            "VMA": str(row[9]) if row[9] else "NÖTR",
-                            "DURUM": str(row[15]) if row[15] else "NÖTR",
-                            "AI_YORUM": str(row[32])[:80] if row[32] else ""
+                            "WT_SINYAL": "POZİTİF" if row[1] and "POZİTİF" in str(row[1]).upper() else "NEGATİF" if row[1] and "NEGATİF" in str(row[1]).upper() else "NÖTR",
+                            "CLOSE": safe_float(row[6]),
+                            "PIVOT": safe_float(row[7]),
+                            "LSMA": str(row[8]) if row[8] is not None else "NÖTR",
+                            "VMA": str(row[9]) if row[9] is not None else "NÖTR",
+                            "DURUM": str(row[15]) if row[15] is not None else "NÖTR",
+                            "AI_YORUM": str(row[32])[:80] if row[32] is not None else ""
                         })
             
             all_data["varliklar"] = asset_data
@@ -138,6 +211,7 @@ def extract_smart_data(excel_path):
         
         wb.close()
         
+        # İSTATİSTİKLER
         stats = {
             "toplam_hisse": len(all_data.get("sinyaller", [])),
             "vma_pozitif": len([h for h in all_data.get("sinyaller", []) 
@@ -159,6 +233,8 @@ def extract_smart_data(excel_path):
         
     except Exception as e:
         print(f"❌ Veri çekme hatası: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return {"error": f"Veri çekme hatası: {str(e)}"}
 
 def create_ai_prompt(question, excel_data):
@@ -189,10 +265,16 @@ def create_ai_prompt(question, excel_data):
     
     signals_summary = []
     for h in excel_data.get("sinyaller", [])[:8]:
-        pivot_fark = ((h['CLOSE'] - h['PIVOT']) / h['PIVOT'] * 100) if h['PIVOT'] > 0 else 0
+        pivot = h.get('PIVOT', 0)
+        close = h.get('CLOSE', 0)
+        pivot_fark = 0
+        if pivot > 0:
+            pivot_fark = ((close - pivot) / pivot * 100)
+        
         signals_summary.append(
-            f"{h['HISSE']}: {h['CLOSE']:.2f}TL | VMA: {h['VMA']} | WT: {h['WT_SINYAL']} | "
-            f"Pivot: {h['PIVOT']:.2f} ({'+' if pivot_fark > 0 else '-'}{abs(pivot_fark):.1f}%)"
+            f"{h['HISSE']}: {close:.2f}TL | VMA: {h.get('VMA', 'NÖTR')} | "
+            f"WT: {h.get('WT_SINYAL', 'NÖTR')} | Pivot: {pivot:.2f} "
+            f"({'üstünde' if close > pivot else 'altında' if close < pivot else 'aynı'})"
         )
     
     vma_section = f"""
@@ -231,7 +313,7 @@ TradingView'de özel geliştirilmiş, piyasadaki EN GÜVENİLİR trend gösterge
 
 📊 **PİYASA ÖZETİ ({stats.get('tarih', 'Bugün')}):**
 • Toplam Analiz: {stats.get('toplam_hisse', 0)} hisse
-• VMA POZİTİF: {stats.get('vma_pozitif', 0)} hisse (%{int((stats.get('vma_pozitif', 0)/stats.get('toplam_hisse', 1))*100) if stats.get('toplam_hisse', 0) > 0 else 0})
+• VMA POZİTİF: {stats.get('vma_pozitif', 0)} hisse
 • VMA NEGATİF: {stats.get('vma_negatif', 0)} hisse
 • WT POZİTİF: {stats.get('wt_pozitif', 0)} hisse
 • WT NEGATİF: {stats.get('wt_negatif', 0)} hisse
@@ -281,7 +363,10 @@ TradingView'de özel geliştirilmiş, piyasadaki EN GÜVENİLİR trend gösterge
 🛡️ DESTEK/DİRENÇ: S1: [A]TL, R1: [B]TL
 ⚡ VMA YORUMU: [X] gündür %94 güvenle [yön] trend
 🎯 ÖNERİ: [VMA trendine göre takip önerisi]
-    🚫 **YAPMA:**
+
+text
+
+🚫 **YAPMA:**
 • Yatırım tavsiyesi VERME ("al", "sat" deme)
 • Excel'de olmayan veri UYDURMA
 • Sadece "X sayfasında Y var" deme - ANALİZ YAP!
@@ -328,7 +413,8 @@ D) **KARŞILAŞTIRMA** ("AKBNK vs GARAN?"):
 def call_ai_analyst(question, excel_data):
     """GERÇEK analiz yapan AI çağır"""
     if not GROQ_API_KEY:
-        return "GROQ_API_KEY gerekli"
+        print("❌ GROQ_API_KEY eksik!")
+        return "GROQ_API_KEY eksik. Lütfen GitHub Secrets'ta GROQ_API_KEY ayarlayın."
     
     system_prompt = create_ai_prompt(question, excel_data)
     
@@ -357,9 +443,11 @@ def call_ai_analyst(question, excel_data):
             result = response.json()
             return result['choices'][0]['message']['content']
         else:
-            return f"API hatası: {response.status_code}"
+            print(f"❌ API Hatası: {response.status_code}")
+            return f"API hatası: {response.status_code} - {response.text[:200]}"
             
     except Exception as e:
+        print(f"❌ Bağlantı hatası: {str(e)}")
         return f"Bağlantı hatası: {str(e)}"
 
 def main():
@@ -384,6 +472,8 @@ def main():
         f.write(answer)
     
     print("✅ VMA analizi tamamlandı!")
+    print(f"📄 Yanıt uzunluğu: {len(answer)} karakter")
+    
     return answer
 
 if __name__ == "__main__":
