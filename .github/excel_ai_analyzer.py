@@ -425,7 +425,7 @@ def call_ai_analyst(question, excel_data):
     }
     
     data = {
-        "model": "mixtral-8x7b-32768",
+        "model": "llama-3.3-70b-versatile",
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": question}
