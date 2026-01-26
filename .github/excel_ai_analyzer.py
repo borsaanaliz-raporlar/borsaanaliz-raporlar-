@@ -214,47 +214,6 @@ def detect_hisse_from_question(question):
 def create_ai_prompt(question, excel_data, hisse_data=None):
     """AI için prompt - GÜNCELLENMİŞ VERSİYON"""
     
-    # ÖNEMLİ: TEKNİK TERİM TANIMLARI
-    TECHNICAL_TERMS = """
-    📚 **TEKNİK TERİM TANIMLARI:**
-    1. **VMA = Volume Moving Algorithm** (Hacim Ağırlıklı Trend Algoritması)
-       - Hacim ve fiyat momentumunu gösteren teknik gösterge
-       - %94 doğruluk oranına sahip
-       - VMA POZİTİF = Yükseliş trendi
-       - VMA NEGATİF = Düşüş trendi
-    
-    2. **WT = Wave Trend Göstergesi**
-       - Aşırı alım/satım seviyelerini gösterir
-       - -60 altı = Aşırı alım bölgesi
-       - +60 üstü = Aşırı satım bölgesi
-    
-    3. **LSMA = En küçük kareler hareketli ortalama**
-       - En küçük kareler  hareketli ortalama
-       - Trend yönünü gösterir
-    
-    4. **Pivot = Denge ve Temel Destek/Direnç Noktası**
-       - Fiyatın üzerinde = Direnç
-       - Fiyatın altında = Destek
-    """
-    
-    # ANALİZ KURALLARI
-    ANALYSIS_RULES = """
-    ⚡ **ANALİZ KURALLARI:**
-    
-    ❌ **YAPMAYACAKSIN:**
-    1. ASLA "Volkswagen" veya "Volkswagen Momentum Analizi" deme
-    2. VMA için SADECE "Volume Moving Algorithm" veya "Hacim Ağırlıklı Trend Algoritması" kullan
-    3. Yatırım tavsiyesi VERME ("al", "sat", "tavsiye ederim" deme)
-    4. Tahmin yapma ("yükselecek", "düşecek" deme)
-    
-    ✅ **YAPACAKSIN:**
-    1. Sadece verilen EXCEL verilerine dayan
-    2. Teknik terimleri DOĞRU kullan
-    3. Objektif teknik analiz yap
-    4. Türkçe yanıt ver
-    5. Risk uyarısı ekle
-    """
-    
     if hisse_data and "error" not in hisse_data:
         # HISSE ANALİZİ
         for sheet_name, data in hisse_data.items():
@@ -268,41 +227,48 @@ def create_ai_prompt(question, excel_data, hisse_data=None):
                 wt_signal = data.get("WT_SINYAL", "NÖTR")
                 lsma = data.get("LSMA", "NÖTR")
                 
-                # Hisse verileri
                 hisse_info = f"""📋 **{hisse_name} TEKNİK VERİLERİ:**
 
 • **Fiyat:** {close:.2f}TL
 • **Pivot:** {pivot:.2f}TL ({'üstünde' if close > pivot else 'altında' if close < pivot else 'aynı'})
-• **WT Sinyali:** {wt_signal}
-• **LSMA:** {lsma}
+• **WT Sinyali (Williams %R):** {wt_signal}
+• **LSMA (Least Squares Moving Average):** {lsma}
 • **VMA (Volume Moving Algorithm):** {vma_raw}"""
                 
-                # VMA detay analizi
-                vma_analysis = ""
+                vma_analysis = f"""🔥 **VMA (Volume Moving Algorithm) TREND (%94 DOĞRULUK):** {vma_direction}"""
                 if vma_days > 0:
-                    vma_analysis = f"""📈 **VMA TREND ANALİZİ (%94 DOĞRULUK):**
-• Trend Yönü: {vma_direction}
-• Trend Süresi: {vma_days} gün"""
-                    
-                    if vma_days > 30:
-                        vma_analysis += "\n• Trend Gücü: ⭐⭐⭐ ÇOK GÜÇLÜ (30+ gün)"
-                    elif vma_days > 15:
-                        vma_analysis += "\n• Trend Gücü: ⭐⭐ GÜÇLÜ (15-30 gün)"
-                    elif vma_days > 7:
-                        vma_analysis += "\n• Trend Gücü: ⭐ ORTA (7-15 gün)"
+                    vma_analysis += f" ({vma_days} gün)"
+                
+                if vma_days > 30:
+                    vma_analysis += "\n• 📈 **TREND GÜCÜ:** ÇOK GÜÇLÜ (30+ gün)"
+                elif vma_days > 15:
+                    vma_analysis += "\n• 📈 **TREND GÜCÜ:** GÜÇLÜ (15-30 gün)"
                 
                 break
         
-        # SİSTEM PROMPT'U OLUŞTUR
-        system_prompt = f"""🎯 **SEN: PROFESYONEL TEKNİK ANALİST UZMANI**
+        prompt = f"""🎯 **SEN: BORSAANALIZ PROFESYONEL TEKNİK ANALİST**
 
-{TECHNICAL_TERMS}
+**TEKNİK TERİM TANIMLARI:**
+1. **VMA = Volume Moving Algorithm** (Hacim Ağırlıklı Trend Algoritması)
+   - Hacim ve fiyat momentumunu gösteren teknik gösterge
+   - %94 doğruluk oranına sahip
+   - VMA POZİTİF = Yükseliş trendi
+   - VMA NEGATİF = Düşüş trendi
 
-{ANALYSIS_RULES}
+2. **WT = Wave Trend Göstergesi**
+   - Aşırı alım/satım seviyelerini gösterir
+   - -60 altı = Aşırı alım bölgesi
+   - +60 üstü = Aşırı satım bölgesi
+
+3. **LSMA = En Küçük Kareler Hareketli Ortalama**
+   - En Küçük Kareler Hareketli Ortalama
+   - Trend yönünü gösterir
+
+4. **Pivot = Denge ve Temel Destek/Direnç Noktası**
+   - Fiyatın üzerinde = Direnç
+   - Fiyatın altında = Destek
 
 ---
-
-🔍 **ANALİZ EDİLECEK HİSSE VERİLERİ:**
 
 {hisse_info}
 
@@ -310,57 +276,87 @@ def create_ai_prompt(question, excel_data, hisse_data=None):
 
 ---
 
-💬 **KULLANICI SORUSU:**
-"{question}"
+**❌ KESİNLİKLE YAPMAYACAKLARIN:**
+1. ASLA "Volkswagen" veya "Volkswagen Momentum Analizi" deme!
+2. VMA için SADECE "Volume Moving Algorithm" veya "Hacim Ağırlıklı Trend Algoritması" kullan
+3. Yatırım tavsiyesi VERME ("al", "sat", "tavsiye ederim" deme)
+4. Tahmin yapma ("yükselecek", "düşecek" deme)
+
+**✅ YAPACAKLARIN:**
+1. Sadece yukarıdaki EXCEL verilerine dayan
+2. Teknik terimleri DOĞRU kullan (VMA = Volume Moving Algorithm)
+3. Objektif teknik analiz yap
+4. Türkçe yanıt ver
+5. Risk uyarısı ekle
+
+**📊 ANALİZ FORMATI:**
+1. **Genel Teknik Durum:** Hisse fiyatı ve pivot analizi
+2. **Gösterge Analizi:** WT, LSMA, VMA teknik yorumları
+3. **Trend Değerlendirmesi:** VMA trend analizi (%94 doğruluk)
+4. **Risk ve Uyarılar:** Teknik riskler
 
 ---
 
-📊 **TEKNİK ANALİZ FORMATI:**
-1. **Genel Durum:** Hisse genel teknik durumu
-2. **Gösterge Analizi:** WT, LSMA, VMA yorumları
-3. **Trend Değerlendirmesi:** VMA trend analizi
-4. **Risk Notları:** Teknik riskler ve uyarılar
+**KULLANICI SORUSU:** "{question}"
 
-⚠️ **SON UYARI:** VMA için ASLA "Volkswagen" deme! VMA = Volume Moving Algorithm'dır.
+**⚠️ SON UYARI:** VMA = Volume Moving Algorithm'dır! ASLA "Volkswagen" deme!
 
-Şimdi yukarıdaki verilere göre teknik analiz yap:"""
-        
-        return system_prompt
+**Şimdi yukarıdaki verilere göre teknik analiz yap:**
+"""
+        return prompt
     
     else:
-        # GENEL ANALİZ (hisse bulunamadıysa)
+        # GENEL ANALİZ
         stats = excel_data.get("istatistikler", {})
         
-        system_prompt = f"""🎯 **SEN: PROFESYONEL TEKNİK ANALİST UZMANI**
+        prompt = f"""🎯 **SEN: BORSAANALIZ PROFESYONEL TEKNİK ANALİST**
 
-{TECHNICAL_TERMS}
+**TEKNİK TERİM TANIMLARI:**
+1. **VMA = Volume Moving Algorithm** (Hacim Ağırlıklı Trend Algoritması)
+   - Hacim ve fiyat momentumunu gösteren teknik gösterge
+   - %94 doğruluk oranına sahip
+   - VMA POZİTİF = Yükseliş trendi
+   - VMA NEGATİF = Düşüş trendi
 
-{ANALYSIS_RULES}
+2. **WT = Williams %R Göstergesi**
+   - Aşırı alım/satım seviyelerini gösterir
+
+3. **LSMA = En Küçük Kareler Harektli Ortalama**
+   - Trend yönünü gösteren hareketli ortalama
 
 ---
 
-📊 **GENEL PİYASA DURUMU ({stats.get('tarih', 'Bugün')}):**
+📊 **PİYASA DURUMU ({stats.get('tarih', 'Bugün')}):**
 
 • **Toplam Analiz Edilen Hisse:** {stats.get('toplam_hisse', 0)}
-• **VMA POZİTİF Trenddeki Hisseler:** {stats.get('vma_pozitif', 0)}
-• **VMA NEGATİF Trenddeki Hisseler:** {stats.get('toplam_hisse', 0) - stats.get('vma_pozitif', 0)}
+• **VMA (Volume Moving Algorithm) POZİTİF Trend:** {stats.get('vma_pozitif', 0)} hisse
+• **VMA (Volume Moving Algorithm) NEGATİF Trend:** {stats.get('toplam_hisse', 0) - stats.get('vma_pozitif', 0)} hisse
 
 📈 **VMA (Volume Moving Algorithm) İSTATİSTİKLERİ:**
 • Doğruluk Oranı: %94
-• Pozitif/Negatif oranı: {stats.get('vma_pozitif', 0)}/{stats.get('toplam_hisse', 0) - stats.get('vma_pozitif', 0)}
+• Pozitif/Negatif Oranı: {stats.get('vma_pozitif', 0)}/{stats.get('toplam_hisse', 0) - stats.get('vma_pozitif', 0)}
 
 ---
 
-💬 **KULLANICI SORUSU:**
-"{question}"
+**❌ KESİNLİKLE YAPMAYACAKLARIN:**
+1. ASLA "Volkswagen" veya "Volkswagen Momentum Analizi" deme!
+2. VMA için SADECE "Volume Moving Algorithm" veya "Hacim Ağırlıklı trend Algoritması" kullan
+3. Yatırım tavsiyesi verme
+
+**✅ YAPACAKLARIN:**
+1. Sadece yukarıdaki piyasa verilerine dayan
+2. Teknik terimleri DOĞRU kullan
+3. Türkçe yanıt ver
 
 ---
 
-⚠️ **SON UYARI:** VMA için ASLA "Volkswagen" deme! VMA = Volume Moving Algorithm'dır.
+**KULLANICI SORUSU:** "{question}"
 
-Şimdi yukarıdaki genel piyasa verilerine göre analiz yap:"""
-        
-        return system_prompt
+**⚠️ SON UYARI:** VMA = Volume Moving Algorithm'dır! ASLA "Volkswagen" deme!
+
+**Şimdi yukarıdaki piyasa verilerine göre analiz yap:**
+"""
+        return prompt
 
 def call_ai_analyst(question, excel_data, hisse_data=None):
     """AI çağır"""
@@ -411,7 +407,7 @@ def call_ai_analyst(question, excel_data, hisse_data=None):
                 response_text = response_text.replace("volkswagen", "Volume Moving Algorithm")
             
             # Risk uyarısı ekle (yoksa)
-            if "yatırım tavsiyesi değildir" not in response_lower:
+            if "yatırım tavsiyesi değildir" not in response_lower and "risk" not in response_lower.lower():
                 response_text += "\n\n⚠️ **ÖNEMLİ UYARI:** Bu analiz bilgi amaçlıdır, yatırım tavsiyesi değildir. Yatırım kararlarınızı kendi araştırmanızla alınız."
             
             return response_text
