@@ -318,7 +318,7 @@ def create_ai_prompt(question, excel_data, hisse_data=None):
    - VMA POZİTİF = Yükseliş trendi
    - VMA NEGATİF = Düşüş trendi
 
-2. **WT = Williams %R Göstergesi**
+2. **WT = Wave Trend Göstergesi**
    - Aşırı alım/satım seviyelerini gösterir
 
 3. **LSMA = En Küçük Kareler Harektli Ortalama**
