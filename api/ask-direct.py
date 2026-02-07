@@ -1,78 +1,134 @@
-# /api/ask-direct.py (DEBUG VERSION)
+# /api/ask-direct.py (FINAL VERSION - DEEPSEEK EKLİ)
 from http.server import BaseHTTPRequestHandler
 import json
 import os
+import urllib.request
+import urllib.error
 
 class handler(BaseHTTPRequestHandler):
     
     def log_message(self, format, *args):
-        """Tüm istekleri logla"""
-        print(f"LOG: {self.address_string()} - {format%args}")
+        """Logları Vercel'e gönder"""
+        print(f"API_LOG: {format%args}")
     
     def do_GET(self):
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
         self.end_headers()
         response = json.dumps({
-            "status": "debug_mode",
-            "endpoint": "POST /api/ask-direct",
-            "test_command": "curl -X POST -H \"Content-Type: application/json\" -d '{\"question\":\"test\"}' https://borsaanaliz-raporlar.vercel.app/api/ask-direct"
+            "status": "online",
+            "ai": "DeepSeek Chat",
+            "usage": "POST {'question':'borsa sorusu'}",
+            "example": "FROTO teknik analizi"
         })
         self.wfile.write(response.encode())
-        print("DEBUG: GET isteği alındı")
     
     def do_POST(self):
         try:
-            print("DEBUG: POST isteği başladı")
+            print("DEEPSEEK: POST başladı")
             
-            # Headers'ı logla
-            print(f"DEBUG Headers: {dict(self.headers)}")
-            
-            # Body'yi oku
+            # 1. Body'yi oku
             content_length = int(self.headers.get('Content-Length', 0))
-            print(f"DEBUG Content-Length: {content_length}")
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data)
+            question = data.get('question', '').strip()
             
-            if content_length == 0:
-                print("DEBUG ERROR: Content-Length 0")
-                self.send_error(400, "Body boş")
+            if not question:
+                self.send_error(400, "Soru gerekli")
                 return
             
-            post_data = self.rfile.read(content_length)
-            print(f"DEBUG Raw data (ilk 100): {post_data[:100]}")
+            print(f"DEEPSEEK: Soru: {question}")
             
-            data = json.loads(post_data)
-            question = data.get('question', 'NO_QUESTION')
-            print(f"DEBUG Parsed question: {question}")
-            
-            # API Key kontrolü
+            # 2. API Key
             api_key = os.environ.get('DEEPSEEK_API_KEY')
-            api_key_exists = api_key is not None and api_key != ""
-            print(f"DEBUG API Key exists: {api_key_exists}")
-            if api_key_exists:
-                print(f"DEBUG API Key prefix: {api_key[:8]}...")
+            if not api_key:
+                raise Exception("DEEPSEEK_API_KEY bulunamadı")
             
-            # Yanıt ver
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
+            print(f"DEEPSEEK: API Key hazır (ilk 8): {api_key[:8]}...)")
             
-            response = json.dumps({
-                "success": True,
-                "debug_info": {
-                    "question_received": question,
-                    "api_key_exists": api_key_exists,
-                    "content_length": content_length,
-                    "timestamp": "2026-02-07T18:15:00Z"
+            # 3. Prompt hazırla
+            prompt = f"""Borsa analiz uzmanı olarak cevapla: {question}
+
+Önemli kurallar:
+1. VMA = Volume Moving Algorithm (ASLA Volkswagen deme)
+2. Excel'de RSI/MACD göstergeleri yok
+3. Kısa ve net cevap ver (max 150 kelime)
+4. Yatırım tavsiyesi VERME
+
+Cevap:"""
+            
+            # 4. DeepSeek API isteği
+            url = "https://api.deepseek.com/chat/completions"
+            
+            request_data = {
+                "model": "deepseek-chat",
+                "messages": [
+                    {"role": "system", "content": prompt},
+                    {"role": "user", "content": question}
+                ],
+                "max_tokens": 400,
+                "temperature": 0.1
+            }
+            
+            # JSON'ı hazırla
+            json_data = json.dumps(request_data).encode('utf-8')
+            
+            # Request oluştur
+            req = urllib.request.Request(
+                url,
+                data=json_data,
+                headers={
+                    'Authorization': f'Bearer {api_key}',
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'BorsaAnaliz/1.0'
                 },
-                "message": "Debug başarılı! DeepSeek testine hazır."
-            })
+                method='POST'
+            )
             
-            self.wfile.write(response.encode())
-            print("DEBUG: POST başarıyla tamamlandı")
+            # 5. API'yi çağır
+            print("DEEPSEEK: API çağrısı başlıyor...")
+            response = urllib.request.urlopen(req, timeout=30)
+            response_data = json.loads(response.read().decode('utf-8'))
             
-        except json.JSONDecodeError as e:
-            print(f"DEBUG JSON Error: {str(e)}")
-            self.send_error(400, f"Geçersiz JSON: {str(e)}")
+            print(f"DEEPSEEK: API yanıt aldı, choices: {len(response_data.get('choices', []))}")
+            
+            # 6. Yanıtı işle
+            if 'choices' in response_data and response_data['choices']:
+                answer = response_data['choices'][0]['message']['content']
+                
+                # Uyarı ekle
+                if "yatırım tavsiyesi" not in answer.lower():
+                    answer += "\n\n⚠️ **UYARI:** Bu analiz bilgi amaçlıdır, yatırım tavsiyesi değildir."
+                
+                # Başarılı yanıt
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                
+                result = json.dumps({
+                    "success": True,
+                    "answer": answer,
+                    "model": "deepseek-chat",
+                    "tokens": response_data.get('usage', {}).get('total_tokens', 0)
+                }, ensure_ascii=False)
+                
+                self.wfile.write(result.encode('utf-8'))
+                print("DEEPSEEK: Başarılı yanıt gönderildi")
+                
+            else:
+                error_msg = f"API geçersiz yanıt: {response_data}"
+                print(f"DEEPSEEK ERROR: {error_msg}")
+                raise Exception(error_msg)
+                
+        except urllib.error.HTTPError as e:
+            error_body = e.read().decode() if hasattr(e, 'read') else str(e)
+            print(f"DEEPSEEK HTTP Error {e.code}: {error_body}")
+            self.send_error(500, f"DeepSeek API hatası: {e.code}")
+            
+        except urllib.error.URLError as e:
+            print(f"DEEPSEEK URL Error: {str(e)}")
+            self.send_error(500, f"Bağlantı hatası: {str(e)}")
+            
         except Exception as e:
-            print(f"DEBUG General Error: {type(e).__name__}: {str(e)}")
+            print(f"DEEPSEEK General Error: {type(e).__name__}: {str(e)}")
             self.send_error(500, f"{type(e).__name__}: {str(e)}")
