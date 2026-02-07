@@ -502,7 +502,7 @@ Excel raporunda şunlar mevcut:
 • Dikkat edilmesi gereken riskler
 
 **ÖNEMLİ:** Tüm analiz Excel'deki GERÇEK verilere dayanmalıdır. Hisse açılımları yazma, sadece sembol kullan.
-
+**ÖNEMLİ:** TÜM bölümleri tamamla. Analiz yarım kalmasın.
 **CEVAP:**
 """
             
@@ -519,7 +519,7 @@ Excel raporunda şunlar mevcut:
                     {"role": "system", "content": prompt},
                     {"role": "user", "content": question}
                 ],
-                "max_tokens": 500,  # 600'den 500'e düşürdüm (çok uzun olmasın)
+                "max_tokens": 700,  # 600'den 500'e düşürdüm (çok uzun olmasın)
                 "temperature": 0.1
             }
             
