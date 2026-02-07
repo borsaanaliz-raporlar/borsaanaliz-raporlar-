@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MÜKEMMEL EXCEL ANALİST - TÜM VERİLERLE DETAYLI ANALİZ
+MÜKEMMEL EXCEL ANALİST - DEEPSEEK + GROQ HİBRİT SİSTEM
 """
 import os
 import sys
@@ -13,6 +13,7 @@ from excel_finder import find_latest_excel
 
 # AYARLAR
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
+DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY', '')
 
 def get_excel_data_for_ai(excel_path):
     """AI için Excel verilerini hazırla - DETAYLI"""
@@ -64,10 +65,8 @@ def get_excel_data_for_ai(excel_path):
 
 def extract_hisse_adi(question):
     """Soru içinden hisse adını çıkar"""
-    # Büyük harf ve 3-6 karakterli kelimeleri bul
     words = re.findall(r'\b[A-Z]{3,6}\b', question.upper())
     
-    # Hisse olma ihtimali yüksek kelimeler
     hisse_keywords = ["FROTO", "THYAO", "ASELS", "EREGL", "SASA", "KCHOL", 
                      "TOASO", "TUPRS", "AKBNK", "GARAN", "YKBNK", "XU100",
                      "GMSTR", "ALTIN", "XAUUSD", "XAGUSD", "XINSA", "XHOLD",
@@ -77,7 +76,6 @@ def extract_hisse_adi(question):
         if word in hisse_keywords:
             return word
     
-    # Eğer bulamazsa, ilk büyük harfli kelimeyi dene
     if words:
         return words[0]
     
@@ -98,7 +96,6 @@ def get_hisse_analysis_data(hisse_info):
         "DİĞER": {}
     }
     
-    # TÜM verileri kategorilere ayır
     for header in headers:
         if header in hisse_data:
             value = hisse_data[header]
@@ -107,31 +104,18 @@ def get_hisse_analysis_data(hisse_info):
             
             header_upper = header.upper()
             
-            # 1. TEMEL VERİLER
             if any(keyword in header_upper for keyword in ["HİSSE", "SEMBOL", "CLOSE", "OPEN", "HIGH", "LOW"]):
                 analysis_data["TEMEL"][header] = value
-            
-            # 2. PİVOT ve DESTEK/DİRENÇ
             elif any(keyword in header_upper for keyword in ["PİVOT", "S1", "S2", "S3", "R1", "R2", "R3"]):
                 analysis_data["PİVOT_DESTEK_DİRENÇ"][header] = value
-            
-            # 3. HACİM VERİLERİ
             elif any(keyword in header_upper for keyword in ["HACİM", "VOLUME"]):
                 analysis_data["HACİM"][header] = value
-            
-            # 4. EMA'lar
             elif "EMA_" in header_upper:
                 analysis_data["EMA"][header] = value
-            
-            # 5. REGRESSION
             elif any(keyword in header_upper for keyword in ["PEARSON", "KANAL", "UZAKLIK"]):
                 analysis_data["REGRESSION"][header] = value
-            
-            # 6. BOLLINGER BANDS
             elif header_upper.startswith("BB_"):
                 analysis_data["BOLLINGER"][header] = value
-            
-            # 7. DİĞER TEKNİK GÖSTERGELER
             elif any(keyword in header_upper for keyword in ["VMA", "LSMA", "WT", "HMA", "SMI", "DURUM", "SİNYAL"]):
                 analysis_data["DİĞER"][header] = value
     
@@ -155,7 +139,6 @@ def create_detailed_hisse_prompt(question, hisse_info, analysis_data):
 ## 📈 **1. TEMEL VERİLER:**
 """
     
-    # TEMEL veriler
     for key, value in analysis_data["TEMEL"].items():
         prompt += f"- **{key}:** {value}\n"
     
@@ -163,11 +146,9 @@ def create_detailed_hisse_prompt(question, hisse_info, analysis_data):
 ## 📊 **2. PİVOT ve DESTEK/DİRENÇ ANALİZİ:**
 """
     
-    # PİVOT ve destek/direnç
     for key, value in analysis_data["PİVOT_DESTEK_DİRENÇ"].items():
         prompt += f"- **{key}:** {value}\n"
     
-    # Pivot analizi yap
     close = analysis_data["TEMEL"].get("Close")
     pivot = analysis_data["PİVOT_DESTEK_DİRENÇ"].get("Pivot")
     if close and pivot:
@@ -185,7 +166,6 @@ def create_detailed_hisse_prompt(question, hisse_info, analysis_data):
 ## 📊 **3. HACİM ANALİZİ:**
 """
     
-    # HACİM analizi
     for key, value in analysis_data["HACİM"].items():
         prompt += f"- **{key}:** {value}\n"
     
@@ -193,12 +173,10 @@ def create_detailed_hisse_prompt(question, hisse_info, analysis_data):
 ## 📊 **4. EMA (Exponential Moving Average) ANALİZİ:**
 """
     
-    # EMA analizi
     ema_items = sorted(analysis_data["EMA"].items())
     for key, value in ema_items:
         prompt += f"- **{key}:** {value}\n"
     
-    # EMA yorumu
     close = analysis_data["TEMEL"].get("Close")
     if close and analysis_data["EMA"]:
         try:
@@ -218,15 +196,10 @@ def create_detailed_hisse_prompt(question, hisse_info, analysis_data):
 ## 📊 **5. REGRESSION KANAL ANALİZİ:**
 """
     
-    # REGRESSION analizi
     for key, value in analysis_data["REGRESSION"].items():
         prompt += f"- **{key}:** {value}\n"
     
-    # Pearson katsayısı analizi
     pearson55 = analysis_data["REGRESSION"].get("Pearson55")
-    pearson144 = analysis_data["REGRESSION"].get("Pearson144")
-    pearson233 = analysis_data["REGRESSION"].get("Pearson233")
-    
     if pearson55:
         try:
             p55 = float(str(pearson55).replace(',', '.'))
@@ -243,11 +216,9 @@ def create_detailed_hisse_prompt(question, hisse_info, analysis_data):
 ## 📊 **6. BOLLINGER BANDS ANALİZİ:**
 """
     
-    # BOLLINGER analizi
     for key, value in analysis_data["BOLLINGER"].items():
         prompt += f"- **{key}:** {value}\n"
     
-    # Bollinger yorumu
     bb_upper = analysis_data["BOLLINGER"].get("BB_UPPER")
     bb_middle = analysis_data["BOLLINGER"].get("BB_MIDDLE")
     bb_lower = analysis_data["BOLLINGER"].get("BB_LOWER")
@@ -272,11 +243,9 @@ def create_detailed_hisse_prompt(question, hisse_info, analysis_data):
 ## 📊 **7. DİĞER TEKNİK GÖSTERGELER:**
 """
     
-    # DİĞER göstergeler
     for key, value in analysis_data["DİĞER"].items():
         prompt += f"- **{key}:** {value}\n"
     
-    # VMA analizi
     vma_value = None
     for key, value in analysis_data["DİĞER"].items():
         if "VMA" in key.upper():
@@ -363,7 +332,6 @@ def create_general_prompt(question, excel_data):
         if len(important_indicators) > 10:
             prompt += f" ..."
         
-        # İlk 5 hisse
         prompt += f"\n• **İlk 5 Hisse:** "
         hisse_list = []
         for hisse in sheet_info["data"][:5]:
@@ -404,8 +372,54 @@ def create_general_prompt(question, excel_data):
     
     return prompt
 
-def call_ai_analyst(prompt):
-    """AI çağır"""
+def call_deepseek_ai(prompt, question):
+    """DeepSeek AI çağır"""
+    if not DEEPSEEK_API_KEY:
+        return "DEEPSEEK_API_KEY eksik"
+    
+    data = {
+        "model": "deepseek-chat",
+        "messages": [
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": question}
+        ],
+        "max_tokens": 2000,
+        "temperature": 0.1,
+        "stream": False
+    }
+    
+    try:
+        response = requests.post(
+            "https://api.deepseek.com/chat/completions",
+            headers={"Authorization": f"Bearer {DEEPSEEK_API_KEY}"},
+            json=data,
+            timeout=60
+        )
+        
+        if response.status_code == 200:
+            answer = response.json()['choices'][0]['message']['content']
+            
+            # Kontroller
+            answer_lower = answer.lower()
+            
+            if "volkswagen" in answer_lower:
+                answer = answer.replace("Volkswagen", "Volume Moving Algorithm")
+            
+            if "rsi" in answer_lower or "macd" in answer_lower:
+                answer += "\n\n⚠️ **NOT:** Excel'de RSI ve MACD göstergeleri bulunmamaktadır."
+            
+            if "yatırım tavsiyesi değildir" not in answer_lower:
+                answer += "\n\n⚠️ **ÖNEMLİ UYARI:** Bu analiz bilgi amaçlıdır, yatırım tavsiyesi değildir. Yatırım kararlarınızı kendi araştırmanızla alınız."
+            
+            return answer
+        else:
+            return f"❌ DeepSeek API hatası: {response.status_code}"
+            
+    except Exception as e:
+        return f"❌ DeepSeek bağlantı hatası: {str(e)}"
+
+def call_groq_ai(prompt, question):
+    """GROQ AI çağır"""
     if not GROQ_API_KEY:
         return "GROQ_API_KEY eksik"
     
@@ -415,7 +429,7 @@ def call_ai_analyst(prompt):
             {"role": "system", "content": prompt},
             {"role": "user", "content": "Lütfen detaylı teknik analiz yap."}
         ],
-        "max_tokens": 2500,  # Daha fazla token (detaylı analiz)
+        "max_tokens": 2000,
         "temperature": 0.1,
         "top_p": 0.9,
         "stream": False
@@ -446,10 +460,27 @@ def call_ai_analyst(prompt):
             
             return answer
         else:
-            return f"❌ API hatası: {response.status_code}"
+            return f"❌ GROQ API hatası: {response.status_code}"
             
     except Exception as e:
-        return f"❌ Bağlantı hatası: {str(e)}"
+        return f"❌ GROQ bağlantı hatası: {str(e)}"
+
+def call_ai_analyst(prompt, question, use_deepseek=True):
+    """HİBRİT AI çağırıcı - Önce DeepSeek, olmazsa GROQ"""
+    
+    if use_deepseek and DEEPSEEK_API_KEY:
+        print("🚀 DeepSeek AI kullanılıyor...")
+        answer = call_deepseek_ai(prompt, question)
+        
+        # Eğer DeepSeek başarılıysa dön
+        if "hatası" not in answer and len(answer) > 100:
+            return answer
+        else:
+            print(f"⚠️ DeepSeek çalışmadı, GROQ'a geçiliyor: {answer[:100]}")
+    
+    # DeepSeek yoksa veya çalışmazsa GROQ
+    print("⚡ GROQ AI kullanılıyor...")
+    return call_groq_ai(prompt, question)
 
 def main():
     """Ana fonksiyon"""
@@ -502,13 +533,13 @@ def main():
                 
                 # DETAYLI prompt oluştur
                 prompt = create_detailed_hisse_prompt(question, hisse_info, analysis_data)
-                answer = call_ai_analyst(prompt)
+                answer = call_ai_analyst(prompt, question)
             else:
                 answer = f"❌ {hisse_adi} hissesi Excel'de bulunamadı"
         else:
             # Genel analiz
             prompt = create_general_prompt(question, excel_data)
-            answer = call_ai_analyst(prompt)
+            answer = call_ai_analyst(prompt, question)
     
     # Sonucu kaydet
     with open('ai_response.txt', 'w', encoding='utf-8') as f:
