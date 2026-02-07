@@ -347,8 +347,23 @@ class handler(BaseHTTPRequestHandler):
             print("📥 Excel indiriliyor ve TÜM veriler okunuyor...")
             excel_result = read_all_excel_data(excel_url)
             
-            if not excel_result["success"]:
-                raise Exception(f"Excel okunamadı: {excel_result.get('error')}")
+            # === BURAYA EKLE: EXCEL OKUNAMADIYSA HATA DÖN ===
+            if not excel_result.get("success"):
+                print("❌ Excel okunamadı, hata mesajı dönülüyor...")
+                self.send_response(200)  # 500 değil, 200 verelim
+                self.send_header('Content-type', 'application/json; charset=utf-8')
+                self.end_headers()
+            
+                result = json.dumps({
+                    "success": False,
+                    "answer": "❌ Excel dosyası okunamadı. Lütfen:\n1. Excel'in sitede olduğundan emin olun\n2. Hisse adını doğru yazın\n3. Daha sonra tekrar deneyin",
+                    "excel_data_used": False,
+                    "help": "Excel: /raporlar/BORSAANALIZ_V11_TAM_*.xlsm"
+                }, ensure_ascii=False)
+            
+                self.wfile.write(result.encode('utf-8'))
+                return
+            # === BURAYA KADAR ===
             
             excel_time = (datetime.now() - excel_start).total_seconds()
             print(f"⏱️ Excel işlem süresi: {excel_time:.2f} sn")
@@ -423,17 +438,25 @@ class handler(BaseHTTPRequestHandler):
 """
             
             prompt += """🎯 **ANALİZ TALİMATLARI:**
-1. Yukarıdaki GERÇEK Excel verilerini KULLANARAK teknik analiz yap
-2. **VMA (Volume Moving Algorithm)** bazlı yorum yap - VMA değerini analiz et
-3. **RSI/MACD YOK** - Onlardan bahsetme
-4. Sayısal değerlerle açık ve net konuş (Örnek: "Close: 115.70 TL")
-5. **YATIRIM TAVSİYESİ VERME** - Sadece teknik analiz yap
-6. Kısa ve öz olsun (max 250 kelime)
+1. Sadece Yukarıdaki GERÇEK Excel verilerini KULLANARAK teknik analiz yap
+2. **VMA (Volume Moving Algorithm)** bazlı yorum yap - VMA değerini mutlaka analiz et
+3. Close, EMA_8, EMA_21, EMA_55 değerlerini KARŞILAŞTIR
+4. Pivot, S1, R1 seviyelerini belirt
+5. Trend (YÜKSELİŞ/YANAL/DÜŞÜŞ) durumunu yorumla
+6. Hacim verisini yorumla (yüksek/düşük/orta)
+7. **RSI/MACD YOK** - Onlardan bahsetme
+8. Sayısal değerlerle açık ve net konuş (Örnek: "Close: 115.70 TL")
+9. **YATIRIM TAVSİYESİ VERME** - Sadece teknik analiz yap
+10. Kısa ve öz olsun (max 250 kelime)
 
 **📊 ANALİZ FORMATI:**
 • 📈 Veri Özeti
+• 📈 Fiyat & Göstergeler
+• 🔍 VMA Analizi
+• ⚖️ Destek/Direnç
 • 🔍 Teknik Yorum (VMA bazlı)
 • ⚠️ Kritik Seviyeler
+• ⚠️ Risk Notu
 • 💡 Gözlemler (bilgi amaçlı)
 
 **CEVAP:**"""
