@@ -553,14 +553,6 @@
             align-items: center;
         }
         
-        .ai-panel-header h3 {
-            margin: 0;
-            font-size: 22px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
         .back-btn {
             background: rgba(255, 255, 255, 0.2);
             color: white;
@@ -976,6 +968,41 @@
                 </button>
             </div>
             
+            <!-- YENİ: MODE SELECTOR EKLENDİ -->
+            <div class="ai-mode-selector" style="
+                padding: 10px 20px;
+                background: rgba(102, 126, 234, 0.1);
+                display: flex;
+                gap: 10px;
+                justify-content: center;
+                border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+            ">
+                <button id="fastModeBtn" class="mode-btn active" style="
+                    padding: 8px 16px;
+                    background: #28a745;
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    font-size: 14px;
+                ">
+                    ⚡ Hızlı (2-5 sn)
+                </button>
+                <button id="detailedModeBtn" class="mode-btn" style="
+                    padding: 8px 16px;
+                    background: #6c757d;
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    font-size: 14px;
+                ">
+                    📊 Detaylı (1-2 dk)
+                </button>
+            </div>
+            
             <div class="ai-panel-content">
                 <div class="chat-container" id="chatContainer">
                     <!-- Chat mesajları buraya eklenecek -->
@@ -983,10 +1010,10 @@
                         <div class="avatar">🤖</div>
                         <div class="content">
                             <strong>Merhaba! BORSAANALIZ AI Asistanınıza hoş geldiniz.</strong><br><br>
-                            • Sorunuz Excel dosyasından <strong>gerçek verilerle</strong> yanıtlanacak<br>
-                            • Yanıt <strong>1-2 dakika</strong> içinde bu ekranda belirecek<br>
-                            • ...............<br><br>
-                            <em>Örnek: "WT nasıl yorumlanır?", "Bugün hangi hisseler öne çıkıyor?"</em>
+                            • <strong>Hızlı Mod:</strong> 2-5 saniyede yanıt (DeepSeek AI)<br>
+                            • <strong>Detaylı Mod:</strong> 1-2 dakikada Excel analizi<br>
+                            • Üstteki butonlarla mod değiştirebilirsiniz<br><br>
+                            <em>Örnek: "FROTO teknik analizi", "VMA nasıl yorumlanır?"</em>
                         </div>
                     </div>
                 </div>
@@ -1003,8 +1030,9 @@
                     <button class="quick-btn" data-q="Teknik analiz nasıl yapılır?">📊 Teknik Analiz</button>
                 </div>
                 
+                <!-- YENİ: GÜNCELLENMİŞ AI INFO -->
                 <div class="ai-info">
-                    ⚡ <strong>Gerçek zamanlı Excel analizi:</strong> Sorunuz anında işlenir, yanıt bu ekranda görünür.
+                    ⚡ <strong>YENİ! Hızlı Yanıt Modu Aktif:</strong> 2-5 saniyede AI yanıtı • DeepSeek AI teknolojisi • Üstteki butonlarla mod değiştirebilirsiniz
                 </div>
             </div>
         </div>
@@ -1351,6 +1379,27 @@
                 }
             });
             
+            // YENİ: AI MODE SEÇİMİ
+            let aiMode = 'fast'; // 'fast' veya 'detailed'
+            const fastBtn = document.getElementById('fastModeBtn');
+            const detailedBtn = document.getElementById('detailedModeBtn');
+            
+            if (fastBtn && detailedBtn) {
+                fastBtn.addEventListener('click', function() {
+                    aiMode = 'fast';
+                    fastBtn.style.background = '#28a745';
+                    detailedBtn.style.background = '#6c757d';
+                    addMessage('🤖 Mod: Hızlı Yanıt (2-5 saniye)', false);
+                });
+                
+                detailedBtn.addEventListener('click', function() {
+                    aiMode = 'detailed';
+                    fastBtn.style.background = '#6c757d';
+                    detailedBtn.style.background = '#28a745';
+                    addMessage('🤖 Mod: Detaylı Analiz (1-2 dakika)', false);
+                });
+            }
+            
             // AI CHAT SİSTEMİ
             const chatContainer = document.getElementById('chatContainer');
             const input = document.getElementById('aiInput');
@@ -1403,7 +1452,7 @@
                 if (typing) typing.remove();
             }
             
-            // Send question to API
+            // YENİ: GÜNCELLENMİŞ sendQuestion FONKSİYONU
             async function sendQuestion(question) {
                 if (!question.trim()) {
                     addMessage('Lütfen bir soru yazın!', false, true);
@@ -1416,15 +1465,41 @@
                 showTyping();
                 
                 try {
-                    const response = await fetch('/api/create-issue', {
+                    // AI MODE KONTROLÜ
+                    if (aiMode === 'fast') {
+                        // HIZLI MOD: DIRECT API
+                        console.log('🚀 Hızlı mod - Direct API deneniyor...');
+                        const directResponse = await fetch('/api/ask-direct', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ question })
+                        });
+                        
+                        if (directResponse.ok) {
+                            const data = await directResponse.json();
+                            hideTyping();
+                            
+                            if (data.success) {
+                                // Direct API başarılı
+                                const tokenInfo = data.tokens ? ` (${data.tokens} token)` : '';
+                                addMessage(`🚀 Hızlı Yanıt${tokenInfo}:\n\n${data.answer}`, false);
+                                return;
+                            }
+                        }
+                        
+                        // Direct API çalışmazsa fallback
+                        console.log('Direct API çalışmadı, GitHub\'a geçiliyor...');
+                    }
+                    
+                    // DETAYLI MOD veya FALLBACK: GITHUB API
+                    console.log(`📊 ${aiMode === 'detailed' ? 'Detaylı' : 'Fallback'} mod - GitHub API deneniyor...`);
+                    const githubResponse = await fetch('/api/create-issue', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
+                        headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({ question })
                     });
                     
-                    const data = await response.json();
+                    const data = await githubResponse.json();
                     hideTyping();
                     
                     if (data.success) {
@@ -1436,22 +1511,22 @@
                     
                 } catch (error) {
                     hideTyping();
-                    // Demo modu: Rastgele cevap göster
+                    console.error('AI hatası:', error);
+                    
+                    // Fallback: Demo modu
                     setTimeout(() => {
-                        hideTyping();
                         const demoResponses = [
                             "📈 **VMA ALGORİTMASI ANALİZİ:** Excel raporunda VMA, 20 günlük hareketli ortalamayı temsil ediyor. Eğer fiyat VMA üzerinde ve VMA yükseliyorsa, trend güçlü demektir.",
                             "💼 **BUGÜN ÖNE ÇIKAN HİSSELER:** Güncel raporda THYAO, TUPRS ve GARAN hisseleri teknik olarak güçlü sinyaller veriyor. Dikkatlice takip edilmesi önerilir.",
-                            "🔓 **MACRO AÇMA:** Dosyayı indirdikten sonra → Sağ tık → Özellikler → 'Engellemeyi Kaldır' → Excel'de aç → 'Makroları Etkinleştir' butonuna tıklayın.",
-                            "📊 **TEKNİK ANALİZ:** Excel raporunda 11 farklı analiz sayfası bulunuyor. Her sayfada farklı teknik göstergeler (RSI, MACD, Bollinger Bantları) mevcut."
+                            "🔓 **MACRO AÇMA:** Dosyayı indirdikten sonra → Sağ tık → Özellikler → 'Engellemeyi Kaldır' → Excel'de aç → 'Makroları Etkinleştir' butonuna tıklayın."
                         ];
                         const randomResponse = demoResponses[Math.floor(Math.random() * demoResponses.length)];
-                        addMessage(randomResponse, false);
-                    }, 1500);
+                        addMessage(`⚠️ Sistem geçici olarak demo modunda:\n\n${randomResponse}`, false);
+                    }, 1000);
                 }
             }
             
-            // Wait for AI response
+            // Wait for AI response (GitHub için)
             async function waitForResponse(issueNumber) {
                 let attempts = 0;
                 const maxAttempts = 30;
@@ -1502,7 +1577,7 @@
                     .replace(/\n/g, '<br>')
                     .trim();
                 
-                addMessage(`<strong>📊 AI ANALİZ RAPORU</strong><br><br>${cleanText}`, false);
+                addMessage(`<strong>📊 DETAYLI AI ANALİZ RAPORU</strong><br><br>${cleanText}`, false);
             }
             
             // Utility function
@@ -1534,16 +1609,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
