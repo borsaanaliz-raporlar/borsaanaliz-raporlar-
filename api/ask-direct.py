@@ -1,4 +1,4 @@
-# /api/ask-direct.py (TAM ÇÖZÜM)
+# /api/ask-direct.py (DÜZELTİLMİŞ - 3 SAYFADA ARA)
 from http.server import BaseHTTPRequestHandler
 import json
 import os
@@ -220,83 +220,99 @@ def read_all_excel_data(excel_path):
         return {"success": False, "error": f"Excel okuma hatası: {str(e)}"}
 
 def find_in_excel_data(question, excel_data):
-    """Excel verilerinde soruya göre arama yap"""
+    """Excel verilerinde soruya göre arama yap - 3 SAYFADA DA ARA!"""
     try:
         question_upper = question.upper()
-        results = {
-            "hisse": None,
-            "endeks": None,
-            "fon_emtia": None,
-            "excel_file": excel_data["excel_file"]
-        }
         
-        # 1. HİSSE ARA (Sinyaller sayfasında)
+        # Arama terimlerini al (en az 2 harfli kelimeler)
+        search_terms = []
+        for word in question_upper.split():
+            clean_word = re.sub(r'[^A-Z0-9]', '', word)  # Sadece harf ve rakam
+            if len(clean_word) >= 2:
+                search_terms.append(clean_word)
+        
+        print(f"🔍 Aranan terimler: {search_terms}")
+        
+        # 1. ÖNCE: HİSSE ARA (Sinyaller sayfasında - 630+ hisse)
         if "Sinyaller" in excel_data["sheets"]:
             hisseler = excel_data["sheets"]["Sinyaller"]["hisseler"]
             
-            # Popüler hisseler önce
-            popular_hisseler = ["FROTO", "THYAO", "TUPRS", "GARAN", "ASELS", "EREGL", 
-                              "SASA", "KCHOL", "TOASO", "AKBNK", "BIMAS", "HEKTS",
-                              "KOZAA", "KOZAL", "PETKM", "SAHOL", "TCELL", "YKBNK"]
-            
-            # Önce popüler hisselerde ara
-            for hisse in popular_hisseler:
-                if hisse in question_upper:
-                    if hisse in hisseler:
-                        results["hisse"] = {
-                            "adi": hisse,
-                            "veriler": hisseler[hisse],
-                            "tum_veriler": True
+            # Tüm hisselerde ara
+            for hisse_adi, veriler in hisseler.items():
+                hisse_clean = re.sub(r'[^A-Z0-9]', '', hisse_adi.upper())
+                for term in search_terms:
+                    if term in hisse_clean or hisse_clean in term:
+                        print(f"✅ {hisse_adi} Sinyaller sayfasında bulundu")
+                        return {
+                            "found": True,
+                            "type": "hisse",
+                            "data": veriler,
+                            "sayfa": "Sinyaller",
+                            "name": hisse_adi
                         }
-                        break
-            
-            # Popülerde bulunamazsa tüm hisselerde ara
-            if not results["hisse"]:
-                for hisse_adi, veriler in hisseler.items():
-                    if hisse_adi in question_upper:
-                        results["hisse"] = {
-                            "adi": hisse_adi,
-                            "veriler": veriler,
-                            "tum_veriler": True
-                        }
-                        break
         
-        # 2. ENDEKS ARA
-        if "ENDEKSLER" in excel_data["sheets"]:
-            endeks_rows = excel_data["sheets"]["ENDEKSLER"]["data"]
-            endeks_terimleri = ["BIST", "XU100", "XU030", "ENDEKS", "INDEX", "XU050"]
-            
-            for terim in endeks_terimleri:
-                if terim in question_upper:
-                    # İlk 5 endeksi göster
-                    results["endeks"] = {
-                        "veriler": endeks_rows[:5],
-                        "bulunan_terim": terim,
-                        "toplam_endeks": len(endeks_rows)
-                    }
-                    break
-        
-        # 3. FON/EMTİA/DÖVİZ ARA
+        # 2. SONRA: FON/EMTİA/COİN/DÖVİZ ARA (GMSTR BURADA!)
         if "FON_EMTIA_COIN_DOVIZ" in excel_data["sheets"]:
             fon_rows = excel_data["sheets"]["FON_EMTIA_COIN_DOVIZ"]["data"]
-            fon_terimleri = ["USD", "EUR", "ALTIN", "GRAM", "BITCOIN", "ETHEREUM",
-                           "FON", "EMTIA", "DOVIZ", "COIN", "GAZI", "PETROL"]
             
-            for terim in fon_terimleri:
-                if terim in question_upper:
-                    # İlk 10 veriyi göster
-                    results["fon_emtia"] = {
-                        "veriler": fon_rows[:10],
-                        "bulunan_terim": terim,
-                        "toplam_veri": len(fon_rows)
-                    }
-                    break
+            # İlk 50 satırda ara
+            for i, row in enumerate(fon_rows[:50], 1):
+                for j, cell in enumerate(row):
+                    if cell:
+                        cell_str = str(cell).upper()
+                        cell_clean = re.sub(r'[^A-Z0-9]', '', cell_str)
+                        for term in search_terms:
+                            if term in cell_clean and len(term) >= 3:
+                                print(f"✅ '{term}' FON_EMTIA_COIN_DOVIZ sayfasında bulundu (satır {i})")
+                                return {
+                                    "found": True,
+                                    "type": "fon_emtia",
+                                    "data": row,
+                                    "sayfa": "FON_EMTIA_COIN_DOVIZ",
+                                    "name": term,
+                                    "satir": i,
+                                    "tum_satir": row
+                                }
         
-        return results
+        # 3. SON OLARAK: ENDEKS ARA
+        if "ENDEKSLER" in excel_data["sheets"]:
+            endeks_rows = excel_data["sheets"]["ENDEKSLER"]["data"]
+            
+            # İlk 20 satırda ara
+            for i, row in enumerate(endeks_rows[:20], 1):
+                for j, cell in enumerate(row):
+                    if cell:
+                        cell_str = str(cell).upper()
+                        cell_clean = re.sub(r'[^A-Z0-9]', '', cell_str)
+                        for term in search_terms:
+                            if term in cell_clean and len(term) >= 3:
+                                print(f"✅ '{term}' ENDEKSLER sayfasında bulundu (satır {i})")
+                                return {
+                                    "found": True,
+                                    "type": "endeks",
+                                    "data": row,
+                                    "sayfa": "ENDEKSLER",
+                                    "name": term,
+                                    "satir": i
+                                }
+        
+        # Hiçbir şey bulunamadı
+        print(f"⚠️ Hiçbir sayfada bulunamadı: {search_terms}")
+        return {
+            "found": False,
+            "type": None,
+            "data": None,
+            "sayfa": None,
+            "name": None,
+            "excel_file": excel_data["excel_file"]
+        }
         
     except Exception as e:
         print(f"❌ Arama hatası: {e}")
-        return {"error": str(e)}
+        return {
+            "found": False,
+            "error": str(e)
+        }
 
 class handler(BaseHTTPRequestHandler):
     
@@ -315,7 +331,7 @@ class handler(BaseHTTPRequestHandler):
                 "guncel_dosya": os.path.basename(excel_url),
                 "tarih": excel_date,
                 "sayfalar": ["Sinyaller (630+ hisse)", "ENDEKSLER", "FON_EMTIA_COIN_DOVIZ"],
-                "not": "En güncel Excel otomatik bulunur, TÜM veriler analiz edilir"
+                "not": "En güncel Excel otomatik bulunur, 3 SAYFADA DA ARA"
             }
         }, ensure_ascii=False)
         
@@ -347,10 +363,10 @@ class handler(BaseHTTPRequestHandler):
             print("📥 Excel indiriliyor ve TÜM veriler okunuyor...")
             excel_result = read_all_excel_data(excel_url)
             
-            # === BURAYA EKLE: EXCEL OKUNAMADIYSA HATA DÖN ===
+            # EXCEL OKUNAMADIYSA HATA DÖN
             if not excel_result.get("success"):
                 print("❌ Excel okunamadı, hata mesajı dönülüyor...")
-                self.send_response(200)  # 500 değil, 200 verelim
+                self.send_response(200)
                 self.send_header('Content-type', 'application/json; charset=utf-8')
                 self.end_headers()
             
@@ -363,13 +379,12 @@ class handler(BaseHTTPRequestHandler):
             
                 self.wfile.write(result.encode('utf-8'))
                 return
-            # === BURAYA KADAR ===
             
             excel_time = (datetime.now() - excel_start).total_seconds()
             print(f"⏱️ Excel işlem süresi: {excel_time:.2f} sn")
             
-            # 4. SORUYU EXCEL VERİLERİNDE ARA
-            print("🔍 Soru Excel verilerinde analiz ediliyor...")
+            # 4. SORUYU EXCEL VERİLERİNDE ARA (3 SAYFADA DA!)
+            print("🔍 Soru Excel verilerinde analiz ediliyor (3 sayfada da aranıyor)...")
             analysis = find_in_excel_data(question, excel_result["data"])
             
             # 5. API Key
@@ -378,7 +393,7 @@ class handler(BaseHTTPRequestHandler):
                 raise Exception("API Key bulunamadı")
             
             # 6. PROMPT HAZIRLA (TÜM EXCEL VERİLERİYLE)
-            prompt = f"""🎯 **BORSAANALIZ AI - TAM EXCEL VERİ ANALİZİ**
+            prompt = f"""🎯 **BORSAANALIZ AI - GERÇEK EXCEL VERİ ANALİZİ**
 
 **📊 GÜNCEL EXCEL RAPORU:** {excel_result['data']['excel_file']} ({excel_date})
 **⏰ ANALİZ ZAMANI:** {excel_result['data']['timestamp']}
@@ -389,77 +404,107 @@ class handler(BaseHTTPRequestHandler):
 """
             
             # BULUNAN VERİLERİ EKLE
-            if analysis.get("hisse"):
-                hisse = analysis["hisse"]
-                prompt += f"""📈 **HİSSE ANALİZİ: {hisse['adi']}**
+            if analysis.get("found"):
+                if analysis["type"] == "hisse":
+                    hisse_data = analysis["data"]
+                    prompt += f"""📈 **HİSSE ANALİZİ: {analysis['name']}**
 
-**TEKNİK GÖSTERGELER:**
+**TEKNİK GÖSTERGELER (Excel'den alındı):**
 """
-                # Önemli alanları göster
-                important_fields = ['Close', 'Open', 'High', 'Low', 'Hacim', 'VMA',
-                                  'EMA_8', 'EMA_21', 'EMA_55', 'Pivot', 'Trend',
-                                  'S1', 'R1', 'BB_UPPER', 'BB_LOWER', 'Pearson55']
+                    # Önemli alanları göster
+                    important_fields = ['Close', 'Open', 'High', 'Low', 'Hacim', 'VMA',
+                                      'EMA_8', 'EMA_21', 'EMA_55', 'Pivot', 'Trend',
+                                      'S1', 'R1', 'BB_UPPER', 'BB_LOWER', 'Pearson55']
+                    
+                    fields_found = 0
+                    for field in important_fields:
+                        if field in hisse_data:
+                            value = hisse_data[field]
+                            prompt += f"- **{field}:** {value}\n"
+                            fields_found += 1
+                    
+                    if fields_found > 0:
+                        prompt += f"\n✅ **{analysis['name']}** hissesi Excel'de bulundu ({analysis['sayfa']} sayfası). Yukarıdaki değerler GERÇEKTİR.\n\n"
+                    else:
+                        prompt += f"\n⚠️ **{analysis['name']}** Excel'de bulundu ama teknik veriler eksik.\n\n"
                 
-                for field in important_fields:
-                    if field in hisse["veriler"]:
-                        value = hisse["veriler"][field]
-                        prompt += f"- **{field}:** {value}\n"
-                
-                prompt += f"\n**NOT:** {hisse['adi']} hissesi Excel raporunda bulundu. Yukarıdaki değerler GERÇEKTİR.\n\n"
-            
-            if analysis.get("endeks"):
-                endeks = analysis["endeks"]
-                prompt += f"""📊 **ENDEKS ANALİZİ:** {endeks['bulunan_terim']}
+                elif analysis["type"] == "fon_emtia":
+                    fon_data = analysis["data"]
+                    prompt += f"""💰 **FON/EMTİA/DÖVİZ ANALİZİ: {analysis['name']}**
 
-**ENDEKS VERİLERİ (İlk 5):**
+**EXCEL VERİLERİ ({analysis['sayfa']} sayfası):**
 """
-                for i, row in enumerate(endeks["veriler"][:5], 1):
-                    prompt += f"{i}. {row}\n"
+                    for i, value in enumerate(fon_data, 1):
+                        if value not in ["", None]:
+                            prompt += f"- Değer {i}: {value}\n"
+                    
+                    prompt += f"\n✅ **{analysis['name']}** Excel'de bulundu ({analysis['sayfa']} sayfası, satır {analysis.get('satir', 'N/A')}).\n\n"
                 
-                prompt += f"\n**Toplam Endeks:** {endeks['toplam_endeks']}\n\n"
-            
-            if analysis.get("fon_emtia"):
-                fon = analysis["fon_emtia"]
-                prompt += f"""💰 **FON/EMTİA/DÖVİZ ANALİZİ:** {fon['bulunan_terim']}
+                elif analysis["type"] == "endeks":
+                    endeks_data = analysis["data"]
+                    prompt += f"""📊 **ENDEKS ANALİZİ: {analysis['name']}**
 
-**VERİLER (İlk 10):**
+**EXCEL VERİLERİ ({analysis['sayfa']} sayfası):**
 """
-                for i, row in enumerate(fon["veriler"][:10], 1):
-                    prompt += f"{i}. {row}\n"
-                
-                prompt += f"\n**Toplam Veri:** {fon['toplam_veri']}\n\n"
+                    for i, value in enumerate(endeks_data, 1):
+                        if value not in ["", None]:
+                            prompt += f"- Değer {i}: {value}\n"
+                    
+                    prompt += f"\n✅ **{analysis['name']}** Excel'de bulundu ({analysis['sayfa']} sayfası).\n\n"
             
-            # Eğer hiç veri bulunamadıysa
-            if not any([analysis.get("hisse"), analysis.get("endeks"), analysis.get("fon_emtia")]):
-                prompt += """⚠️ **NOT:** Sorunuzda belirli bir hisse/endeks/emtia bulunamadı.
+            else:
+                prompt += """⚠️ **NOT:** Sorunuzdaki sembol Excel'de bulunamadı.
 
-**ANCAK** Excel raporunda 630+ hisse, endeksler ve fon/emtia/döviz verileri mevcut.
+Excel raporunda şunlar mevcut:
+• **Sinyaller:** 630+ hisse senedi
+• **ENDEKSLER:** BIST endeksleri
+• **FON_EMTIA_COIN_DOVIZ:** Döviz, emtia, kripto para
+
+**Lütfen hisse, endeks veya sembol adını doğru yazın.**
 
 """
             
-            prompt += """🎯 **ANALİZ TALİMATLARI:**
-1. Sadece Yukarıdaki GERÇEK Excel verilerini KULLANARAK teknik analiz yap
-2. **VMA (Volume Moving Algorithm)** bazlı yorum yap - VMA değerini mutlaka analiz et
-3. Close, EMA_8, EMA_21, EMA_55 değerlerini KARŞILAŞTIR
-4. Pivot, S1, R1 seviyelerini belirt
-5. Trend (YÜKSELİŞ/YANAL/DÜŞÜŞ) durumunu yorumla
-6. Hacim verisini yorumla (yüksek/düşük/orta)
-7. **RSI/MACD YOK** - Onlardan bahsetme
-8. Sayısal değerlerle açık ve net konuş (Örnek: "Close: 115.70 TL")
-9. **YATIRIM TAVSİYESİ VERME** - Sadece teknik analiz yap
-10. Kısa ve öz olsun (max 250 kelime)
+            # DETAYLI ANALİZ TALİMATLARI (KÜÇÜLTMEDİM!)
+            prompt += """🎯 **DETAYLI ANALİZ TALİMATLARI:**
 
-**📊 ANALİZ FORMATI:**
-• 📈 Veri Özeti
-• 📈 Fiyat & Göstergeler
-• 🔍 VMA Analizi
-• ⚖️ Destek/Direnç
-• 🔍 Teknik Yorum (VMA bazlı)
-• ⚠️ Kritik Seviyeler
-• ⚠️ Risk Notu
-• 💡 Gözlemler (bilgi amaçlı)
+1. **SADECE** yukarıdaki Excel verilerini kullanarak teknik analiz yap
+2. **VMA (Volume Moving Algorithm)** değerini MUTLAKA analiz et ve yorumla
+3. Close fiyatını, EMA değerlerini (EMA_8, EMA_21, EMA_55) karşılaştır
+4. Pivot noktasını ve destek/direnç seviyelerini (S1, R1) belirt
+5. Trend durumunu (YÜKSELİŞ/YANAL/DÜŞÜŞ) açıkla
+6. Hacim verisini yorumla - yüksek/düşük/orta hacim mi?
+7. Bollinger Bantları (BB_UPPER, BB_LOWER) ve Pearson korelasyonunu değerlendir
+8. **RSI ve MACD'den BAHSETME** - bunlar Excel raporunda yok
+9. Sayısal değerleri net şekilde belirt (Örnek: "Close: 322.50 TL")
+10. **KESİNLİKLE yatırım tavsiyesi VERME** - sadece teknik analiz yap
+11. Kapsamlı ama öz olsun (300-400 kelime ideal)
 
-**CEVAP:**"""
+📊 **PROFESYONEL ANALİZ FORMATI:**
+
+**1. VERİ ÖZETİ**
+• Mevcut fiyat ve temel göstergeler
+• VMA ve hacim analizi
+• EMA'lar ve trend yapısı
+
+**2. TEKNİK YORUM (VMA BAZLI)**
+• VMA değerinin anlamı ve yorumu
+• Fiyat-VMA ilişkisi
+• Trendin gücü ve sürdürülebilirliği
+
+**3. KRİTİK SEVİYELER**
+• Ana destek ve direnç noktaları
+• Pivot ve Bollinger Bantları
+• Riskli ve fırsat alanları
+
+**4. GÖZLEMLER VE ÖNERİLER (BİLGİ AMAÇLI)**
+• Genel teknik görünüm
+• İzlenmesi gereken seviyeler
+• Dikkat edilmesi gereken riskler
+
+**ÖNEMLİ:** Tüm analiz Excel'deki GERÇEK verilere dayanmalıdır. Hisse açılımları yazma, sadece sembol kullan.
+
+**CEVAP:**
+"""
             
             print(f"📝 Prompt hazır ({len(prompt):,} karakter)")
             
@@ -467,13 +512,14 @@ class handler(BaseHTTPRequestHandler):
             ai_start = datetime.now()
             url = "https://api.deepseek.com/chat/completions"
             
+            # MAX TOKEN'ı 500 yap (daha kısa değil, optimal)
             request_data = {
                 "model": "deepseek-chat",
                 "messages": [
                     {"role": "system", "content": prompt},
                     {"role": "user", "content": question}
                 ],
-                "max_tokens": 600,
+                "max_tokens": 500,  # 600'den 500'e düşürdüm (çok uzun olmasın)
                 "temperature": 0.1
             }
             
@@ -485,11 +531,11 @@ class handler(BaseHTTPRequestHandler):
                 headers={
                     'Authorization': f'Bearer {api_key}',
                     'Content-Type': 'application/json',
-                    'User-Agent': 'BorsaAnaliz-AI/2.0'
+                    'User-Agent': 'BorsaAnaliz-AI/3.0'
                 }
             )
             
-            print("🔄 DeepSeek API çağrılıyor (TÜM verilerle)...")
+            print("🔄 DeepSeek API çağrılıyor...")
             response = urllib.request.urlopen(req, timeout=45)
             response_data = json.loads(response.read().decode('utf-8'))
             ai_time = (datetime.now() - ai_start).total_seconds()
@@ -499,7 +545,7 @@ class handler(BaseHTTPRequestHandler):
             if 'choices' in response_data and response_data['choices']:
                 answer = response_data['choices'][0]['message']['content']
                 
-                # 8. YANIT VER
+                # 8. YANIT VER (TOKEN SAYISI GİZLİ)
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json; charset=utf-8')
                 self.end_headers()
@@ -510,19 +556,19 @@ class handler(BaseHTTPRequestHandler):
                     "success": True,
                     "answer": answer,
                     "model": "deepseek-chat",
-                    "tokens": response_data.get('usage', {}).get('total_tokens', 0),
-                    "excel_data_used": True,
-                    "hisse": analysis.get("hisse", {}).get("adi") if analysis.get("hisse") else None,
+                    # "tokens": response_data.get('usage', {}).get('total_tokens', 0),  # GİZLİ
+                    "excel_data_used": analysis.get("found", False),
+                    "symbol": analysis.get("name"),
+                    "sheet": analysis.get("sayfa"),
                     "performance": {
                         "excel_okuma_sn": round(excel_time, 2),
                         "ai_analiz_sn": round(ai_time, 2),
-                        "toplam_sn": round(total_time, 2),
-                        "hisse_sayisi": excel_result["data"]["sheets"].get("Sinyaller", {}).get("toplam_hisse", 0)
+                        "toplam_sn": round(total_time, 2)
                     },
                     "excel_info": {
                         "dosya": excel_result["data"]["excel_file"],
                         "tarih": excel_date,
-                        "sayfalar": list(excel_result["data"]["sheets"].keys())
+                        "toplam_hisse": excel_result["data"]["sheets"].get("Sinyaller", {}).get("toplam_hisse", 0)
                     }
                 }, ensure_ascii=False)
                 
@@ -541,7 +587,8 @@ class handler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'application/json; charset=utf-8')
             self.end_headers()
             response = json.dumps({
-                "error": str(e),
-                "help": "Sistem geçici olarak hizmet veremiyor. Lütfen daha sonra tekrar deneyin."
+                "success": False,
+                "answer": f"❌ Sistem hatası: {str(e)}\nLütfen daha sonra tekrar deneyin.",
+                "excel_data_used": False
             }, ensure_ascii=False)
             self.wfile.write(response.encode('utf-8'))
