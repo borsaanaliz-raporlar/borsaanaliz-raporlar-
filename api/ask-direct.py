@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # /api/ask-direct.py
 # BorsaAnaliz AI - Doğrudan Excel Analiz Sistemi
-# Versiyon: 4.1 (XU100 Fix + Genel Sorular Dahil) - DÜZELTİLMİŞ!
+# Versiyon: 4.1 (XU100 Fix + Genel Sorular Dahil) - VERCEL FIXED!
 
 from http.server import BaseHTTPRequestHandler
 import json
@@ -12,9 +12,17 @@ import urllib.error
 from datetime import datetime
 import re
 import ssl
+import sys
+import traceback
 
 # Excel processor import
-from excel_processor import excel_processor
+try:
+    from excel_processor import excel_processor
+except ImportError:
+    # Local development için
+    import sys
+    sys.path.append('..')
+    from excel_processor import excel_processor
 
 # SSL doğrulamasını devre dışı bırak
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -41,8 +49,8 @@ def find_in_excel_data(question, excel_data):
         print(f"🔍 Aranan terimler: {search_terms}")
         
         # 1. ÖNCE: HİSSE ARA (Sinyaller sayfasında)
-        if "Sinyaller" in excel_data["sheets"]:
-            hisseler = excel_data["sheets"]["Sinyaller"]["hisseler"]
+        if "Sinyaller" in excel_data.get("sheets", {}):
+            hisseler = excel_data["sheets"]["Sinyaller"].get("hisseler", {})
             
             for term in search_terms:
                 for hisse_adi, hisse_veriler in hisseler.items():
@@ -58,14 +66,14 @@ def find_in_excel_data(question, excel_data):
                         }
         
         # 2. SONRA: ENDEKS ARA (ENDEKSLER sayfasında)
-        if "ENDEKSLER" in excel_data["sheets"]:
-            endeksler = excel_data["sheets"]["ENDEKSLER"]["semboller"]
+        if "ENDEKSLER" in excel_data.get("sheets", {}):
+            endeksler = excel_data["sheets"]["ENDEKSLER"].get("semboller", {})
             
             # ÖNCE: XU100 ÖZEL ARAMA (TAM EŞLEŞME) - FIX EDİLDİ!
             if "XU100" in question_upper:
                 # Önce tam eşleşme ara
                 for sembol in endeksler.keys():
-                    sembol_upper = sembol.upper()
+                    sembol_upper = str(sembol).upper()
                     if "XU100" in sembol_upper:
                         print(f"✅ XU100 bulundu: {sembol}")
                         return {
@@ -79,7 +87,7 @@ def find_in_excel_data(question, excel_data):
                 # Tam bulunamazsa benzer ara
                 benzer_endeksler = []
                 for sembol in endeksler.keys():
-                    sembol_clean = re.sub(r'[^A-Z0-9]', '', sembol.upper())
+                    sembol_clean = re.sub(r'[^A-Z0-9]', '', str(sembol).upper())
                     if "XU" in sembol_clean or "BIST" in sembol_clean or "100" in sembol_clean:
                         benzer_endeksler.append(sembol)
                 
@@ -98,7 +106,7 @@ def find_in_excel_data(question, excel_data):
             # DİĞER ENDEKS ARAMALARI
             for term in search_terms:
                 for sembol_adi, sembol_veriler in endeksler.items():
-                    sembol_clean = re.sub(r'[^A-Z0-9]', '', sembol_adi.upper())
+                    sembol_clean = re.sub(r'[^A-Z0-9]', '', str(sembol_adi).upper())
                     if term in sembol_clean or sembol_clean in term:
                         print(f"✅ {sembol_adi} ENDEKSLER sayfasında bulundu")
                         return {
@@ -110,12 +118,12 @@ def find_in_excel_data(question, excel_data):
                         }
         
         # 3. SON OLARAK: FON/EMTİA/DÖVİZ ARA
-        if "FON_EMTIA_COIN_DOVIZ" in excel_data["sheets"]:
-            fonlar = excel_data["sheets"]["FON_EMTIA_COIN_DOVIZ"]["semboller"]
+        if "FON_EMTIA_COIN_DOVIZ" in excel_data.get("sheets", {}):
+            fonlar = excel_data["sheets"]["FON_EMTIA_COIN_DOVIZ"].get("semboller", {})
             
             for term in search_terms:
                 for sembol_adi, sembol_veriler in fonlar.items():
-                    sembol_clean = re.sub(r'[^A-Z0-9]', '', sembol_adi.upper())
+                    sembol_clean = re.sub(r'[^A-Z0-9]', '', str(sembol_adi).upper())
                     if term in sembol_clean or sembol_clean in term:
                         print(f"✅ {sembol_adi} FON_EMTIA_COIN_DOVIZ sayfasında bulundu")
                         return {
@@ -131,12 +139,12 @@ def find_in_excel_data(question, excel_data):
         
         # Hangi semboller mevcut? (debug için)
         available_symbols = []
-        if "Sinyaller" in excel_data["sheets"]:
-            available_symbols.extend(list(excel_data["sheets"]["Sinyaller"]["hisseler"].keys())[:5])
-        if "ENDEKSLER" in excel_data["sheets"]:
-            available_symbols.extend(list(excel_data["sheets"]["ENDEKSLER"]["semboller"].keys())[:5])
-        if "FON_EMTIA_COIN_DOVIZ" in excel_data["sheets"]:
-            available_symbols.extend(list(excel_data["sheets"]["FON_EMTIA_COIN_DOVIZ"]["semboller"].keys())[:5])
+        if "Sinyaller" in excel_data.get("sheets", {}):
+            available_symbols.extend(list(excel_data["sheets"]["Sinyaller"].get("hisseler", {}).keys())[:5])
+        if "ENDEKSLER" in excel_data.get("sheets", {}):
+            available_symbols.extend(list(excel_data["sheets"]["ENDEKSLER"].get("semboller", {}).keys())[:5])
+        if "FON_EMTIA_COIN_DOVIZ" in excel_data.get("sheets", {}):
+            available_symbols.extend(list(excel_data["sheets"]["FON_EMTIA_COIN_DOVIZ"].get("semboller", {}).keys())[:5])
         
         print(f"📋 Mevcut semboller (örnek): {available_symbols}")
         
@@ -151,6 +159,7 @@ def find_in_excel_data(question, excel_data):
         
     except Exception as e:
         print(f"❌ Arama hatası: {e}")
+        traceback.print_exc()
         return {
             "found": False,
             "error": str(e)
@@ -191,8 +200,8 @@ def analyze_question_type(question):
     
     # 4. GENEL BORSA SORULARI (YENİ EKLENDİ!)
     genel_borsa_kelimeleri = [
-        'bugün öne çıkan', 'öne çıkan hisseler', 'en iyi hisseler',
-        'tavsiye', 'öner', 'hangi hisse', 'ne alayım', 'ne alalım',
+        'bugün öne çıkan', 'öne çikan hisseler', 'en iyi hisseler',
+        'tavsiye', 'öner', 'hangi hisse', 'ne alayim', 'ne alalım',
         'gündem', 'piyasa', 'borsa durumu', 'genel durum',
         'hangi sektör', 'sektörel', 'önerilerin', 'önerin',
         'neler popüler', 'popüler hisseler', 'hangi hisseler iyi'
@@ -361,7 +370,7 @@ def get_genel_borsa_cevabı(excel_data):
         if "Sinyaller" not in excel_data.get("sheets", {}):
             return "📊 Borsa genel durumu için Excel verileri yüklenemedi."
         
-        hisseler = excel_data["sheets"]["Sinyaller"]["hisseler"]
+        hisseler = excel_data["sheets"]["Sinyaller"].get("hisseler", {})
         excel_date = excel_data.get("excel_date", "bilinmiyor")
         
         # En iyi 5 hisseyi bul (Pearson55 yüksek olanlar)
@@ -406,23 +415,25 @@ def get_genel_borsa_cevabı(excel_data):
             vma = hisse["vma"]
             
             # Durum emojisi
-            if "GÜÇLÜ POZİTİF" in str(durum).upper():
+            durum_str = str(durum).upper()
+            if "GÜÇLÜ POZİTİF" in durum_str:
                 durum_emoji = "🟢"
-            elif "POZİTİF" in str(durum).upper():
+            elif "POZİTİF" in durum_str:
                 durum_emoji = "🟢"
-            elif "GÜÇLÜ NEGATİF" in str(durum).upper():
+            elif "GÜÇLÜ NEGATİF" in durum_str:
                 durum_emoji = "🔴"
-            elif "NEGATİF" in str(durum).upper():
+            elif "NEGATİF" in durum_str:
                 durum_emoji = "🔴"
-            elif "NÖTR" in str(durum).upper():
+            elif "NÖTR" in durum_str:
                 durum_emoji = "🟡"
             else:
                 durum_emoji = "⚪"
             
             # VMA emojisi
-            if "POZİTİF" in str(vma).upper():
+            vma_str = str(vma).upper()
+            if "POZİTİF" in vma_str:
                 vma_emoji = "📈"
-            elif "NEGATİF" in str(vma).upper():
+            elif "NEGATİF" in vma_str:
                 vma_emoji = "📉"
             else:
                 vma_emoji = "↔️"
@@ -442,7 +453,8 @@ def get_genel_borsa_cevabı(excel_data):
             pearson = hisse["pearson"]
             durum = hisse["durum"]
             
-            if "NEGATİF" in str(durum).upper():
+            durum_str = str(durum).upper()
+            if "NEGATİF" in durum_str:
                 durum_emoji = "🔴"
             else:
                 durum_emoji = "🟡"
@@ -459,65 +471,91 @@ def get_genel_borsa_cevabı(excel_data):
         
     except Exception as e:
         print(f"❌ Genel borsa cevabı hatası: {e}")
+        traceback.print_exc()
         return "📊 Borsa genel durumu analiz ediliyor... Lütfen biraz bekleyin veya spesifik bir hisse sorun."
 
+# ==================== VERCEL HANDLER CLASS ====================
 class handler(BaseHTTPRequestHandler):
     
+    def log_message(self, format, *args):
+        """Vercel logları için"""
+        print(f"{self.address_string()} - {format % args}")
+    
     def do_GET(self):
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json; charset=utf-8')
-        self.end_headers()
-        
-        # Excel processor'dan güncel bilgi al
+        """GET istekleri için"""
         try:
-            excel_info = {
-                "status": "online",
-                "ai": "BORSAANALIZ AI - GÜNCEL EXCEL ANALİZ",
-                "version": "4.1 (XU100 Fix + Genel Sorular)",
-                "last_update": datetime.now().strftime("%d.%m.%Y %H:%M"),
-                "features": [
-                    "630+ hisse analizi",
-                    "3 sayfa tam okuma (Sinyaller, ENDEKSLER, FON_EMTIA)",
-                    "Güncel Excel otomatik bulma",
-                    "VMA, EMA, Pivot analizi",
-                    "Doğal dil anlama",
-                    "XU100 endeks analizi",
-                    "Genel borsa durumu"
-                ],
-                "example_queries": [
-                    "FROTO analiz et",
-                    "XU100 endeksi analiz et",
-                    "VMA nedir?",
-                    "Bugün öne çıkan hisseler",
-                    "Borsanın genel durumu"
-                ],
-                "fixes": [
-                    "XU100 endeks arama düzeltildi",
-                    "Genel borsa soruları eklendi",
-                    "Büyük/küçük harf duyarlılığı düzeltildi"
-                ]
-            }
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json; charset=utf-8')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            
+            # Excel processor'dan güncel bilgi al
+            try:
+                excel_info = {
+                    "status": "online",
+                    "ai": "BORSAANALIZ AI - GÜNCEL EXCEL ANALİZ",
+                    "version": "4.1 (XU100 Fix + Genel Sorular)",
+                    "endpoint": "/api/ask-direct",
+                    "last_update": datetime.now().strftime("%d.%m.%Y %H:%M"),
+                    "features": [
+                        "630+ hisse analizi",
+                        "3 sayfa tam okuma (Sinyaller, ENDEKSLER, FON_EMTIA)",
+                        "Güncel Excel otomatik bulma",
+                        "VMA, EMA, Pivot analizi",
+                        "Doğal dil anlama",
+                        "XU100 endeks analizi",
+                        "Genel borsa durumu"
+                    ],
+                    "example_queries": [
+                        "FROTO analiz et",
+                        "XU100 endeksi analiz et",
+                        "VMA nedir?",
+                        "Bugün öne çıkan hisseler",
+                        "Borsanın genel durumu"
+                    ],
+                    "method": "POST JSON with {'question': 'sorunuz'}"
+                }
+            except Exception as e:
+                excel_info = {
+                    "status": "online",
+                    "ai": "BORSAANALIZ AI",
+                    "note": "Excel sistemi hazırlanıyor",
+                    "error": str(e)
+                }
+            
+            response = json.dumps(excel_info, ensure_ascii=False, indent=2)
+            self.wfile.write(response.encode('utf-8'))
+            print("✅ GET isteği başarılı")
+            
         except Exception as e:
-            excel_info = {
-                "status": "online",
-                "ai": "BORSAANALIZ AI",
-                "note": "Excel sistemi hazırlanıyor",
-                "error": str(e)
-            }
-        
-        response = json.dumps(excel_info, ensure_ascii=False, indent=2)
-        self.wfile.write(response.encode('utf-8'))
+            print(f"❌ GET hatası: {e}")
+            traceback.print_exc()
     
     def do_POST(self):
+        """POST istekleri için - Ana analiz endpoint"""
         try:
             # 1. Soruyu al
             content_length = int(self.headers.get('Content-Length', 0))
             post_data = self.rfile.read(content_length)
-            data = json.loads(post_data)
-            question = data.get('question', '').strip()
+            
+            print(f"📨 POST verisi alındı: {len(post_data)} bytes")
+            
+            try:
+                data = json.loads(post_data)
+                question = data.get('question', '').strip()
+            except json.JSONDecodeError:
+                question = post_data.decode('utf-8', errors='ignore').strip()
+                if 'question=' in question:
+                    import urllib.parse
+                    parsed = urllib.parse.parse_qs(question)
+                    question = parsed.get('question', [''])[0]
             
             if not question:
-                self.send_error(400, "Soru gerekli")
+                self.send_response(400)
+                self.send_header('Content-type', 'application/json; charset=utf-8')
+                self.end_headers()
+                response = {"success": False, "error": "Soru gerekli"}
+                self.wfile.write(json.dumps(response).encode('utf-8'))
                 return
             
             print(f"\n" + "="*70)
@@ -528,7 +566,7 @@ class handler(BaseHTTPRequestHandler):
             question_type = analyze_question_type(question)
             print(f"🔍 Soru tipi: {question_type}")
             
-            # 3. ÖZEL SORU TİPLERİ için direkt cevap - DÜZELTİLDİ!
+            # 3. ÖZEL SORU TİPLERİ için direkt cevap
             if question_type in ["teşekkür", "sistem", "teknik", "nasil", "genel_borsa"]:
                 print(f"✅ Özel cevap hazırlanıyor: {question_type}")
                 
@@ -552,10 +590,12 @@ class handler(BaseHTTPRequestHandler):
                         answer = get_genel_borsa_cevabı(excel_result)
                     except Exception as e:
                         print(f"❌ Excel okuma hatası: {str(e)}")
+                        traceback.print_exc()
                         answer = "📊 Borsa genel durumu için Excel verileri yüklenemedi."
                 
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json; charset=utf-8')
+                self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
                 
                 result = json.dumps({
@@ -569,7 +609,7 @@ class handler(BaseHTTPRequestHandler):
                 self.wfile.write(result.encode('utf-8'))
                 print(f"📤 Özel yanıt gönderildi: {question_type}")
                 print("="*70 + "\n")
-                return  # ⬅️ BU ÇOK ÖNEMLİ! RETURN EKLENDİ!
+                return
             
             # 4. EXCEL'DEN VERİ AL (GÜNCEL) - Normal hisse analizleri için
             print("🔍 Güncel Excel bulunuyor ve okunuyor...")
@@ -589,8 +629,10 @@ class handler(BaseHTTPRequestHandler):
                 
             except Exception as e:
                 print(f"❌ Excel okuma hatası: {str(e)}")
+                traceback.print_exc()
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json; charset=utf-8')
+                self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
                 
                 result = json.dumps({
@@ -604,11 +646,11 @@ class handler(BaseHTTPRequestHandler):
                 self.wfile.write(result.encode('utf-8'))
                 return
             
-            # 6. SORUYU EXCEL VERİLERİNDE ARA (3 SAYFADA)
+            # 5. SORUYU EXCEL VERİLERİNDE ARA (3 SAYFADA)
             print("🔍 Soru Excel verilerinde analiz ediliyor (3 sayfada TAM arama)...")
             analysis = find_in_excel_data(question, excel_result)
             
-            # 7. API Key kontrolü
+            # 6. API Key kontrolü
             api_key = os.environ.get('DEEPSEEK_API_KEY')
             if not api_key:
                 # Fallback: Basit yanıt oluştur
@@ -655,6 +697,7 @@ class handler(BaseHTTPRequestHandler):
                 
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json; charset=utf-8')
+                self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
                 
                 result = json.dumps({
@@ -674,7 +717,7 @@ class handler(BaseHTTPRequestHandler):
                 print("="*70 + "\n")
                 return
             
-            # 8. PROMPT HAZIRLA
+            # 7. PROMPT HAZIRLA
             prompt = f"""🎯 **BORSAANALIZ AI - GERÇEK EXCEL VERİ ANALİZİ**
 
 **📊 GÜNCEL EXCEL RAPORU:** {os.path.basename(excel_result.get('excel_url', 'bilinmiyor'))} ({excel_date})
@@ -766,10 +809,9 @@ class handler(BaseHTTPRequestHandler):
             
             print(f"📝 Prompt hazır ({len(prompt):,} karakter)")
             
-            # 9. DEEPSEEK API'Yİ ÇAĞIR
+            # 8. DEEPSEEK API'Yİ ÇAĞIR
             ai_start = datetime.now()
             try:
-                # API çağrısı için gerekli import
                 import requests
                 
                 headers = {
@@ -787,6 +829,7 @@ class handler(BaseHTTPRequestHandler):
                     "temperature": 0.7
                 }
                 
+                print("🤖 AI çağrısı yapılıyor...")
                 response = requests.post(
                     'https://api.deepseek.com/v1/chat/completions',
                     headers=headers,
@@ -817,10 +860,12 @@ class handler(BaseHTTPRequestHandler):
                 answer = f"❌ AI analiz hatası: {str(e)[:100]}\n\n"
                 answer += "Lütfen daha sonra tekrar deneyin."
                 print(f"❌ AI hatası: {e}")
+                traceback.print_exc()
             
-            # 10. YANITI GÖNDER
+            # 9. YANITI GÖNDER
             self.send_response(200)
             self.send_header('Content-type', 'application/json; charset=utf-8')
+            self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             
             result = json.dumps({
@@ -842,9 +887,12 @@ class handler(BaseHTTPRequestHandler):
             print("="*70 + "\n")
             
         except Exception as e:
-            print(f"❌ Genel hata: {e}")
+            print(f"❌ Genel POST hatası: {e}")
+            traceback.print_exc()
+            
             self.send_response(500)
             self.send_header('Content-type', 'application/json; charset=utf-8')
+            self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             
             result = json.dumps({
@@ -855,3 +903,14 @@ class handler(BaseHTTPRequestHandler):
             }, ensure_ascii=False)
             
             self.wfile.write(result.encode('utf-8'))
+
+# ==================== LOCAL DEVELOPMENT ====================
+if __name__ == "__main__":
+    # Local development için
+    from http.server import HTTPServer
+    
+    port = int(os.environ.get("PORT", 3001))
+    server = HTTPServer(("0.0.0.0", port), handler)
+    print(f"🚀 BorsaAnaliz AI API çalışıyor: http://localhost:{port}/api/ask-direct")
+    print(f"📊 Versiyon: 4.1 (XU100 Fix + Genel Sorular)")
+    server.serve_forever()
