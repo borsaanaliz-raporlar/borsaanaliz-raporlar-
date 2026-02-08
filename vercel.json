@@ -16,7 +16,7 @@
       "destination": "/api/query.js"
     },
     {
-      "source": "/api/ask", 
+      "source": "/api/ask",
       "destination": "/api/ask-direct.py"
     },
     {
