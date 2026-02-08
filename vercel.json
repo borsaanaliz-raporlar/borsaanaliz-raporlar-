@@ -2,12 +2,12 @@
   "functions": {
     "api/*.js": {
       "maxDuration": 10,
-      "runtime": "nodejs@18.x"
+      "runtime": "nodejs18.x"
     },
     "api/*.py": {
       "maxDuration": 30,
       "memory": 1024,
-      "runtime": "python@3.9"
+      "runtime": "python3.9"
     }
   },
   "rewrites": [
