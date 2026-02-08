@@ -233,7 +233,7 @@ def get_sistem_cevabı():
     return """🤖 **BorsaAnaliz AI Sistemi**
 
 **Geliştirici:** BorsaAnaliz Ekibi
-**Kuruluş:** 2024
+**Kuruluş:** 2025 Haziran
 **Versiyon:** 4.1 (XU100 Fix + Genel Sorular)
 
 📊 **Sistem Özellikleri:**
@@ -265,22 +265,17 @@ def get_teknik_cevabı(question):
     if 'vma' in question_lower:
         return """📊 **VMA (Volume Moving Average) Trend Algoritması**
 
-**VMA Nedir?**
-VMA, "Hacim Hareketli Ortalama" anlamına gelir. Fiyat hareketlerinin hacimle desteklenip desteklenmediğini gösteren bir göstergedir.
+**VMA Algo Nedir?**
+VMA Algo, "Hacim Ağırlıklı Algoritma" anlamına gelir. Fiyat hareketlerinin hacimle desteklenip desteklenmediğini gösteren bir algoritmadır.
 
 **Nasıl Yorumlanır?**
-• **POZİTİF (50-100):** Hacim trendi güçlü, fiyat hareketi güvenilir
-• **POZİTİF (0-50):** Hacim trendi orta, dikkatli olunmalı
-• **NEGATİF (0-50):** Hacim trendi zayıf, fiyat hareketi şüpheli
-• **NEGATİF (50-100):** Hacim trendi çok zayıf, güvenilir değil
-
-**Örnek Yorumlar:**
-• "POZİTİF (75)" → Güçlü hacim desteği, trend sağlam
-• "POZİTİF (25)" → Zayıf hacim desteği, dikkat edilmeli
-• "NEGATİF (30)" → Hacim trend olumsuz, satış baskısı var
+• **POZİTİF (00):** Trendin başladığını gösterir (parantez içindeki rakam gün sayısıdır)
+• **POZİTİF (--):** Algoritma trendin günlük periyotta devam ettiğini söyler
+• **NEGATİF (00):** Trendin bittiğini gösterir (parantez içindeki rakam gün sayısıdır)
+• **NEGATİF (--):** Algoritma trendin günlük periyotta bittiğini söyler
 
 **Neden Önemli?**
-VMA, sadece fiyat değil, işlem hacmini de analiz ederek daha güvenilir sinyaller verir.
+VMA Algo, sadece fiyat değil, işlem hacmini de analiz ederek daha güvenilir sinyaller verir.
 
 Başka bir teknik gösterge hakkında sorunuz var mı?"""
     
@@ -309,7 +304,7 @@ Başka sorunuz var mı?"""
         return """📈 **Teknik Analiz Göstergeleri**
 
 **Temel Göstergeler:**
-1. **VMA (Volume Moving Average):** Hacim trendi
+1. **VMA (Volume Moving Average Algo):** Hacim trendi
 2. **EMA (Exponential Moving Average):** Fiyat trendi
 3. **Pivot Noktaları:** Destek/direnç seviyeleri
 4. **Bollinger Bantları:** Volatilite seviyeleri
@@ -327,7 +322,7 @@ def get_nasil_cevabı():
     return """🔧 **Nasıl Analiz Yapıyorum?**
 
 **Adım 1: Veri Toplama**
-• Her sabah güncel Excel raporunu indiririm
+• Her akşam güncel Excel raporunu indiririm
 • 630+ hissenin teknik verilerini okurum
 • VMA, EMA, Pivot, Bollinger Bant verilerini alırım
 
@@ -340,7 +335,7 @@ def get_nasil_cevabı():
 1. **Fiyat Analizi:** Mevcut fiyat ve günlük hareket
 2. **VMA Analizi:** Hacim trendinin gücü
 3. **EMA Analizi:** Kısa-orta-uzun vade trendleri
-4. **Seviye Analizi:** Pivot, destek (S1), direnç (R1)
+4. **Denge Analizi:** Pivot, destek (S1), direnç (R1)
 5. **Durum Değerlendirmesi:** Genel teknik durum
 
 **Adım 4: Formatlama**
@@ -762,16 +757,17 @@ class handler(BaseHTTPRequestHandler):
 1. **SADECE** yukarıdaki Excel verilerini kullan
 2. **VMA trend algo** değerini MUTLAKA analiz et (Örnek: "POZİTİF (50)")
 3. Close, EMA_8, EMA_21, EMA_55 değerlerini karşılaştır
-4. Pivot, S1, R1 seviyelerini belirt
-5. **DURUM** alanını yorumla (GÜÇLÜ POZİTİF/ZAYIF vb.)
-6. **AI_YORUM** alanındaki özeti dikkate al
-7. **RSI/MACD YOK** - onlardan bahsetme
-8. Sayısal değerleri net belirt (Örnek: "Close: 712,5 TL")
-9. **YATIRIM TAVSİYESİ VERME** - sadece teknik analiz
-10. Kapsamlı ama öz olsun (300-400 kelime)
+4. WT Sinyal, LSMA KAMA değerlerini analiz et
+5. Pivot, S1, R1 seviyelerini belirt
+6. **DURUM** alanını yorumla (GÜÇLÜ POZİTİF/ZAYIF vb.)
+7. **AI_YORUM** alanındaki özeti dikkate al
+8. **RSI/MACD YOK** - onlardan bahsetme
+9. Sayısal değerleri net belirt (Örnek: "Close: 712,5 TL")
+10. **YATIRIM TAVSİYESİ VERME** - sadece teknik analiz
+11. Kapsamlı ama öz olsun (300-400 kelime)
 
 📊 **ANALİZ FORMATI:**
-**1. TEMEL VERİLER:** Fiyat, VMA, EMA'lar
+**1. TEMEL VERİLER:** Fiyat, VMA, EMA'lar, WT Sinyal, LSMA KAMA
 **2. TEKNİK YORUM:** VMA analizi, trend yapısı
 **3. KRİTİK SEVİYELER:** Pivot, destek (S1), direnç (R1)
 **4. GENEL DEĞERLENDİRME:** Durum ve riskler
