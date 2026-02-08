@@ -351,7 +351,7 @@ def get_nasil_cevabı():
 🎯 Durum: 🟡 NÖTR
 
 **📊 Veri Kaynağı:** BorsaAnaliz günlük Excel raporları
-**⏰ Güncelleme:** Her sabah otomatik
+**⏰ Güncelleme:** Her akşam otomatik
 
 Başka sorunuz var mı?"""
 
