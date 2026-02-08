@@ -1,8 +1,43 @@
 {
+  "functions": {
+    "api/ask-direct.py": {
+      "maxDuration": 30
+    },
+    "api/index.py": {
+      "maxDuration": 30
+    }
+  },
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/$1.py"
+      "source": "/api/ask-direct",
+      "destination": "/api/ask-direct.py"
+    },
+    {
+      "source": "/api/ask",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/api/",
+      "destination": "/api/index.py"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET,POST,OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
     }
   ]
 }
