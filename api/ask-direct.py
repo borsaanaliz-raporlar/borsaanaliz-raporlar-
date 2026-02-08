@@ -244,7 +244,7 @@ def get_sistem_cevabı():
 • **AI destekli** yorumlama
 
 🔧 **Nasıl Çalışır?**
-1. Her sabah güncel Excel raporu indirilir
+1. Her akşam güncel Excel raporu indirilir
 2. 630+ hissenin teknik verileri okunur
 3. Sorunuzdaki hisse kodu aranır
 4. Bulunan verilerle kısa teknik analiz oluşturulur
