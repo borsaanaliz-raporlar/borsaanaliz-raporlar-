@@ -17,7 +17,7 @@
     },
     {
       "source": "/api/ask", 
-      "destination": "/api/ask.js"
+      "destination": "/api/ask-direct.py"
     },
     {
       "source": "/api/(.*)",
