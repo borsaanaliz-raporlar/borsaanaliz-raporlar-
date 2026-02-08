@@ -1,9 +1,10 @@
-# /api/query.py - ANA SORGULAMA MOTORU
+# /api/query.py - SORGULAMA MOTORU (GÜNCELLENMİŞ)
 from http.server import BaseHTTPRequestHandler
 import json
 import os
 from datetime import datetime
 from typing import Dict, List, Any
+import re
 
 # Import modules
 from excel_processor import excel_processor
@@ -11,17 +12,29 @@ from query_parser import query_parser
 from filter_engine import filter_engine
 
 class QueryEngine:
-    """Ana sorgulama motoru"""
+    """Ana sorgulama motoru - GÜNCEL EXCEL"""
     
     def __init__(self):
         self.excel_data = None
-        self.excel_url = "https://borsaanaliz-raporlar.vercel.app/raporlar/BORSAANALIZ_V11_TAM_06022026.xlsm"
+        self.last_load_time = None
     
     def load_excel_data(self) -> Dict:
-        """Excel verilerini yükle (cache'li)"""
-        if self.excel_data is None:
-            print("📥 Excel verileri yükleniyor...")
-            self.excel_data = excel_processor.read_excel_data(self.excel_url)
+        """GÜNCEL Excel verilerini yükle (cache'li)"""
+        current_time = datetime.now()
+        
+        # 5 dakikadan eskiyse yenile
+        if self.excel_data is None or self.last_load_time is None or \
+           (current_time - self.last_load_time).total_seconds() > 300:  # 5 dakika
+            
+            print("🔄 Güncel Excel yükleniyor...")
+            start_time = datetime.now()
+            self.excel_data = excel_processor.read_excel_data()  # Otomatik güncel bulur
+            self.last_load_time = current_time
+            
+            load_time = (datetime.now() - start_time).total_seconds()
+            print(f"✅ Excel yüklendi: {self.excel_data.get('total_symbols', 0)} sembol, {load_time:.2f}s")
+            print(f"📅 Excel tarihi: {self.excel_data.get('excel_date', 'bilinmiyor')}")
+        
         return self.excel_data
     
     def execute_query(self, query: str, query_type: str = "natural") -> Dict:
@@ -43,22 +56,36 @@ class QueryEngine:
                 return {
                     "success": False,
                     "error": "Sorgu anlaşılamadı",
-                    "parsed_query": parsed
+                    "parsed_query": parsed,
+                    "suggestions": [
+                        "Pearson55 > 0.85",
+                        "VMA pozitif",
+                        "Durum GÜÇLÜ POZİTİF",
+                        "BB alt bandına yakın hisseler"
+                    ]
                 }
             
-            # 2. Excel verilerini yükle
+            # 2. GÜNCEL Excel verilerini yükle
             excel_data = self.load_excel_data()
-            all_hisseler = excel_data.get("hisseler", {})
+            excel_date = excel_data.get("excel_date", "bilinmiyor")
             
-            # 3. Filtrele ve sırala
+            # 3. Tüm sembolleri birleştir (3 sayfa)
+            all_symbols = self.combine_all_symbols(excel_data)
+            
+            # 4. Filtrele ve sırala
             results = filter_engine.filter_and_sort(
-                all_hisseler=all_hisseler,
+                all_hisseler=all_symbols,
                 filters=parsed["filters"],
                 sort_config=parsed["sorting"],
                 limit=parsed["pagination"]["limit"]
             )
             
-            # 4. İstatistikleri hesapla
+            # 5. Sayfa bilgisi ekle
+            for result in results:
+                if "source_sheet" in result:
+                    result["sayfa"] = result["source_sheet"]
+            
+            # 6. İstatistikleri hesapla
             stats = self.calculate_stats(results, parsed["filters"])
             
             execution_time = (datetime.now() - start_time).total_seconds()
@@ -69,12 +96,13 @@ class QueryEngine:
                 "parsed_query": parsed,
                 "results": results,
                 "stats": stats,
-                "execution_time": execution_time,
                 "excel_info": {
-                    "total_hisses": len(all_hisseler),
-                    "excel_url": self.excel_url,
+                    "excel_date": excel_date,
+                    "total_symbols": excel_data.get("total_symbols", 0),
+                    "sheets_loaded": list(excel_data.get("sheets", {}).keys()),
                     "load_time": excel_data.get("load_time", 0)
-                }
+                },
+                "execution_time": execution_time
             }
             
         except Exception as e:
@@ -87,46 +115,95 @@ class QueryEngine:
                 "execution_time": (datetime.now() - start_time).total_seconds()
             }
     
+    def combine_all_symbols(self, excel_data: Dict) -> Dict:
+        """3 sayfanın tüm sembollerini birleştir"""
+        all_symbols = {}
+        
+        # 1. Sinyaller sayfası
+        if "Sinyaller" in excel_data.get("sheets", {}):
+            sinyaller = excel_data["sheets"]["Sinyaller"]["hisseler"]
+            for hisse_adi, hisse_veriler in sinyaller.items():
+                all_symbols[hisse_adi] = {
+                    **hisse_veriler,
+                    "source_sheet": "Sinyaller",
+                    "symbol_type": "hisse"
+                }
+        
+        # 2. ENDEKSLER sayfası
+        if "ENDEKSLER" in excel_data.get("sheets", {}):
+            endeksler = excel_data["sheets"]["ENDEKSLER"]["semboller"]
+            for sembol_adi, sembol_veriler in endeksler.items():
+                all_symbols[sembol_adi] = {
+                    **sembol_veriler,
+                    "source_sheet": "ENDEKSLER",
+                    "symbol_type": "endeks"
+                }
+        
+        # 3. FON_EMTIA_COIN_DOVIZ sayfası
+        if "FON_EMTIA_COIN_DOVIZ" in excel_data.get("sheets", {}):
+            fonlar = excel_data["sheets"]["FON_EMTIA_COIN_DOVIZ"]["semboller"]
+            for sembol_adi, sembol_veriler in fonlar.items():
+                all_symbols[sembol_adi] = {
+                    **sembol_veriler,
+                    "source_sheet": "FON_EMTIA_COIN_DOVIZ",
+                    "symbol_type": "fon_emtia"
+                }
+        
+        print(f"📊 3 sayfa birleştirildi: {len(all_symbols)} sembol")
+        return all_symbols
+    
     def calculate_stats(self, results: List[Dict], filters: List[Dict]) -> Dict:
         """İstatistikleri hesapla"""
         if not results:
-            return {}
+            return {
+                "count": 0,
+                "message": "Filtrelere uygun sembol bulunamadı"
+            }
         
         stats = {
             "count": len(results),
-            "avg_pearson55": 0,
-            "avg_close": 0,
-            "strong_positive": 0,
-            "neutral": 0,
-            "strong_negative": 0,
+            "by_sheet": {},
+            "by_type": {},
+            "field_stats": {}
         }
         
-        total_pearson = 0
-        total_close = 0
-        
+        # Sayfa ve tip dağılımı
         for result in results:
-            # Pearson ortalaması
-            pearson = result.get("Pearson55", 0)
-            if isinstance(pearson, (int, float)):
-                total_pearson += float(pearson)
+            sheet = result.get("source_sheet", "bilinmiyor")
+            sym_type = result.get("symbol_type", "bilinmiyor")
             
-            # Close ortalaması
-            close = result.get("Close", 0)
-            if isinstance(close, (int, float)):
-                total_close += float(close)
-            
-            # Durum sayıları
-            durum = str(result.get("DURUM", "")).upper()
-            if "GÜÇLÜ POZİTİF" in durum:
-                stats["strong_positive"] += 1
-            elif "NÖTR" in durum:
-                stats["neutral"] += 1
-            elif "GÜÇLÜ NEGATİF" in durum:
-                stats["strong_negative"] += 1
+            stats["by_sheet"][sheet] = stats["by_sheet"].get(sheet, 0) + 1
+            stats["by_type"][sym_type] = stats["by_type"].get(sym_type, 0) + 1
         
-        if stats["count"] > 0:
-            stats["avg_pearson55"] = round(total_pearson / stats["count"], 3)
-            stats["avg_close"] = round(total_close / stats["count"], 2)
+        # Alan istatistikleri (sadece Sinyaller için)
+        sinyaller_results = [r for r in results if r.get("source_sheet") == "Sinyaller"]
+        if sinyaller_results:
+            # Pearson ortalaması
+            pearson_values = []
+            close_values = []
+            
+            for result in sinyaller_results:
+                if "Pearson55" in result:
+                    try:
+                        pearson_values.append(float(result["Pearson55"]))
+                    except:
+                        pass
+                
+                if "Close" in result:
+                    try:
+                        close_values.append(float(result["Close"]))
+                    except:
+                        pass
+            
+            if pearson_values:
+                stats["field_stats"]["avg_pearson55"] = round(sum(pearson_values) / len(pearson_values), 3)
+                stats["field_stats"]["min_pearson55"] = round(min(pearson_values), 3)
+                stats["field_stats"]["max_pearson55"] = round(max(pearson_values), 3)
+            
+            if close_values:
+                stats["field_stats"]["avg_close"] = round(sum(close_values) / len(close_values), 2)
+                stats["field_stats"]["min_close"] = round(min(close_values), 2)
+                stats["field_stats"]["max_close"] = round(max(close_values), 2)
         
         return stats
     
@@ -138,6 +215,7 @@ class QueryEngine:
         
         results = result.get("results", [])
         stats = result.get("stats", {})
+        excel_info = result.get("excel_info", {})
         parsed = result.get("parsed_query", {})
         
         if not results:
@@ -147,61 +225,108 @@ class QueryEngine:
         
         # Başlık
         response_lines.append(f"📊 **SORGULAMA SONUÇLARI**")
-        response_lines.append("=" * 50)
+        response_lines.append("=" * 60)
+        
+        # Excel bilgisi
+        response_lines.append(f"📅 **Excel Tarihi:** {excel_info.get('excel_date', 'bilinmiyor')}")
+        response_lines.append(f"📈 **Toplam Sembol:** {excel_info.get('total_symbols', 0)} (3 sayfa)")
+        response_lines.append(f"⏱️ **Çalışma Süresi:** {result.get('execution_time', 0):.2f}s")
+        response_lines.append("")
         
         # İstatistikler
-        response_lines.append(f"• **Bulunan Hisse:** {stats.get('count', 0)}")
-        response_lines.append(f"• **Ortalama Pearson55:** {stats.get('avg_pearson55', 0)}")
-        response_lines.append(f"• **Ortalama Fiyat:** {stats.get('avg_close', 0)} TL")
-        response_lines.append(f"• **Güçlü Pozitif:** {stats.get('strong_positive', 0)}")
-        response_lines.append(f"• **Nötr:** {stats.get('neutral', 0)}")
-        response_lines.append(f"• **Güçlü Negatif:** {stats.get('strong_negative', 0)}")
-        response_lines.append(f"• **Çalışma Süresi:** {result.get('execution_time', 0):.2f}s")
+        response_lines.append(f"✅ **Bulunan Sembol:** {stats.get('count', 0)}")
+        
+        if "by_sheet" in stats:
+            response_lines.append("📋 **Sayfa Dağılımı:**")
+            for sheet, count in stats["by_sheet"].items():
+                response_lines.append(f"   • {sheet}: {count}")
+        
+        if "field_stats" in stats and stats["field_stats"]:
+            response_lines.append("📊 **İstatistikler (Sinyaller):**")
+            for field, value in stats["field_stats"].items():
+                response_lines.append(f"   • {field}: {value}")
+        
         response_lines.append("")
         
         # Hisse listesi (ilk 10)
-        response_lines.append("🏆 **EN İYİ 10 HİSSE:**")
+        response_lines.append("🏆 **EN İYİ 10 SONUÇ:**")
         response_lines.append("")
         
-        for i, hisse in enumerate(results[:10], 1):
-            hisse_adi = hisse.get("hisse", "N/A")
-            close = hisse.get("Close", "N/A")
-            pearson = hisse.get("Pearson55", "N/A")
-            vma = hisse.get("VMA trend algo", "N/A")
-            durum = hisse.get("DURUM", "N/A")
+        for i, sembol in enumerate(results[:10], 1):
+            sembol_adi = sembol.get("hisse", sembol.get("sembol", "N/A"))
+            sembol_type = sembol.get("symbol_type", "N/A")
+            sayfa = sembol.get("sayfa", sembol.get("source_sheet", "N/A"))
             
-            # Durum emojisi
-            durum_upper = str(durum).upper()
-            if "GÜÇLÜ POZİTİF" in durum_upper:
-                emoji = "🟢"
-            elif "POZİTİF" in durum_upper:
-                emoji = "🟢"
-            elif "GÜÇLÜ NEGATİF" in durum_upper:
-                emoji = "🔴"
-            elif "NEGATİF" in durum_upper:
-                emoji = "🔴"
-            elif "NÖTR" in durum_upper:
-                emoji = "🟡"
+            # Emoji
+            if sembol_type == "hisse":
+                emoji = "📈"
+            elif sembol_type == "endeks":
+                emoji = "📊"
+            elif sembol_type == "fon_emtia":
+                emoji = "💰"
             else:
-                emoji = "⚪"
+                emoji = "📌"
             
-            response_lines.append(f"{i}. **{hisse_adi}** {emoji}")
-            response_lines.append(f"   • Fiyat: **{close} TL**")
-            response_lines.append(f"   • Pearson55: **{pearson}**")
-            response_lines.append(f"   • VMA: {vma}")
-            response_lines.append(f"   • Durum: {durum}")
+            response_lines.append(f"{i}. **{sembol_adi}** {emoji} ({sayfa})")
             
-            # Bollinger alt bandına uzaklık
-            if "BB_LOWER" in hisse:
-                bb_lower = hisse.get("BB_LOWER", 0)
-                if isinstance(close, (int, float)) and isinstance(bb_lower, (int, float)) and bb_lower > 0:
-                    distance = ((close - bb_lower) / bb_lower) * 100
-                    response_lines.append(f"   • BB Alt Bandı: %{distance:.1f} uzak")
+            # Temel bilgiler
+            if "Close" in sembol:
+                response_lines.append(f"   • Fiyat: **{sembol['Close']} TL**")
+            
+            if "Pearson55" in sembol:
+                pearson = sembol["Pearson55"]
+                if isinstance(pearson, (int, float)):
+                    if pearson >= 0.85:
+                        pe_emoji = "🟢"
+                    elif pearson >= 0.70:
+                        pe_emoji = "🟡"
+                    else:
+                        pe_emoji = "🔴"
+                    response_lines.append(f"   • Pearson55: {pe_emoji} **{pearson}**")
+                else:
+                    response_lines.append(f"   • Pearson55: {pearson}")
+            
+            if "VMA trend algo" in sembol:
+                vma = str(sembol["VMA trend algo"])
+                if "POZİTİF" in vma.upper():
+                    vma_emoji = "📈"
+                elif "NEGATİF" in vma.upper():
+                    vma_emoji = "📉"
+                else:
+                    vma_emoji = "↔️"
+                response_lines.append(f"   • VMA: {vma_emoji} {vma}")
+            
+            if "DURUM" in sembol:
+                durum = str(sembol["DURUM"])
+                if "GÜÇLÜ POZİTİF" in durum.upper():
+                    durum_emoji = "🟢"
+                elif "POZİTİF" in durum.upper():
+                    durum_emoji = "🟢"
+                elif "GÜÇLÜ NEGATİF" in durum.upper():
+                    durum_emoji = "🔴"
+                elif "NEGATİF" in durum.upper():
+                    durum_emoji = "🔴"
+                elif "NÖTR" in durum.upper():
+                    durum_emoji = "🟡"
+                else:
+                    durum_emoji = "⚪"
+                response_lines.append(f"   • Durum: {durum_emoji} {durum}")
+            
+            # Bollinger Bandı uzaklığı
+            if "Close" in sembol and "BB_LOWER" in sembol:
+                try:
+                    close = float(sembol["Close"])
+                    bb_lower = float(sembol["BB_LOWER"])
+                    if bb_lower > 0:
+                        distance = ((close - bb_lower) / bb_lower) * 100
+                        response_lines.append(f"   • BB Alt Bandı: %{distance:.1f} uzak")
+                except:
+                    pass
             
             response_lines.append("")
         
         if len(results) > 10:
-            response_lines.append(f"⏩ **... ve {len(results) - 10} hisse daha**")
+            response_lines.append(f"⏩ **... ve {len(results) - 10} sembol daha**")
             response_lines.append("")
         
         # Filtre bilgisi
@@ -214,7 +339,7 @@ class QueryEngine:
                 value = f.get("value", "")
                 response_lines.append(f"• {field} {operator} {value}")
         else:
-            response_lines.append("• Tüm hisseler")
+            response_lines.append("• Tüm semboller")
         
         # Sıralama bilgisi
         sorting = parsed.get("sorting", {})
@@ -225,9 +350,10 @@ class QueryEngine:
         
         response_lines.append("")
         response_lines.append("💡 **Örnek sorgular:**")
-        response_lines.append("• `Pearson55 >= 0.85 ve VMA POZİTİF`")
-        response_lines.append("• `Regression kanalı pozitif olanlar`")
+        response_lines.append("• `Pearson55 >= 0.85`")
+        response_lines.append("• `VMA POZİTİF ve Durum GÜÇLÜ POZİTİF`")
         response_lines.append("• `BB alt bandına en yakın 10 hisse`")
+        response_lines.append("• `FROTO, THYAO, GARAN analizi`")
         
         return "\n".join(response_lines)
 
@@ -246,18 +372,24 @@ class QueryHandler(BaseHTTPRequestHandler):
         response = {
             "status": "online",
             "service": "BorsaAnaliz Query Engine",
-            "version": "1.0-alpha",
-            "endpoints": {
-                "POST /api/query": "Doğal dil sorgulama",
-                "POST /api/query/advanced": "Advanced JSON sorgulama"
+            "version": "2.0",
+            "guncel_ozellikler": {
+                "excel_okuma": "Güncel Excel otomatik bulma",
+                "sayfalar": "3 sayfa tam okuma (Sinyaller, ENDEKSLER, FON_EMTIA)",
+                "filtreler": "Pearson, VMA, Durum, BB, EMA filtreleri",
+                "siralama": "Çoklu sıralama seçenekleri",
+                "cache": "5 dakika cache, 1 saat Excel cache"
             },
-            "capabilities": [
-                "Pearson55/144/233 filtreleme",
-                "VMA trend analizi",
-                "Regression kanalı filtreleme",
-                "Bollinger Bandı analizi",
-                "EMA trend analizi",
-                "Doğal Türkçe sorgu"
+            "endpoints": {
+                "GET /api/query": "Sistem durumu (bu sayfa)",
+                "POST /api/query": "Doğal dil sorgulama",
+                "POST /api/query?type=advanced": "Advanced JSON sorgulama"
+            },
+            "ornek_sorgular": [
+                {"query": "Pearson55 > 0.85", "aciklama": "Yüksek korelasyonlu hisseler"},
+                {"query": "VMA POZİTİF ve Durum GÜÇLÜ POZİTİF", "aciklama": "Güçlü trend"},
+                {"query": "BB alt bandına en yakın 5 hisse", "aciklama": "Destek seviyesi"},
+                {"query": "EMA_8 > EMA_21 > EMA_55", "aciklama": "Güçlü yükseliş trendi"}
             ]
         }
         
@@ -293,15 +425,16 @@ class QueryHandler(BaseHTTPRequestHandler):
                 "query": query,
                 "response": formatted_response,
                 "stats": result.get("stats", {}),
+                "excel_info": result.get("excel_info", {}),
                 "execution_time": result.get("execution_time", 0),
                 "result_count": len(result.get("results", [])),
-                "engine_version": "1.0-alpha",
+                "engine_version": "2.0",
                 "timestamp": datetime.now().isoformat()
             }
             
             # Raw results için (debug)
             if data.get("debug", False):
-                response_data["raw_results"] = result.get("results", [])
+                response_data["raw_results"] = result.get("results", [])[:5]  # İlk 5
                 response_data["parsed_query"] = result.get("parsed_query", {})
             
             # Yanıtı gönder
