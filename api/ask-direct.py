@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # /api/ask-direct.py
 # BorsaAnaliz AI - Doğrudan Excel Analiz Sistemi
-# Versiyon: 4.1 (XU100 Fix + Genel Sorular Dahil)
+# Versiyon: 4.1 (XU100 Fix + Genel Sorular Dahil) - DÜZELTİLMİŞ!
 
 from http.server import BaseHTTPRequestHandler
 import json
@@ -323,7 +323,7 @@ def get_nasil_cevabı():
 
 **Adım 1: Veri Toplama**
 • Her akşam güncel Excel raporunu indiririm
-• 630+ hissenin teknik verilerini okurum
+• 630+ hissenin teknik verilerini okurım
 • VMA, EMA, Pivot, Bollinger Bant verilerini alırım
 
 **Adım 2: Hisse Bulma**
@@ -528,8 +528,8 @@ class handler(BaseHTTPRequestHandler):
             question_type = analyze_question_type(question)
             print(f"🔍 Soru tipi: {question_type}")
             
-            # 3. ÖZEL SORU TİPLERİ için direkt cevap
-            if question_type in ["teşekkür", "sistem", "teknik", "nasil"]:
+            # 3. ÖZEL SORU TİPLERİ için direkt cevap - DÜZELTİLDİ!
+            if question_type in ["teşekkür", "sistem", "teknik", "nasil", "genel_borsa"]:
                 print(f"✅ Özel cevap hazırlanıyor: {question_type}")
                 
                 if question_type == "teşekkür":
@@ -540,6 +540,19 @@ class handler(BaseHTTPRequestHandler):
                     answer = get_teknik_cevabı(question)
                 elif question_type == "nasil":
                     answer = get_nasil_cevabı()
+                elif question_type == "genel_borsa":
+                    # Excel verilerini al
+                    print("🔍 Güncel Excel bulunuyor ve okunuyor...")
+                    excel_start = datetime.now()
+                    try:
+                        excel_result = excel_processor.read_excel_data()
+                        excel_time = (datetime.now() - excel_start).total_seconds()
+                        excel_date = excel_result.get("excel_date", "bilinmiyor")
+                        print(f"✅ Excel okundu: {excel_result.get('total_symbols', 0)} sembol, {excel_time:.2f}s")
+                        answer = get_genel_borsa_cevabı(excel_result)
+                    except Exception as e:
+                        print(f"❌ Excel okuma hatası: {str(e)}")
+                        answer = "📊 Borsa genel durumu için Excel verileri yüklenemedi."
                 
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json; charset=utf-8')
@@ -548,7 +561,7 @@ class handler(BaseHTTPRequestHandler):
                 result = json.dumps({
                     "success": True,
                     "answer": answer,
-                    "excel_data_used": False,
+                    "excel_data_used": question_type == "genel_borsa",
                     "question_type": question_type,
                     "timestamp": datetime.now().isoformat()
                 }, ensure_ascii=False)
@@ -556,9 +569,9 @@ class handler(BaseHTTPRequestHandler):
                 self.wfile.write(result.encode('utf-8'))
                 print(f"📤 Özel yanıt gönderildi: {question_type}")
                 print("="*70 + "\n")
-                return
+                return  # ⬅️ BU ÇOK ÖNEMLİ! RETURN EKLENDİ!
             
-            # 4. EXCEL'DEN VERİ AL (GÜNCEL)
+            # 4. EXCEL'DEN VERİ AL (GÜNCEL) - Normal hisse analizleri için
             print("🔍 Güncel Excel bulunuyor ve okunuyor...")
             excel_start = datetime.now()
             
@@ -589,30 +602,6 @@ class handler(BaseHTTPRequestHandler):
                 }, ensure_ascii=False)
                 
                 self.wfile.write(result.encode('utf-8'))
-                return
-            
-            # 5. GENEL BORSA SORUSU ise özel cevap
-            if question_type == "genel_borsa":
-                print("📊 Genel borsa sorusu işleniyor...")
-                answer = get_genel_borsa_cevabı(excel_result)
-                
-                self.send_response(200)
-                self.send_header('Content-type', 'application/json; charset=utf-8')
-                self.end_headers()
-                
-                result = json.dumps({
-                    "success": True,
-                    "answer": answer,
-                    "excel_data_used": True,
-                    "question_type": "genel_borsa",
-                    "excel_date": excel_date,
-                    "total_symbols": excel_result.get("total_symbols", 0),
-                    "timestamp": datetime.now().isoformat()
-                }, ensure_ascii=False)
-                
-                self.wfile.write(result.encode('utf-8'))
-                print(f"📤 Genel borsa yanıtı gönderildi")
-                print("="*70 + "\n")
                 return
             
             # 6. SORUYU EXCEL VERİLERİNDE ARA (3 SAYFADA)
@@ -740,7 +729,7 @@ class handler(BaseHTTPRequestHandler):
 **EXCEL'DE MEVCUT OLANLAR (3 SAYFA):**
 • **Sinyaller:** 630+ hisse senedi (A1CAP, FROTO, THYAO, TUPRS, SASA, EREGL, KCHOL, ASELS, GARAN, BIMAS vb.)
 • **ENDEKSLER:** BIST endeksleri (XTEKS, XULAS, XU serisi vb.)
-• **FON_EMTIA_COIN_DOVIZ:** Döviz, emtia, kripto para (GMSTR, ALTIN, USD, EUR, BTC, ETH vb.)
+• **FON_EMTIA_COIN_DOVİZ:** Döviz, emtia, kripto para (GMSTR, ALTIN, USD, EUR, BTC, ETH vb.)
 
 **Lütfen:**
 1. Sembol adını doğru yazın
