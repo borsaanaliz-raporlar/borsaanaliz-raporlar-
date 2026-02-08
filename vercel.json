@@ -1,8 +1,16 @@
 {
   "rewrites": [
     {
+      "source": "/api/query",
+      "destination": "/api/query.js"  # Sadece .js'ye yönlendir
+    },
+    {
+      "source": "/api/ask",
+      "destination": "/api/ask-direct.py"  # .py'ye yönlendir
+    },
+    {
       "source": "/api/(.*)",
-      "destination": "/api/$1.py"
+      "destination": "/api/$1.py"  # Diğer her şey .py'ye
     }
   ]
 }
