@@ -15,7 +15,7 @@ class ExcelProcessor:
     
     def __init__(self):
         self.cache_dir = "/tmp/borsa_cache"
-        self.cache_duration = 3600  # 1 saat cache
+        self.cache_duration = 7200  # 2 saat cache
         os.makedirs(self.cache_dir, exist_ok=True)
     
     def find_latest_excel(self) -> tuple:
