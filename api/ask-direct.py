@@ -152,7 +152,7 @@ def get_endeks_cevabı(endeks_adi="XU100"):
 **Önemli Endeksler:**
 • **XU100:** Büyük şirketler
 • **XU30:** En büyük 30 şirket
-• **XTUSY:** Tüm hisseler
+• **XUTUM:** Tüm hisseler
 
 Detaylı hisse analizi için hisse adı yazın: "GARAN analiz et" """
 
