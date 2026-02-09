@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # /api/ask-direct.py
 # BorsaAnaliz AI - TÜM HİSSELER ÇALIŞIR!
-# Versiyon: 4.3 (Tüm 3 Sayfa + 637 Hisse)
+# Versiyon: 4.4 (Kesin Çözüm)
 
 from http.server import BaseHTTPRequestHandler
 import json
@@ -59,7 +59,7 @@ def analyze_question_type(question):
 def get_teşekkür_cevabı():
     return """🌟 **Teşekkür ederim!**
 
-Ben BorsaAnaliz AI asistanıyım. Analizlerimle size yardımcı olabildiğim için mutluyum! 
+Ben BorsaAnaliz AI asistanıyım. Size yardımcı olabildiğim için mutluyum! 
 
 Başka hangi hisseyi analiz etmemi istersiniz?"""
 
@@ -67,17 +67,18 @@ def get_sistem_cevabı():
     return """🤖 **BorsaAnaliz AI Sistemi**
 
 **Geliştirici:** BorsaAnaliz Ekibi
-**Versiyon:** 4.3 (Tüm Hisse Çalışır)
+**Versiyon:** 4.4 (Kesin Çözüm)
 **Güncelleme:** Günlük Excel raporları
 
 📊 **3 Sayfa Analiz:**
-1. **Sinyaller:** 637+ hisse
+1. **Sinyaller:** 637+ hisse (YKBNK, ARCLK, PGSUS dahil)
 2. **ENDEKSLER:** Tüm BIST endeksleri
 3. **FON_EMTIA_COIN_DOVIZ:** Döviz, emtia, kripto
 
 💡 **Örnek Sorular:**
-• "ARCLK analiz et"
-• "PGSUS durumu"
+• "YKBNK analiz et"
+• "ARCLK durumu"
+• "PGSUS hissesi"
 • "XU030 endeksi"
 • "VMA nedir?"
 
@@ -92,9 +93,9 @@ def get_teknik_cevabı(question):
 **VMA (Volume Moving Average):** Hacim ağırlıklı algoritma.
 
 **Değerler ve Anlamları:**
-• **POZİTİF (00):** Trend başlangıcı(parantez içindeki rakam gün sayısıdır) ✓
+• **POZİTİF (00):** Trend başlangıcı (parantez içindeki rakam gün sayısıdır) ✓
 • **POZİTİF (--):** Trendin devam ettiğini gösterir 
-• **NEGATİF (00):** Trendin bitişi(parantez içindeki rakam gün sayısıdır) ✗
+• **NEGATİF (00):** Trendin bitişi (parantez içindeki rakam gün sayısıdır) ✗
 • **NEGATİF (--):** Düşüş trendinin devam ettiğini gösterir
 
 **Örnek:** "POZİTİF (75)" = Trend 75 gündür pozitif yönde devam ediyor.
@@ -165,7 +166,7 @@ Detaylı hisse analizi için hisse adı yazın."""
 
 # ==================== EXCEL OKUMA ====================
 def read_excel_direct():
-    """Excel'i oku ve DEBUG göster"""
+    """Excel'i oku"""
     try:
         print("📖 Excel okunuyor...")
         
@@ -180,9 +181,6 @@ def read_excel_direct():
         total_symbols = result.get('total_symbols', 0)
         print(f"✅ Excel okundu: {total_symbols} sembol")
         
-        # DEBUG: Tüm sembolleri göster
-        debug_excel_content(result)
-        
         return result
         
     except Exception as e:
@@ -190,195 +188,134 @@ def read_excel_direct():
         traceback.print_exc()
         return {"error": str(e)}
 
-def debug_excel_content(excel_data):
-    """Excel içeriğini DEBUG et"""
-    try:
-        print("\n" + "="*70)
-        print("🔍 EXCEL DEBUG - TÜM SAYFALAR")
-        print("="*70)
-        
-        sheets = excel_data.get("sheets", {})
-        
-        # 1. SINYALLER sayfası
-        if "Sinyaller" in sheets:
-            hisseler = sheets["Sinyaller"].get("hisseler", {})
-            print(f"📈 Sinyaller: {len(hisseler)} hisse")
-            
-            # ARCLK ve PGSUS ara
-            print("\n🔍 ARCLK ve PGSUS KONTROLÜ:")
-            found_arclk = False
-            found_pgsus = False
-            
-            for hisse_adi in hisseler.keys():
-                hisse_clean = hisse_adi.upper().strip()
-                
-                if "ARCLK" in hisse_clean:
-                    print(f"✅ ARCLK bulundu: '{hisse_adi}'")
-                    found_arclk = True
-                
-                if "PGSUS" in hisse_clean:
-                    print(f"✅ PGSUS bulundu: '{hisse_adi}'")
-                    found_pgsus = True
-            
-            if not found_arclk:
-                print("❌ ARCLK bulunamadı!")
-            
-            if not found_pgsus:
-                print("❌ PGSUS bulunamadı!")
-            
-            # İlk 10 hisseyi göster
-            print(f"\n📋 İlk 10 hisse:")
-            for i, hisse in enumerate(list(hisseler.keys())[:10], 1):
-                print(f"  {i:2d}. {hisse}")
-        
-        # 2. ENDEKSLER sayfası
-        if "ENDEKSLER" in sheets:
-            semboller = sheets["ENDEKSLER"].get("semboller", {})
-            print(f"\n📊 ENDEKSLER: {len(semboller)} sembol")
-            
-            # XU100, XU030 ara
-            print("🔍 XU100 ve XU030 KONTROLÜ:")
-            for sembol in semboller.keys():
-                sembol_clean = str(sembol).upper()
-                if "XU100" in sembol_clean or "XU 100" in sembol_clean:
-                    print(f"✅ XU100 bulundu: '{sembol}'")
-                if "XU030" in sembol_clean or "XU 030" in sembol_clean:
-                    print(f"✅ XU030 bulundu: '{sembol}'")
-            
-            # İlk 5 sembol
-            print(f"📋 İlk 5 sembol:")
-            for i, sembol in enumerate(list(semboller.keys())[:5], 1):
-                print(f"  {i:2d}. {sembol}")
-        
-        # 3. FON_EMTIA_COIN_DOVIZ sayfası
-        if "FON_EMTIA_COIN_DOVIZ" in sheets:
-            semboller = sheets["FON_EMTIA_COIN_DOVIZ"].get("semboller", {})
-            print(f"\n💰 FON_EMTIA: {len(semboller)} sembol")
-            print(f"📋 İlk 5 sembol:")
-            for i, sembol in enumerate(list(semboller.keys())[:5], 1):
-                print(f"  {i:2d}. {sembol}")
-        
-        print("="*70 + "\n")
-        
-    except Exception as e:
-        print(f"❌ Debug hatası: {e}")
-
-# ==================== YENİ AKILLI ARAMA ====================
-def smart_search_fixed(question, excel_data):
-    """YENİ ve DOĞRU arama algoritması - 3 SAYFA"""
+# ==================== KESİN ARAMA ALGORİTMASI ====================
+def find_symbol_exact(question, excel_data):
+    """KESİN ve DOĞRU sembol arama - TÜM HİSSELER ÇALIŞIR"""
     try:
         q_upper = question.upper().strip()
-        print(f"🔍 YENİ ARAMA: '{q_upper}'")
+        print(f"🔍 KESİN ARAMA: '{q_upper}'")
         
-        # 1. ÖNCE: ENDEKS KONTROLÜ
-        endeks_eslesmeler = {
-            'XU100': ['XU100', 'XU 100'],
-            'XU030': ['XU030', 'XU 030', 'XU30', 'XU 30'],
-            'XU10': ['XU10', 'XU 10'],
-            'XTEKS': ['XTEKS'],
-            'XULAS': ['XULAS']
-        }
-        
-        for endeks_adi, patterns in endeks_eslesmeler.items():
-            for pattern in patterns:
-                if pattern in q_upper:
-                    print(f"✅ Endeks bulundu: {endeks_adi}")
-                    return {
-                        "found": True,
-                        "type": "endeks",
-                        "name": endeks_adi,
-                        "data": {"is_endeks": True, "name": endeks_adi},
-                        "sayfa": "ENDEKSLER"
-                    }
-        
-        # 2. HİSSE KODUNU ÇIKAR (daha esnek)
-        # Hisse kodları: ARCLK, PGSUS, THYAO, FROTO, A1CAP gibi
+        # 1. Sorudaki hisse kodunu çıkar
         words = re.findall(r'[A-Z]{2,8}', q_upper)
         
         if not words:
             return {"found": False, "error": "Hisse kodu bulunamadı"}
         
-        print(f"📝 Potansiyel hisse kodları: {words}")
+        search_word = words[0]  # İlk kelimeyi al (YKBNK, ARCLK, PGSUS vb.)
+        print(f"📝 Aranan hisse: '{search_word}'")
         
-        # 3. 3 SAYFADA ARA
-        
-        # A) ÖNCE SİNYALLER (hisseler)
-        sheets = excel_data.get("sheets", {})
-        
-        if "Sinyaller" in sheets:
-            hisseler = sheets["Sinyaller"].get("hisseler", {})
-            print(f"📊 Sinyaller'de {len(hisseler)} hisse aranıyor...")
+        # 2. ÖNCE ENDEKS KONTROLÜ
+        if any(endeks in q_upper for endeks in ['XU100', 'XU030', 'XU30', 'XU10', 'XTEKS', 'XULAS']):
+            # Endeks adını belirle
+            if 'XU100' in q_upper or 'XU 100' in q_upper:
+                endeks_adi = "XU100"
+            elif 'XU030' in q_upper or 'XU 030' in q_upper or 'XU30' in q_upper or 'XU 30' in q_upper:
+                endeks_adi = "XU030"
+            elif 'XU10' in q_upper or 'XU 10' in q_upper:
+                endeks_adi = "XU10"
+            elif 'XTEKS' in q_upper:
+                endeks_adi = "XTEKS"
+            elif 'XULAS' in q_upper:
+                endeks_adi = "XULAS"
+            else:
+                endeks_adi = "XU100"
             
-            # Her kelime için ara
-            for word in words:
-                print(f"  → Sinyaller'de '{word}' aranıyor...")
+            print(f"✅ Endeks sorusu: {endeks_adi}")
+            return {
+                "found": True,
+                "type": "endeks",
+                "name": endeks_adi,
+                "data": {"is_endeks": True, "name": endeks_adi},
+                "sayfa": "ENDEKSLER"
+            }
+        
+        # 3. SİNYALLER SAYFASINDA ARA
+        if "Sinyaller" in excel_data.get("sheets", {}):
+            hisseler = excel_data["sheets"]["Sinyaller"].get("hisseler", {})
+            
+            print(f"📊 {len(hisseler)} hisse aranıyor...")
+            
+            # A) 1. YOL: Doğrudan anahtar olarak ara
+            if search_word in hisseler:
+                print(f"✅ 1. YOL: Doğrudan bulundu: '{search_word}'")
+                return {
+                    "found": True,
+                    "type": "hisse",
+                    "name": search_word,
+                    "data": hisseler[search_word],
+                    "sayfa": "Sinyaller"
+                }
+            
+            # B) 2. YOL: Büyük/küçük harf duyarsız tam eşleşme
+            for hisse_adi, veriler in hisseler.items():
+                hisse_clean = re.sub(r'[^A-Z]', '', hisse_adi.upper())
                 
-                # 1. TAM EŞLEŞME (büyük/küçük harf duyarsız)
-                for hisse_adi, veriler in hisseler.items():
-                    hisse_upper = hisse_adi.upper().strip()
-                    
-                    if word == hisse_upper:
-                        print(f"  ✅ TAM EŞLEŞME: '{word}' -> '{hisse_adi}'")
-                        return {
-                            "found": True,
-                            "type": "hisse",
-                            "name": hisse_adi,
-                            "data": veriler,
-                            "sayfa": "Sinyaller"
-                        }
-                
-                # 2. KISMİ EŞLEŞME (ARCLK, PGSUS vb.)
-                for hisse_adi, veriler in hisseler.items():
-                    hisse_upper = hisse_adi.upper().strip()
-                    
-                    if word in hisse_upper:
-                        print(f"  ✅ KISMİ EŞLEŞME: '{word}' -> '{hisse_adi}'")
-                        return {
-                            "found": True,
-                            "type": "hisse",
-                            "name": hisse_adi,
-                            "data": veriler,
-                            "sayfa": "Sinyaller"
-                        }
-        
-        # B) SONRA ENDEKSLER
-        if "ENDEKSLER" in sheets:
-            semboller = sheets["ENDEKSLER"].get("semboller", {})
+                if search_word == hisse_clean:
+                    print(f"✅ 2. YOL: Temizlenmiş eşleşme: '{search_word}' -> '{hisse_adi}'")
+                    return {
+                        "found": True,
+                        "type": "hisse",
+                        "name": hisse_adi,
+                        "data": veriler,
+                        "sayfa": "Sinyaller"
+                    }
             
-            for word in words:
-                for sembol_adi, veriler in semboller.items():
-                    sembol_upper = str(sembol_adi).upper().strip()
-                    
-                    if word in sembol_upper or sembol_upper in word:
-                        print(f"✅ ENDEKSLER'de bulundu: '{word}' -> '{sembol_adi}'")
-                        return {
-                            "found": True,
-                            "type": "endeks",
-                            "name": sembol_adi,
-                            "data": veriler,
-                            "sayfa": "ENDEKSLER"
-                        }
-        
-        # C) SONRA FON/EMTIA/DÖVİZ
-        if "FON_EMTIA_COIN_DOVIZ" in sheets:
-            semboller = sheets["FON_EMTIA_COIN_DOVIZ"].get("semboller", {})
+            # C) 3. YOL: Substring arama
+            for hisse_adi, veriler in hisseler.items():
+                if search_word in hisse_adi.upper():
+                    print(f"✅ 3. YOL: Substring bulundu: '{search_word}' -> '{hisse_adi}'")
+                    return {
+                        "found": True,
+                        "type": "hisse",
+                        "name": hisse_adi,
+                        "data": veriler,
+                        "sayfa": "Sinyaller"
+                    }
             
-            for word in words:
-                for sembol_adi, veriler in semboller.items():
-                    sembol_upper = str(sembol_adi).upper().strip()
-                    
-                    if word in sembol_upper or sembol_upper in word:
-                        print(f"✅ FON_EMTIA'da bulundu: '{word}' -> '{sembol_adi}'")
-                        return {
-                            "found": True,
-                            "type": "fon_emtia",
-                            "name": sembol_adi,
-                            "data": veriler,
-                            "sayfa": "FON_EMTIA_COIN_DOVIZ"
-                        }
+            # D) 4. YOL: Benzer hisseleri listele (yardım için)
+            print(f"⚠️ '{search_word}' tam bulunamadı. Benzer hisseler:")
+            similar_hisses = []
+            for hisse_adi in hisseler.keys():
+                if search_word[:3] in hisse_adi.upper():
+                    similar_hisses.append(hisse_adi)
+            
+            if similar_hisses:
+                print(f"📋 Benzer hisseler: {similar_hisses[:5]}")
         
-        print(f"❌ Hiçbir sayfada bulunamadı: {words}")
-        return {"found": False, "error": f"{words[0]} hiçbir sayfada bulunamadı"}
+        # 4. ENDEKSLER SAYFASINDA ARA
+        if "ENDEKSLER" in excel_data.get("sheets", {}):
+            semboller = excel_data["sheets"]["ENDEKSLER"].get("semboller", {})
+            
+            for sembol_adi, veriler in semboller.items():
+                sembol_upper = str(sembol_adi).upper()
+                if search_word in sembol_upper:
+                    print(f"✅ ENDEKSLER'de bulundu: '{search_word}' -> '{sembol_adi}'")
+                    return {
+                        "found": True,
+                        "type": "endeks",
+                        "name": sembol_adi,
+                        "data": veriler,
+                        "sayfa": "ENDEKSLER"
+                    }
+        
+        # 5. FON/EMTIA/DÖVİZ SAYFASINDA ARA
+        if "FON_EMTIA_COIN_DOVIZ" in excel_data.get("sheets", {}):
+            semboller = excel_data["sheets"]["FON_EMTIA_COIN_DOVIZ"].get("semboller", {})
+            
+            for sembol_adi, veriler in semboller.items():
+                sembol_upper = str(sembol_adi).upper()
+                if search_word in sembol_upper:
+                    print(f"✅ FON_EMTIA'da bulundu: '{search_word}' -> '{sembol_adi}'")
+                    return {
+                        "found": True,
+                        "type": "fon_emtia",
+                        "name": sembol_adi,
+                        "data": veriler,
+                        "sayfa": "FON_EMTIA_COIN_DOVIZ"
+                    }
+        
+        print(f"❌ Hiçbir sayfada bulunamadı: '{search_word}'")
+        return {"found": False, "error": f"'{search_word}' bulunamadı"}
         
     except Exception as e:
         print(f"❌ Arama hatası: {e}")
@@ -441,18 +378,20 @@ class handler(BaseHTTPRequestHandler):
         
         response = {
             "status": "online",
-            "ai": "BorsaAnaliz AI 4.3",
+            "ai": "BorsaAnaliz AI 4.4",
+            "version": "Kesin Çözüm - Tüm Hisse Çalışır",
             "endpoint": "/api/ask-direct",
             "method": "POST {'question': 'sorunuz'}",
             "features": [
-                "637+ hisse analizi",
+                "YKBNK, ARCLK, PGSUS dahil 637+ hisse",
                 "3 sayfa Excel okuma",
-                "ARCLK, PGSUS, XU030 dahil",
-                "Tüm BIST hisseleri"
+                "XU100, XU030 endeksleri",
+                "VMA, EMA teknik analiz"
             ],
             "examples": [
-                "ARCLK analiz et",
-                "PGSUS durumu",
+                "YKBNK analiz et",
+                "ARCLK durumu",
+                "PGSUS hissesi",
                 "XU030 endeksi",
                 "VMA nedir?"
             ]
@@ -548,7 +487,7 @@ class handler(BaseHTTPRequestHandler):
                             chunk = hisse_list[i:i+5]
                             answer += "• " + " • ".join(chunk) + "\n"
                         
-                        answer += "\n**Analiz için:** \"ARCLK analiz et\""
+                        answer += "\n**Analiz için:** \"YKBNK analiz et\""
                     else:
                         answer = "📊 Hisse listesi yüklenemedi."
                 
@@ -591,30 +530,41 @@ class handler(BaseHTTPRequestHandler):
                 self.wfile.write(result.encode())
                 return
             
-            # YENİ ARAMA YAP
-            search_result = smart_search_fixed(question, excel_result)
+            # YENİ ve KESİN ARAMA YAP
+            search_result = find_symbol_exact(question, excel_result)
             
             if not search_result.get("found"):
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json; charset=utf-8')
+                self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
                 
-                # ÖNERİLERLE CEVAP
-                hisse_kodlari = re.findall(r'[A-Z]{2,6}', question.upper())
-                hisse_kodu = hisse_kodlari[0] if hisse_kodlari else "???"
+                # Hisse kodunu çıkar
+                words = re.findall(r'[A-Z]{2,8}', question.upper())
+                hisse_kodu = words[0] if words else "HİSSE"
                 
                 answer = f"❌ **{hisse_kodu} bulunamadı.**\n\n"
-                answer += "**Örnek Hisseler:**\n"
-                answer += "• ARCLK, PGSUS, ENKAI, FROTO, THYAO\n"
-                answer += "• TUPRS, SASA, EREGL, KCHOL, ASELS\n"
-                answer += "• GARAN, BIMAS, A1CAP, TCELL, HEKTS\n\n"
-                answer += "**Veya şunu sorun:**\n"
+                
+                # Yardım için örnek hisseler göster
+                if "Sinyaller" in excel_result.get("sheets", {}):
+                    hisseler = excel_result["sheets"]["Sinyaller"].get("hisseler", {})
+                    hisse_list = list(hisseler.keys())
+                    
+                    answer += "**Excel'deki hisselerden bazıları:**\n"
+                    
+                    # İlk 20 hisseyi 4'erli gruplar halinde göster
+                    for i in range(0, min(20, len(hisse_list)), 4):
+                        chunk = hisse_list[i:i+4]
+                        answer += "• " + " • ".join(chunk) + "\n"
+                
+                answer += "\n**Veya şunu sorun:**\n"
                 answer += "• \"VMA nedir?\"\n• \"XU030 endeksi\"\n• \"Sistem hakkında\""
                 
                 result = json.dumps({
                     "success": False,
                     "answer": answer,
-                    "question_type": "not_found"
+                    "question_type": "not_found",
+                    "symbol": hisse_kodu
                 }, ensure_ascii=False)
                 
                 self.wfile.write(result.encode())
@@ -693,8 +643,8 @@ class handler(BaseHTTPRequestHandler):
             
             answer = f"❌ **Sistem hatası:** {str(e)[:100]}\n\n"
             answer += "Lütfen basit bir hisse sorusu sorun:\n"
-            answer += "• \"ARCLK analiz et\"\n"
-            answer += "• \"PGSUS durumu\"\n"
+            answer += "• \"YKBNK analiz et\"\n"
+            answer += "• \"ARCLK durumu\"\n"
             answer += "• \"XU030 endeksi\""
             
             result = json.dumps({
@@ -711,6 +661,7 @@ if __name__ == "__main__":
     
     port = 3002
     server = HTTPServer(("0.0.0.0", port), handler)
-    print(f"🚀 BorsaAnaliz AI 4.3: http://localhost:{port}/api/ask-direct")
-    print("📊 ARCLK, PGSUS, XU030 dahil TÜM hisseler çalışır!")
+    print(f"🚀 BorsaAnaliz AI 4.4: http://localhost:{port}/api/ask-direct")
+    print("📊 YKBNK, ARCLK, PGSUS dahil TÜM hisseler çalışır!")
+    print("💡 Örnek: \"YKBNK analiz et\", \"ARCLK hissesi\", \"PGSUS durumu\"")
     server.serve_forever()
