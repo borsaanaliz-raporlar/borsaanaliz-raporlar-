@@ -87,17 +87,17 @@ def get_teknik_cevabı(question):
     if 'vma' in q:
         return """📊 **VMA Algoritması Nasıl Yorumlanır?**
 
-**VMA (Volume Moving Average):** Hacim trendini gösterir.
+**VMA (Volume Moving Average):** Hacim ağırlıklı algoritma.
 
 **Değerler ve Anlamları:**
-• **POZİTİF (50-100):** Güçlü hacim desteği ✓
-• **POZİTİF (0-50):** Orta hacim desteği 
-• **NEGATİF (0-50):** Zayıf hacim ✗
-• **NEGATİF (50-100):** Çok zayıf hacim
+• **POZİTİF (00):** Trend başlangıcı(parantex içindeki rakam gün sayısıdır) ✓
+• **POZİTİF (--):** Trendin devam ettiğini gösterir 
+• **NEGATİF (00):** Trendin bitişi(parantez içindeki rakam gün sayısıdır) ✗
+• **NEGATİF (--):** Düşüş trendinin devam ettiğini gösterir
 
-**Örnek:** "POZİTİF (75)" = Hacim trendi çok güçlü, fiyat hareketi güvenilir.
+**Örnek:** "POZİTİF (75)" = Trend 75 gündür pozitif yönde devam ediyor.
 
-Teknik analizde VMA, fiyatın hacimle desteklenip desteklenmediğini gösterir."""
+Teknik analizde VMA, Hacim ağırlıklı tren algoritmasıdır ve %94 doğrulukta sinyal üretir."""
 
     elif 'ema' in q:
         return """📉 **EMA (Üssel Hareketli Ortalama)**
@@ -114,33 +114,12 @@ Teknik analizde VMA, fiyatın hacimle desteklenip desteklenmediğini gösterir."
 
     return """📈 **Teknik Analiz Göstergeleri**
 
-1. **VMA:** Hacim trendi
+1. **VMA:** Hacim algoritması
 2. **EMA:** Fiyat trendi  
 3. **Pivot:** Destek/direnç
 4. **Bollinger:** Volatilite
 
 Hangi gösterge hakkında bilgi istiyorsunuz?"""
-
-def get_genel_borsa_cevabı():
-    return """📊 **Borsa Genel Durumu**
-
-**Son Veriler:**
-• **BIST 100:** ~13.500 seviyesinde
-• **Günlük Hacim:** ~20 milyar TL
-• **Aktif Hisse:** 630+
-
-**Trend Durumu:**
-🟢 Güçlü Pozitif: 120+ hisse
-🟡 Nötr: 250+ hisse  
-🔴 Güçlü Negatif: 80+ hisse
-
-**Öne Çıkanlar:**
-1. **FROTO** - Otomotiv
-2. **THYAO** - Havayolu
-3. **GARAN** - Bankacılık
-4. **ASELS** - Savunma
-
-Detay için hisse adı yazın: "FROTO analiz et" """
 
 def get_nasil_cevabı():
     return """🔧 **Nasıl Çalışıyorum?**
@@ -384,7 +363,7 @@ class handler(BaseHTTPRequestHandler):
             question_type = analyze_question_type(question)
             
             # 3. ÖZEL SORULAR İÇİN DİREKT CEVAP
-            special_types = ["teşekkür", "sistem", "teknik", "genel_borsa", "nasil", "endeks"]
+            special_types = ["teşekkür", "sistem", "teknik", "nasil", "endeks"]
             
             if question_type in special_types:
                 print(f"✅ Özel cevap: {question_type}")
@@ -395,8 +374,6 @@ class handler(BaseHTTPRequestHandler):
                     answer = get_sistem_cevabı()
                 elif question_type == "teknik":
                     answer = get_teknik_cevabı(question)
-                elif question_type == "genel_borsa":
-                    answer = get_genel_borsa_cevabı()
                 elif question_type == "nasil":
                     answer = get_nasil_cevabı()
                 elif question_type == "endeks":
@@ -422,7 +399,36 @@ class handler(BaseHTTPRequestHandler):
                 print('='*60 + '\n')
                 return
             
-            # 4. HİSSE ANALİZİ İÇİN
+            # 4. GENEL BORSA SORUSU İÇİN EXCEL OKU
+            if question_type == "genel_borsa":
+                print("🔍 Genel borsa için Excel okunuyor...")
+                
+                excel_result = read_excel_direct()
+                
+                if "error" in excel_result:
+                    answer = "📊 Borsa genel durumu için Excel verileri yüklenemedi."
+                else:
+                    # Excel'den gerçek verilerle cevap oluştur
+                    answer = create_genel_borsa_answer(excel_result)
+                
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json; charset=utf-8')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                
+                result = json.dumps({
+                    "success": True,
+                    "answer": answer,
+                    "question_type": "genel_borsa",
+                    "timestamp": datetime.now().isoformat()
+                }, ensure_ascii=False)
+                
+                self.wfile.write(result.encode())
+                print(f"📤 Genel borsa cevabı gönderildi")
+                print('='*60 + '\n')
+                return
+            
+            # 5. HİSSE ANALİZİ İÇİN
             print("🔍 Hisse analizi başlatılıyor...")
             
             # Excel'i oku
@@ -474,7 +480,7 @@ class handler(BaseHTTPRequestHandler):
                 print(f"📤 Hisse bulunamadı: {hisse_kodu}")
                 return
             
-            # 5. AI ANALİZİ YAP
+            # 6. AI ANALİZİ YAP
             print(f"✅ {search_result['name']} bulundu, AI analizi yapılıyor...")
             
             sembol_adi = search_result["name"]
@@ -514,7 +520,7 @@ class handler(BaseHTTPRequestHandler):
             # AI'dan analiz al
             ai_answer = get_ai_analysis(prompt)
             
-            # 6. CEVABI GÖNDER
+            # 7. CEVABI GÖNDER
             self.send_response(200)
             self.send_header('Content-type', 'application/json; charset=utf-8')
             self.send_header('Access-Control-Allow-Origin', '*')
@@ -555,6 +561,41 @@ class handler(BaseHTTPRequestHandler):
             }, ensure_ascii=False)
             
             self.wfile.write(result.encode())
+
+def create_genel_borsa_answer(excel_data):
+    """Excel'den gerçek verilerle genel borsa cevabı oluştur"""
+    try:
+        if "Sinyaller" not in excel_data.get("sheets", {}):
+            return "📊 Borsa genel durumu için Excel verileri yüklenemedi."
+        
+        hisseler = excel_data["sheets"]["Sinyaller"].get("hisseler", {})
+        excel_date = excel_data.get("excel_date", "bilinmiyor")
+        
+        # Örnek hisseler
+        sample_hisseler = list(hisseler.keys())[:15]
+        
+        response = []
+        response.append(f"📊 **BORSA GENEL DURUMU** ({excel_date})")
+        response.append("=" * 50)
+        response.append("")
+        response.append(f"**Toplam Hisse:** {len(hisseler)}")
+        response.append("")
+        response.append("**Örnek Hisseler:**")
+        
+        # 3 sütun halinde göster
+        for i in range(0, len(sample_hisseler), 5):
+            chunk = sample_hisseler[i:i+5]
+            response.append("• " + " • ".join(chunk))
+        
+        response.append("")
+        response.append("**Analiz için hisse adı yazın:**")
+        response.append('Örnek: "FROTO analiz et", "THYAO durumu"')
+        
+        return "\n".join(response)
+        
+    except Exception as e:
+        print(f"❌ Genel borsa cevabı hatası: {e}")
+        return "📊 Borsa genel durumu analiz ediliyor..."
 
 # ==================== LOCAL TEST ====================
 if __name__ == "__main__":
