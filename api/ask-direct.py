@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # /api/ask-direct.py
-# BorsaAnaliz AI - API KEY GEREKMEZ
-# Versiyon: 6.1 (No API Key)
+# BorsaAnaliz AI - TAM ÇALIŞAN VERSİYON
+# Versiyon: 7.0 (Final)
 
 from http.server import BaseHTTPRequestHandler
 import json
@@ -11,206 +11,305 @@ import sys
 import re
 import traceback
 from datetime import datetime
+import urllib.request
+import tempfile
+from openpyxl import load_workbook
+import requests
 import random
 
-# ==================== ÖNCE SORU ANALİZİ ====================
+# ==================== GLOBAL AYARLAR ====================
+DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY', '')
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
+MODE = "hizli"  # "hizli" veya "detayli" - frontend'den gelecek
+
+# ==================== EXCEL OKUYUCU ====================
+class ExcelReader:
+    """EN GÜNCEL Excel'i bul ve 3 sayfa oku"""
+    
+    def find_latest_excel(self):
+        """En güncel Excel dosyasını bul"""
+        try:
+            base_url = "https://borsaanaliz-raporlar.vercel.app/raporlar/"
+            today = datetime.now()
+            
+            # Son 7 günü kontrol et
+            for i in range(7):
+                date = today.replace(hour=0, minute=0, second=0, microsecond=0)
+                date_str = date.strftime("%d%m%Y")
+                filename = f"BORSAANALIZ_V11_TAM_{date_str}.xlsm"
+                file_url = f"{base_url}{filename}"
+                
+                try:
+                    # HEAD isteği ile dosya var mı kontrol et
+                    req = urllib.request.Request(file_url, method='HEAD')
+                    with urllib.request.urlopen(req, timeout=5) as response:
+                        if response.status == 200:
+                            print(f"✅ GÜNCEL EXCEL BULUNDU: {filename}", file=sys.stderr)
+                            return file_url, date.strftime("%d.%m.%Y")
+                except:
+                    continue  # Bu tarih yok, bir önceki güne bak
+            
+            # Fallback: Bugünün dosyası yoksa en son dosyayı kullan
+            print("⚠️ Güncel dosya bulunamadı, fallback kullanılıyor...", file=sys.stderr)
+            return f"{base_url}BORSAANALIZ_V11_TAM_06022026.xlsm", "06.02.2026"
+            
+        except Exception as e:
+            print(f"❌ Excel bulma hatası: {e}", file=sys.stderr)
+            return "https://borsaanaliz-raporlar.vercel.app/raporlar/BORSAANALIZ_V11_TAM_06022026.xlsm", "06.02.2026"
+    
+    def read_excel(self):
+        """3 sayfayı da oku"""
+        try:
+            print("🚀 EXCEL OKUMA BAŞLIYOR...", file=sys.stderr)
+            
+            # 1. En güncel Excel'i bul
+            excel_url, excel_date = self.find_latest_excel()
+            print(f"📥 Excel: {excel_url}", file=sys.stderr)
+            print(f"📅 Tarih: {excel_date}", file=sys.stderr)
+            
+            # 2. İndir
+            headers = {'User-Agent': 'Mozilla/5.0'}
+            req = urllib.request.Request(excel_url, headers=headers)
+            
+            with urllib.request.urlopen(req, timeout=30) as response:
+                excel_content = response.read()
+                print(f"✅ İndirildi: {len(excel_content)} bytes", file=sys.stderr)
+            
+            # 3. Geçici dosya
+            with tempfile.NamedTemporaryFile(suffix='.xlsm', delete=False) as tmp:
+                tmp.write(excel_content)
+                tmp_path = tmp.name
+            
+            # 4. Aç
+            wb = load_workbook(tmp_path, data_only=True, read_only=True)
+            print(f"📖 Sayfalar: {wb.sheetnames}", file=sys.stderr)
+            
+            result = {
+                "success": True,
+                "excel_date": excel_date,
+                "excel_url": excel_url,
+                "total_symbols": 0,
+                "sheets": {}
+            }
+            
+            # ==================== 1. SİNYALLER ====================
+            if "Sinyaller" in wb.sheetnames:
+                ws = wb["Sinyaller"]
+                hisseler = {}
+                
+                for row in ws.iter_rows(min_row=2, max_row=1000, values_only=True):
+                    if not row or not row[0]:
+                        continue
+                    
+                    hisse_adi = str(row[0]).strip()
+                    if not hisse_adi:
+                        continue
+                    
+                    # Temel verileri al
+                    hisse_dict = {
+                        "Hisse": hisse_adi,
+                        "Close": row[6] if len(row) > 6 else None,
+                        "VMA": row[9] if len(row) > 9 else None,
+                        "DURUM": row[15] if len(row) > 15 else None,
+                        "EMA_8": row[27] if len(row) > 27 else None,
+                        "Pivot": row[7] if len(row) > 7 else None,
+                        "Open": row[49] if len(row) > 49 else None,
+                        "High": row[50] if len(row) > 50 else None,
+                        "Low": row[51] if len(row) > 51 else None,
+                        "Hacim": row[11] if len(row) > 11 else None
+                    }
+                    
+                    # None değerleri temizle
+                    hisse_dict = {k: v for k, v in hisse_dict.items() if v is not None}
+                    hisseler[hisse_adi] = hisse_dict
+                
+                result["sheets"]["Sinyaller"] = {"hisseler": hisseler}
+                result["total_symbols"] += len(hisseler)
+                print(f"✅ Sinyaller: {len(hisseler)} hisse", file=sys.stderr)
+            
+            # ==================== 2. ENDEKSLER ====================
+            if "ENDEKSLER" in wb.sheetnames:
+                ws = wb["ENDEKSLER"]
+                endeksler = {}
+                
+                for row in ws.iter_rows(min_row=2, max_row=100, values_only=True):
+                    if not row or not row[0]:
+                        continue
+                    
+                    sembol_adi = str(row[0]).strip()
+                    if not sembol_adi:
+                        continue
+                    
+                    sembol_dict = {
+                        "Sembol": sembol_adi,
+                        "Close": row[6] if len(row) > 6 else None,
+                        "VMA": row[9] if len(row) > 9 else None,
+                        "DURUM": row[15] if len(row) > 15 else None
+                    }
+                    
+                    sembol_dict = {k: v for k, v in sembol_dict.items() if v is not None}
+                    endeksler[sembol_adi] = sembol_dict
+                
+                result["sheets"]["ENDEKSLER"] = {"semboller": endeksler}
+                result["total_symbols"] += len(endeksler)
+                print(f"✅ ENDEKSLER: {len(endeksler)} sembol", file=sys.stderr)
+            
+            # ==================== 3. FON_EMTIA_COIN_DOVIZ ====================
+            if "FON_EMTIA_COIN_DOVIZ" in wb.sheetnames:
+                ws = wb["FON_EMTIA_COIN_DOVIZ"]
+                fonlar = {}
+                
+                for row in ws.iter_rows(min_row=2, max_row=100, values_only=True):
+                    if not row or not row[0]:
+                        continue
+                    
+                    sembol_adi = str(row[0]).strip()
+                    if not sembol_adi:
+                        continue
+                    
+                    sembol_dict = {
+                        "Sembol": sembol_adi,
+                        "Close": row[6] if len(row) > 6 else None,
+                        "VMA": row[9] if len(row) > 9 else None,
+                        "DURUM": row[15] if len(row) > 15 else None
+                    }
+                    
+                    sembol_dict = {k: v for k, v in sembol_dict.items() if v is not None}
+                    fonlar[sembol_adi] = sembol_dict
+                
+                result["sheets"]["FON_EMTIA_COIN_DOVIZ"] = {"semboller": fonlar}
+                result["total_symbols"] += len(fonlar)
+                print(f"✅ FON_EMTIA_COIN_DOVIZ: {len(fonlar)} sembol", file=sys.stderr)
+            
+            wb.close()
+            os.unlink(tmp_path)
+            
+            print(f"🎉 TOPLAM: {result['total_symbols']} sembol", file=sys.stderr)
+            return result
+            
+        except Exception as e:
+            print(f"❌ EXCEL OKUMA HATASI: {e}", file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
+            return {"success": False, "error": str(e)}
+
+# Global Excel reader
+excel_reader = ExcelReader()
+
+# ==================== SORU ANALİZİ ====================
 def analyze_question_type(question):
-    """Soruyu BASİT analiz et"""
+    """Soruyu analiz et"""
     q = question.lower().strip()
     
-    print(f"🔍 Soru: '{q}'", file=sys.stderr)
-    
-    # Özel sorular (HIZLI MOD - API key gerekmez)
-    if any(k in q for k in ['teşekkür', 'sağ ol', 'sağol', 'mükemmel', 'harika']):
+    # Hızlı mod soruları
+    if any(k in q for k in ['teşekkür', 'sağ ol', 'sağol']):
         return "teşekkür"
     
-    if any(k in q for k in ['vma', 'ema', 'teknik analiz', 'nasıl yorumlanır', 'ne demek']):
+    if any(k in q for k in ['vma', 'ema', 'teknik analiz', 'nasıl yorumlanır']):
         return "teknik"
     
-    if any(k in q for k in ['excel', 'macro', 'makro', 'dosya', 'açılır']):
+    if any(k in q for k in ['excel', 'macro', 'makro']):
         return "excel_macro"
     
-    if any(k in q for k in ['kim yaptı', 'sistem', 'hakkında', 'sen ai', 'kimsin']):
+    if any(k in q for k in ['kim yaptı', 'sistem', 'hakkında']):
         return "sistem"
     
-    if any(k in q for k in ['öne çıkan', 'en iyi', 'borsa durumu', 'popüler', 'hangi hisseler']):
+    if any(k in q for k in ['öne çıkan', 'en iyi', 'borsa durumu']):
         return "genel_borsa"
     
-    if any(k in q for k in ['nasıl çalışır', 'yöntem', 'süreç']):
-        return "nasil"
-    
-    if any(k in q for k in ['endeks', 'xu100', 'xu030', 'xulas', 'xteks']):
+    if any(k in q for k in ['endeks', 'xu100', 'xulas']):
         return "endeks"
     
-    # Hisse/endeks kodu varsa analiz
+    if any(k in q for k in ['nasıl çalışır']):
+        return "nasil"
+    
+    # Hisse kodu varsa
     if re.search(r'\b([A-Z]{2,6})\b', question.upper()):
         return "analiz"
     
     return "bilinmeyen"
 
-# ==================== ÖZEL CEVAPLAR (HIZLI MOD) ====================
-def get_teşekkür_cevabı():
-    return "🌟 **Teşekkür ederim!**\n\nBaşka hisse analizi istiyor musunuz?"
-
-def get_teknik_cevabı(question):
-    q = question.lower()
+# ==================== HIZLI MOD CEVAPLARI ====================
+def get_hizli_cevap(question_type, question=""):
+    """Hızlı mod için özel cevaplar"""
+    if question_type == "teşekkür":
+        return "🌟 **Teşekkür ederim!**\n\nBaşka hisse analizi istiyor musunuz?"
     
-    if 'vma' in q:
-        return """📊 **VMA (Volume Moving Average) - Hacim Algoritması**
-
-**Değerler ve Anlamları:**
-• **POZİTİF (00):** Trend başlangıcı (parantez içindeki rakam gün sayısıdır)
-• **POZİTİF (--):** Trendin devam ettiğini gösterir
-• **NEGATİF (00):** Trendin bitişi
-• **NEGATİF (--):** Düşüş trendinin devam ettiğini gösterir
-
-**Örnek:** "POZİTİF (75)" = Trend 75 gündür pozitif yönde devam ediyor."""
+    elif question_type == "teknik":
+        if 'vma' in question.lower():
+            return """📊 **VMA Algoritması:**
+• POZİTİF (00): Trend başlangıcı
+• POZİTİF (--): Trend devamı  
+• NEGATİF (00): Trend bitişi
+• NEGATİF (--): Düşüş devamı"""
+        else:
+            return """📈 **Teknik Analiz Göstergeleri:**
+• VMA: Hacim algoritması
+• EMA: Fiyat trendi
+• Pivot: Destek/direnç"""
     
-    elif 'ema' in q:
-        return """📉 **EMA (Üssel Hareketli Ortalama)**
-
-**EMA Türleri:**
-• **EMA_8:** Kısa vade (8 gün)
-• **EMA_21:** Orta vade (21 gün)
-• **EMA_55:** Uzun vade (55 gün)
-
-**Yorumlama:**
-• EMA_8 > EMA_21 > EMA_55 = Güçlü YÜKSELİŞ 📈
-• EMA_8 < EMA_21 < EMA_55 = Güçlü DÜŞÜŞ 📉
-• Karışık = YATAY/YÖNSÜZ ↔"""
+    elif question_type == "excel_macro":
+        return "📊 **Excel Macro:** .xlsm dosyası, 'Makroları Etkinleştir' seçeneğini işaretleyin."
     
-    else:
-        return """📈 **Teknik Analiz Göstergeleri**
+    elif question_type == "sistem":
+        return """🤖 **BorsaAnaliz AI Sistemi**
+**Versiyon:** 7.0 (Final)
+**Modlar:** Hızlı (DeepSeek) / Detaylı (Groq)
+**Excel:** Güncel tarihli otomatik bulunur"""
+    
+    elif question_type == "genel_borsa":
+        # Excel'den rastgele hisseler göster
+        try:
+            excel_data = excel_reader.read_excel()
+            if excel_data.get("success"):
+                if "Sinyaller" in excel_data.get("sheets", {}):
+                    hisseler = list(excel_data["sheets"]["Sinyaller"]["hisseler"].keys())
+                    if hisseler:
+                        if len(hisseler) > 6:
+                            secilen = random.sample(hisseler, 6)
+                        else:
+                            secilen = hisseler[:6]
+                        
+                        cevap = "📈 **Öne Çıkan Hisseler (Rastgele):**\n\n"
+                        for h in secilen:
+                            cevap += f"• {h}\n"
+                        cevap += f"\n**Toplam:** {len(hisseler)} hisse\n"
+                        cevap += "**Analiz:** \"[HİSSE] analiz et\""
+                        return cevap
+        except:
+            pass
+        
+        return """📊 **Borsa Genel Durumu:**
+• 600+ hisse analiz
+• Güncel Excel verileri
+• Örnek: "GARAN analiz et", "XU100 durumu" """
+    
+    elif question_type == "endeks":
+        return """📈 **BIST Endeksleri:**
+• XU100: BIST 100
+• XU030: BIST 30  
+• XULAS: Tüm şirketler
+• Analiz: "XU100 analiz et" """
+    
+    elif question_type == "nasil":
+        return """🔧 **Nasıl Çalışır:**
+1. Güncel Excel bulunur
+2. 3 sayfa okunur
+3. Hisse aranır
+4. AI analizi yapılır"""
+    
+    return """🤔 **Anlamadım**
 
-1. **VMA:** Hacim algoritması
-2. **EMA:** Fiyat trendi
-3. **Pivot:** Destek/direnç
-4. **Bollinger:** Volatilite
+Örnekler:
+• Hisse: "GARAN analiz et"
+• Endeks: "XU100 durumu"  
+• Teknik: "VMA nedir?"
+• Genel: "Öne çıkan hisseler""""
 
-Detaylı bilgi için: "VMA nasıl yorumlanır?" veya "EMA nedir?" """
-
-def get_excel_macro_cevabı():
-    return """📊 **Excel ve MACRO Hakkında**
-
-**Excel Dosyası:**
-• Format: .xlsm (macro içeren)
-• İçerik: 3 sayfa, 600+ hisse, endeksler, GMSTR/ALTIN
-
-**MACRO Açmak İçin:**
-1. Microsoft Excel 2010+
-2. "Güvenlik Uyarısı" görürseniz → "Makroları Etkinleştir"
-3. Veya: Dosya → Seçenekler → Güven Merkezi → Makro Ayarları
-
-**Hisse Analizi İçin:** "GMSTR analiz et", "XU100 durumu" """
-
-def get_sistem_cevabı():
-    return """🤖 **BorsaAnaliz AI Sistemi**
-
-**Versiyon:** 6.1 (No API Key)
-**Özellik:** Hızlı Mod - Özel cevaplar anında
-
-📊 **3 Sayfa Analiz:**
-1. **Sinyaller:** 600+ hisse (ENKAI, TUPRS, LOGO)
-2. **ENDEKSLER:** XU100, XULAS, XTEKS
-3. **FON_EMTIA_COIN_DOVIZ:** GMSTR, ALTIN, döviz, emtia
-
-💡 **Örnek Sorular:**
-• "GMSTR analiz et" (FON sayfasında)
-• "XU100 analiz et" (ENDEKSLER sayfasında)
-• "ENKAI analiz et" (Sinyaller sayfasında)
-• "VMA nasıl yorumlanır?"
-• "Excel macro nasıl açılır?" """
-
-def get_nasil_cevabı():
-    return """🔧 **Nasıl Çalışıyorum?**
-
-1. **Veri Al:** Güncel Excel'i okurum (3 sayfa)
-2. **Sembol Bul:** Sorudaki kodu 3 sayfada da ararım
-3. **Analiz:** Excel'deki verileri gösteririm
-4. **Özel Sorular:** Hızlı modda anında cevap
-
-**Örnek Akış:**
-"GMSTR analiz et" → FON sayfasında bul → Verileri göster
-
-**Hızlı Mod:** VMA, Excel, Sistem soruları anında cevaplanır."""
-
-def get_endeks_cevabı():
-    return """📈 **BIST Endeksleri**
-
-**Ana Endeksler:**
-• **XU100:** BIST 100 - 100 büyük şirket
-• **XU30:** BIST 30 - En büyük 30 şirket
-• **XULAS:** Tüm şirketler
-• **XTEKS:** Teknoloji endeksi
-• **XUHIZ:** Hizmet endeksi
-
-**Analiz için:** "XU100 analiz et", "XULAS durumu" """
-
-# ==================== AKILLI ÖNE ÇIKAN HİSSELER ====================
-def get_genel_borsa_cevabı():
-    """Excel'den canlı hisse listesi - API key gerekmez"""
+# ==================== ARAMA FONKSİYONU ====================
+def find_symbol(question, excel_data):
+    """3 sayfada sembol ara"""
     try:
-        # Excel'i oku
-        excel_result = read_excel_direct()
-        
-        if "error" not in excel_result and "Sinyaller" in excel_result.get("sheets", {}):
-            hisseler = list(excel_result["sheets"]["Sinyaller"]["hisseler"].keys())
-            
-            if hisseler:
-                # Rastgele 6 hisse seç
-                if len(hisseler) > 6:
-                    random_hisseler = random.sample(hisseler, 6)
-                else:
-                    random_hisseler = hisseler[:6]
-                
-                answer = "📈 **Bugün Öne Çıkan Hisseler (Rastgele Seçim):**\n\n"
-                for hisse in random_hisseler:
-                    answer += f"• {hisse}\n"
-                
-                answer += f"\n**Toplam:** {len(hisseler)} hisse analiz ediliyor.\n"
-                answer += "**Detay için:** \"[HİSSE ADI] analiz et\"\n\n"
-                answer += "**Örnek:** \"ENKAI analiz et\", \"GMSTR durumu\""
-                return answer
-    except:
-        pass
-    
-    # Fallback (API key gerekmez)
-    return """📊 **Borsa Genel Durumu**
-
-**3 Sayfadan Örnekler:**
-• **FON Sayfası:** GMSTR, ALTIN
-• **ENDEKSLER:** XU100, XULAS, XTEKS
-• **SİNYALLER:** ENKAI, TUPRS, LOGO, GARAN, AKBNK
-
-**Analiz İçin:**
-"GMSTR analiz et", "XU100 durumu", "ENKAI hissesi"
-
-**Toplam:** 600+ hisse, endeks ve sembol analiz ediliyor."""
-
-# ==================== EXCEL OKUMA ====================
-def read_excel_direct():
-    """Excel'i oku - API key gerekmez"""
-    try:
-        print("📖 Excel okunuyor...", file=sys.stderr)
-        
-        from excel_processor import excel_processor
-        result = excel_processor.read_excel_data()
-        
-        if not result.get("success", True):
-            return {"error": "Excel okunamadı"}
-        
-        print(f"✅ Excel okundu: {result.get('total_symbols', 0)} sembol", file=sys.stderr)
-        return result
-        
-    except Exception as e:
-        print(f"❌ Excel hatası: {e}", file=sys.stderr)
-        return {"error": str(e)}
-
-# ==================== BASİT ARAMA ====================
-def find_symbol_simple(question, excel_data):
-    """BASİT ARAMA - 3 sayfanın TÜMÜNÜ kontrol et"""
-    try:
-        # Hisse kodunu çıkar
+        # Sembol kodunu çıkar
         match = re.search(r'\b([A-Z]{2,6})\b', question.upper())
         if not match:
             return {"found": False, "error": "Kod bulunamadı"}
@@ -218,44 +317,29 @@ def find_symbol_simple(question, excel_data):
         target = match.group(1)
         print(f"🔍 Aranan: '{target}'", file=sys.stderr)
         
-        # 1. ÖNCE SİNYALLER SAYFASI
+        # 1. Sinyaller
         if "Sinyaller" in excel_data.get("sheets", {}):
-            hisseler = excel_data["sheets"]["Sinyaller"].get("hisseler", {})
+            hisseler = excel_data["sheets"]["Sinyaller"]["hisseler"]
             for hisse_adi, veriler in hisseler.items():
                 if target in hisse_adi.upper():
-                    print(f"✅ Sinyaller: '{hisse_adi}'", file=sys.stderr)
-                    return {
-                        "found": True,
-                        "name": hisse_adi,
-                        "data": veriler,
-                        "sayfa": "Sinyaller"
-                    }
+                    print(f"✅ Sinyaller: {hisse_adi}", file=sys.stderr)
+                    return {"found": True, "name": hisse_adi, "data": veriler, "sayfa": "Sinyaller"}
         
-        # 2. SONRA ENDEKSLER SAYFASI
+        # 2. ENDEKSLER
         if "ENDEKSLER" in excel_data.get("sheets", {}):
-            semboller = excel_data["sheets"]["ENDEKSLER"].get("semboller", {})
+            semboller = excel_data["sheets"]["ENDEKSLER"]["semboller"]
             for sembol_adi, veriler in semboller.items():
                 if target in sembol_adi.upper():
-                    print(f"✅ ENDEKSLER: '{sembol_adi}'", file=sys.stderr)
-                    return {
-                        "found": True,
-                        "name": sembol_adi,
-                        "data": veriler,
-                        "sayfa": "ENDEKSLER"
-                    }
+                    print(f"✅ ENDEKSLER: {sembol_adi}", file=sys.stderr)
+                    return {"found": True, "name": sembol_adi, "data": veriler, "sayfa": "ENDEKSLER"}
         
-        # 3. SONRA FON_EMTIA_COIN_DOVIZ SAYFASI
+        # 3. FON_EMTIA_COIN_DOVIZ
         if "FON_EMTIA_COIN_DOVIZ" in excel_data.get("sheets", {}):
-            semboller = excel_data["sheets"]["FON_EMTIA_COIN_DOVIZ"].get("semboller", {})
+            semboller = excel_data["sheets"]["FON_EMTIA_COIN_DOVIZ"]["semboller"]
             for sembol_adi, veriler in semboller.items():
                 if target in sembol_adi.upper():
-                    print(f"✅ FON: '{sembol_adi}'", file=sys.stderr)
-                    return {
-                        "found": True,
-                        "name": sembol_adi,
-                        "data": veriler,
-                        "sayfa": "FON_EMTIA_COIN_DOVIZ"
-                    }
+                    print(f"✅ FON: {sembol_adi}", file=sys.stderr)
+                    return {"found": True, "name": sembol_adi, "data": veriler, "sayfa": "FON_EMTIA_COIN_DOVIZ"}
         
         print(f"❌ '{target}' bulunamadı", file=sys.stderr)
         return {"found": False, "error": f"'{target}' Excel'de yok"}
@@ -264,94 +348,92 @@ def find_symbol_simple(question, excel_data):
         print(f"❌ Arama hatası: {e}", file=sys.stderr)
         return {"found": False, "error": str(e)}
 
-# ==================== BASİT ANALİZ (API KEY GEREKMEZ) ====================
-def generate_simple_analysis(sembol_adi, sembol_data, sembol_sayfa):
-    """API key GEREKMEZ - Excel verilerinden basit analiz"""
-    
-    # Temel verileri al
-    close = sembol_data.get('Close', 'N/A')
-    vma = sembol_data.get('VMA', sembol_data.get('VMA trend algo', 'N/A'))
-    durum = sembol_data.get('DURUM', 'N/A')
-    ema_8 = sembol_data.get('EMA_8', 'N/A')
-    pivot = sembol_data.get('Pivot', 'N/A')
-    open_price = sembol_data.get('Open', 'N/A')
-    high = sembol_data.get('High', 'N/A')
-    low = sembol_data.get('Low', 'N/A')
-    
-    # Durum analizi
-    durum_analiz = ""
-    if "POZİTİF" in str(durum).upper():
-        durum_analiz = "📈 **Pozitif Trend**"
-    elif "NEGATİF" in str(durum).upper():
-        durum_analiz = "📉 **Negatif Trend**"
-    elif "NÖTR" in str(durum).upper():
-        durum_analiz = "↔ **Yatay/Nötr**"
-    
-    # VMA analizi
-    vma_analiz = ""
-    if "POZİTİF" in str(vma).upper():
-        vma_analiz = "✅ **VMA Pozitif** - Hacim trendi destekliyor"
-    elif "NEGATİF" in str(vma).upper():
-        vma_analiz = "⚠️ **VMA Negatif** - Hacim trendi desteklemiyor"
-    
-    # EMA analizi
-    ema_analiz = ""
+# ==================== AI ANALİZLERİ ====================
+def get_deepseek_analysis(prompt, mode="hizli"):
+    """DeepSeek API ile analiz"""
     try:
-        if ema_8 != 'N/A' and close != 'N/A':
-            ema_8_val = float(str(ema_8).replace(',', '.'))
-            close_val = float(str(close).replace(',', '.'))
-            if close_val > ema_8_val:
-                ema_analiz = f"🚀 **Fiyat EMA_8 üzerinde** ({close_val} > {ema_8_val})"
-            else:
-                ema_analiz = f"📉 **Fiyat EMA_8 altında** ({close_val} < {ema_8_val})"
-    except:
-        ema_analiz = ""
-    
-    # Pivot analizi
-    pivot_analiz = ""
+        if not DEEPSEEK_API_KEY:
+            return "⚠️ DeepSeek API key gerekli"
+        
+        # Prompt'u mode'a göre ayarla
+        if mode == "hizli":
+            system_msg = "Kısa teknik analiz (max 150 kelime). Sadece verilen verileri kullan."
+            max_tokens = 300
+        else:
+            system_msg = "Detaylı teknik analiz. Tüm göstergeleri değerlendir."
+            max_tokens = 800
+        
+        headers = {
+            'Authorization': f'Bearer {DEEPSEEK_API_KEY}',
+            'Content-Type': 'application/json'
+        }
+        
+        data = {
+            "model": "deepseek-chat",
+            "messages": [
+                {"role": "system", "content": system_msg},
+                {"role": "user", "content": prompt[:1500]}  # Uzunluğu sınırla
+            ],
+            "max_tokens": max_tokens,
+            "temperature": 0.7
+        }
+        
+        response = requests.post(
+            'https://api.deepseek.com/v1/chat/completions',
+            headers=headers,
+            json=data,
+            timeout=15 if mode == "hizli" else 30
+        )
+        
+        if response.status_code == 200:
+            return response.json()['choices'][0]['message']['content']
+        else:
+            return f"❌ DeepSeek hatası: {response.status_code}"
+            
+    except requests.exceptions.Timeout:
+        return "⏱️ DeepSeek zaman aşımı"
+    except Exception as e:
+        return f"❌ DeepSeek hatası: {str(e)[:100]}"
+
+def get_groq_analysis(prompt):
+    """Groq API ile detaylı analiz"""
     try:
-        if pivot != 'N/A' and close != 'N/A':
-            pivot_val = float(str(pivot).replace(',', '.'))
-            close_val = float(str(close).replace(',', '.'))
-            if close_val > pivot_val:
-                pivot_analiz = f"⚖️ **Fiyat pivot üstünde** ({close_val} > {pivot_val})"
-            else:
-                pivot_analiz = f"⚖️ **Fiyat pivot altında** ({close_val} < {pivot_val})"
-    except:
-        pivot_analiz = ""
-    
-    # Analizi oluştur
-    analysis = f"""📊 **{sembol_adi.upper()} TEKNİK ANALİZİ**
+        if not GROQ_API_KEY:
+            return "⚠️ Groq API key gerekli"
+        
+        headers = {
+            'Authorization': f'Bearer {GROQ_API_KEY}',
+            'Content-Type': 'application/json'
+        }
+        
+        data = {
+            "model": "mixtral-8x7b-32768",
+            "messages": [
+                {"role": "system", "content": "Detaylı borsa analizi yap. Tüm teknik göstergeleri değerlendir."},
+                {"role": "user", "content": prompt[:2000]}
+            ],
+            "max_tokens": 1500,
+            "temperature": 0.7
+        }
+        
+        response = requests.post(
+            'https://api.groq.com/openai/v1/chat/completions',
+            headers=headers,
+            json=data,
+            timeout=40
+        )
+        
+        if response.status_code == 200:
+            return response.json()['choices'][0]['message']['content']
+        else:
+            return f"❌ Groq hatası: {response.status_code}"
+            
+    except requests.exceptions.Timeout:
+        return "⏱️ Groq zaman aşımı"
+    except Exception as e:
+        return f"❌ Groq hatası: {str(e)[:100]}"
 
-**Kaynak:** {sembol_sayfa} sayfası
-
-**TEMEL VERİLER:**
-• **Kapanış:** {close}
-• **Açılış:** {open_price}
-• **Yüksek:** {high}
-• **Düşük:** {low}
-• **VMA:** {vma}
-• **EMA_8:** {ema_8}
-• **Pivot:** {pivot}
-• **Durum:** {durum}
-
-**TEKNİK YORUM:**
-{durum_analiz}
-{vma_analiz}
-{ema_analiz}
-{pivot_analiz}
-
-**ÖNERİLER:**
-1. **VMA Pozitif** ise trend güçlü
-2. **Fiyat EMA_8 üzerinde** ise kısa vade olumlu
-3. **Fiyat pivot üstünde** ise direnç aşılabilir
-4. **Durum GÜÇLÜ POZİTİF** ise yükseliş devam edebilir
-
-⚠️ **NOT:** Bu analiz yatırım tavsiyesi değildir. Kendi araştırmanızı yapın."""
-    
-    return analysis
-
-# ==================== BASİT HANDLER ====================
+# ==================== VERCEL HANDLER ====================
 class handler(BaseHTTPRequestHandler):
     
     def do_GET(self):
@@ -362,92 +444,146 @@ class handler(BaseHTTPRequestHandler):
         
         response = {
             "status": "online",
-            "ai": "BorsaAnaliz AI 6.1",
-            "version": "No API Key - Hızlı Mod",
-            "features": "Özel sorular anında, hisse analizi Excel'den"
+            "version": "7.0 Final",
+            "apis": "DeepSeek (hızlı) + Groq (detaylı)",
+            "excel": "Güncel tarihli otomatik bulunur"
         }
         self.wfile.write(json.dumps(response, ensure_ascii=False).encode())
     
     def do_POST(self):
         try:
-            # Soruyu al
+            # İstek verilerini al
             content_length = int(self.headers.get('Content-Length', 0))
             post_data = self.rfile.read(content_length)
             data = json.loads(post_data)
+            
             question = data.get('question', '').strip()
+            mode = data.get('mode', 'hizli')  # "hizli" veya "detayli"
             
             if not question:
                 self.send_error_response("Soru gerekli")
                 return
             
-            print(f"\n🤖 SORU: {question}", file=sys.stderr)
+            print(f"\n{'='*60}", file=sys.stderr)
+            print(f"🤖 SORU: {question}", file=sys.stderr)
+            print(f"🎮 MOD: {mode}", file=sys.stderr)
+            print('='*60, file=sys.stderr)
             
-            # Soru tipi
+            # Soru tipini analiz et
             question_type = analyze_question_type(question)
             print(f"🔍 Tip: {question_type}", file=sys.stderr)
             
-            # Özel cevaplar (HIZLI MOD - API key gerekmez)
-            special_answers = {
-                "teşekkür": get_teşekkür_cevabı,
-                "teknik": lambda: get_teknik_cevabı(question),
-                "excel_macro": get_excel_macro_cevabı,
-                "sistem": get_sistem_cevabı,
-                "genel_borsa": get_genel_borsa_cevabı,
-                "nasil": get_nasil_cevabı,
-                "endeks": get_endeks_cevabı
-            }
-            
-            if question_type in special_answers:
-                answer = special_answers[question_type]()
-                self.send_success_response(answer)
-                print(f"📤 Hızlı cevap: {question_type}", file=sys.stderr)
+            # HIZLI MOD için özel cevaplar
+            if mode == "hizli" and question_type in ["teşekkür", "teknik", "excel_macro", 
+                                                    "sistem", "genel_borsa", "endeks", "nasil"]:
+                answer = get_hizli_cevap(question_type, question)
+                self.send_success_response(answer, mode)
                 return
             
-            # HİSSE ANALİZİ
+            # HİSSE ANALİZİ (her iki modda da)
             if question_type == "analiz":
-                print("🔍 Hisse analizi...", file=sys.stderr)
+                print(f"🔍 {mode.upper()} analiz başlıyor...", file=sys.stderr)
                 
                 # Excel'i oku
-                excel_result = read_excel_direct()
+                excel_data = excel_reader.read_excel()
                 
-                if "error" in excel_result:
-                    self.send_success_response("❌ Excel okunamadı. Lütfen daha sonra tekrar deneyin.")
+                if not excel_data.get("success"):
+                    error_msg = excel_data.get("error", "Excel okunamadı")
+                    print(f"❌ Excel hatası: {error_msg}", file=sys.stderr)
+                    
+                    # Hızlı modda basit cevap
+                    if mode == "hizli":
+                        answer = f"""❌ **Excel okunamadı**
+
+**Sebep:** {error_msg[:100]}
+
+**Hızlı modda deneyin:**
+• "VMA nedir?"
+• "Excel macro"
+• "Sistem hakkında"
+
+**Detaylı mod için daha sonra tekrar deneyin.**"""
+                    else:
+                        answer = f"❌ **Excel okunamadı:** {error_msg}"
+                    
+                    self.send_success_response(answer, mode)
                     return
                 
-                # Hisseyi ara (3 sayfada da)
-                search_result = find_symbol_simple(question, excel_result)
+                # Sembolü ara
+                search_result = find_symbol(question, excel_data)
                 
                 if not search_result.get("found"):
                     match = re.search(r'\b([A-Z]{2,6})\b', question.upper())
                     sembol_kodu = match.group(1) if match else "SEMBOL"
                     
-                    # 3 sayfada aradığımızı belirt
-                    answer = f"""❌ **{sembol_kodu} Excel'de bulunamadı.**
-
-**3 SAYFA TARANDI:**
-1. **Sinyaller:** 600+ hisse
-2. **ENDEKSLER:** Tüm BIST endeksleri
-3. **FON_EMTIA_COIN_DOVIZ:** GMSTR, ALTIN, döviz, emtia
-
-**ÖRNEKLER (Farklı Sayfalar):**
-• **FON:** "GMSTR analiz et", "ALTIN analiz et"
-• **ENDEKSLER:** "XU100 analiz et", "XULAS analiz et"
-• **SİNYALLER:** "ENKAI analiz et", "TUPRS analiz et"
-
-**Popüler:** GMSTR, ALTIN, XU100, ENKAI, TUPRS, LOGO"""
+                    # Excel bilgilerini ekle
+                    total = excel_data.get("total_symbols", 0)
+                    date = excel_data.get("excel_date", "güncel")
                     
-                    self.send_success_response(answer)
+                    answer = f"""❌ **{sembol_kodu} bulunamadı**
+
+**Excel Bilgisi:**
+• Tarih: {date}
+• Toplam: {total} sembol
+• Sayfalar: {list(excel_data.get('sheets', {}).keys())}
+
+**Örnekler:**
+• GMSTR, ALTIN (FON sayfasında)
+• XU100, XULAS (ENDEKSLER sayfasında)
+• ENKAI, GARAN (Sinyaller sayfasında)
+
+**Deneyin:** "GMSTR analiz et", "XU100 durumu" """
+                    
+                    self.send_success_response(answer, mode)
                     return
                 
-                # BASİT ANALİZ (API key GEREKMEZ)
+                # AI analizi için prompt hazırla
                 sembol_adi = search_result["name"]
                 sembol_data = search_result["data"]
                 sembol_sayfa = search_result.get("sayfa", "Sinyaller")
+                excel_date = excel_data.get("excel_date", "güncel")
                 
                 print(f"✅ Bulundu: {sembol_adi} ({sembol_sayfa})", file=sys.stderr)
                 
-                # Excel verilerinden basit analiz oluştur
-                analysis = generate_simple_analysis(sembol_adi, sembol_data, sembol_sayfa)
+                # Prompt oluştur
+                prompt = f"""📊 **{sembol_adi.upper()} TEKNİK ANALİZİ**
+
+**Kaynak:** {sembol_sayfa} sayfası
+**Excel Tarihi:** {excel_date}
+**Analiz Modu:** {mode.upper()}
+
+**VERİLER:**
+"""
+                
+                # Tüm verileri ekle
+                for key, value in sembol_data.items():
+                    prompt += f"• **{key}:** {value}\n"
+                
+                prompt += f"\n**SORU:** {question}\n\n"
+                
+                if mode == "hizli":
+                    prompt += """**TALİMAT (Hızlı Mod):**
+1. Kısa ve öz ol (max 150 kelime)
+2. VMA, EMA, Pivot'a odaklan
+3. Temel teknik yorum yap
+4. Yatırım tavsiyesi VERME
+
+**ANALİZ:**"""
+                else:
+                    prompt += """**TALİMAT (Detaylı Mod):**
+1. Tüm göstergeleri detaylı analiz et
+2. VMA, EMA, Pivot, Bollinger değerlendir
+3. Risk ve potansiyeli belirt
+4. Destek/direnç seviyelerini analiz et
+5. Yatırım tavsiyesi VERME
+
+**DETAYLI ANALİZ:**"""
+                
+                # AI analizi al
+                if mode == "hizli":
+                    ai_answer = get_deepseek_analysis(prompt, "hizli")
+                else:
+                    ai_answer = get_groq_analysis(prompt)
                 
                 # Cevapla
                 self.send_response(200)
@@ -457,39 +593,51 @@ class handler(BaseHTTPRequestHandler):
                 
                 result = {
                     "success": True,
-                    "answer": analysis,
+                    "answer": ai_answer,
                     "symbol": sembol_adi,
                     "sheet": sembol_sayfa,
-                    "mode": "hızlı_mod",
+                    "excel_date": excel_date,
+                    "mode": mode,
                     "timestamp": datetime.now().isoformat()
                 }
                 
                 self.wfile.write(json.dumps(result, ensure_ascii=False).encode())
-                print(f"📤 Gönderildi: {sembol_adi} ({sembol_sayfa})", file=sys.stderr)
+                print(f"📤 {mode} analiz gönderildi: {sembol_adi}", file=sys.stderr)
                 return
             
             # BİLİNMEYEN SORU
-            self.send_success_response("""🤔 **Anlamadım**
+            answer = """🤔 **Anlamadım**
 
-**HIZLI MOD Örnekleri:**
-• **Analiz:** "GMSTR analiz et", "XU100 durumu", "ENKAI hissesi"
-• **Teknik:** "VMA nasıl yorumlanır?", "EMA nedir?"
-• **Sistem:** "Excel macro nasıl açılır?", "Sistem hakkında"
-• **Genel:** "Bugün öne çıkan hisseler"
+**Modlar:**
+• **Hızlı:** Özel sorular anında
+• **Detaylı:** AI analizi 1-2 dakika
 
-**3 Sayfa Analiz:** Sinyaller, ENDEKSLER, FON_EMTIA_COIN_DOVIZ""")
+**Örnekler:**
+• Hisse: "GMSTR analiz et"
+• Endeks: "XU100 durumu"
+• Teknik: "VMA nedir?"
+• Genel: "Öne çıkan hisseler"
+
+**Not:** Hisse analizi için mod seçin."""
+            
+            self.send_success_response(answer, mode)
             
         except Exception as e:
             print(f"❌ HATA: {e}", file=sys.stderr)
             traceback.print_exc(file=sys.stderr)
             self.send_error_response(f"Sistem hatası: {str(e)[:100]}")
 
-    def send_success_response(self, answer):
+    def send_success_response(self, answer, mode="hizli"):
         self.send_response(200)
         self.send_header('Content-type', 'application/json; charset=utf-8')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
-        result = {"success": True, "answer": answer, "mode": "hızlı"}
+        result = {
+            "success": True, 
+            "answer": answer, 
+            "mode": mode,
+            "timestamp": datetime.now().isoformat()
+        }
         self.wfile.write(json.dumps(result, ensure_ascii=False).encode())
     
     def send_error_response(self, error):
@@ -497,7 +645,7 @@ class handler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'application/json; charset=utf-8')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
-        result = {"success": False, "answer": f"❌ Hata: {error}", "mode": "hızlı"}
+        result = {"success": False, "answer": f"❌ Hata: {error}"}
         self.wfile.write(json.dumps(result, ensure_ascii=False).encode())
 
 # ==================== TEST ====================
@@ -505,7 +653,7 @@ if __name__ == "__main__":
     from http.server import HTTPServer
     port = 3002
     server = HTTPServer(("0.0.0.0", port), handler)
-    print(f"🚀 BorsaAnaliz AI 6.1: http://localhost:{port}")
-    print("📊 HIZLI MOD - API key GEREKMEZ")
-    print("✨ Özel sorular anında, hisse analizi Excel'den")
+    print(f"🚀 BorsaAnaliz AI 7.0: http://localhost:{port}")
+    print("🎮 Modlar: Hızlı (DeepSeek) + Detaylı (Groq)")
+    print("📅 Excel: Güncel tarihli otomatik bulunur")
     server.serve_forever()
