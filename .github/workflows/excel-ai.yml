@@ -28,13 +28,13 @@ jobs:
       
     - name: 🔍 Excel dosyalarını kontrol et
       run: |
-        echo "📂 Mevcut dosyalar:"
-        find . -name "*.xls*" -type f | head -10
+        echo "📂 raporlar klasörü içeriği:"
+        ls -la raporlar/ || echo "⚠️ raporlar klasörü yok!"
         echo ""
-        echo "📊 Excel sayısı:"
-        find . -name "*.xls*" -type f | wc -l
+        echo "📊 En son Excel:"
+        ls -la raporlar/*.xls* 2>/dev/null | tail -5 || echo "Excel dosyası yok!"
       
-    - name: 🤖 Excel AI analizini çalıştır (DEEPSEEK + GROQ HİBRİT)
+    - name: 🤖 Excel AI analizini çalıştır
       env:
         DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -44,12 +44,15 @@ jobs:
       id: check-response
       run: |
         if [ -f "ai_response.txt" ]; then
-          echo "✅ Yanıt dosyası bulundu. Boyut: $(wc -c < ai_response.txt) byte"
+          echo "✅ Yanıt dosyası bulundu! Boyut: $(wc -c < ai_response.txt) byte"
           echo "has_response=true" >> $GITHUB_OUTPUT
+          echo "📄 İlk 200 karakter:"
+          head -c 200 ai_response.txt
+          echo ""
         else
           echo "❌ Hata: ai_response.txt bulunamadı!"
           echo "has_response=false" >> $GITHUB_OUTPUT
-          echo "Üzgünüm, Excel AI yanıtı oluşturulamadı. GitHub Actions loglarını kontrol edin." > ai_response.txt
+          echo "⚠️ AI analizi çalışmadı - logları kontrol edin" > ai_response.txt
         fi
       
     - name: 💬 Yanıtı Issue'a ekle
@@ -64,7 +67,7 @@ jobs:
             if (fs.existsSync('ai_response.txt')) {
               response = fs.readFileSync('ai_response.txt', 'utf8');
             } else {
-              response = "❌ Excel AI analizi çalıştı ancak yanıt dosyası bulunamadı.";
+              response = "❌ Excel AI analizi çalıştı ancak yanıt dosyası bulunamadı.\n\nLütfen GitHub Actions loglarını kontrol edin.";
             }
           } catch (e) {
             response = `❌ Hata: ${e.message}`;
@@ -74,16 +77,7 @@ jobs:
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: `## 📊 **BORSAANALİZ PROFESYONEL TEKNİK ANALİZ RAPORU**\n\n${response}\n\n---\n⚡ **AI Motor:** DeepSeek + Groq Hibrit\n📅 **Tarih:** ${new Date().toLocaleString('tr-TR')}\n📌 **Not:** Bu analiz yatırım tavsiyesi değildir.`
+            body: `## 📊 **BORSAANALİZ PROFESYONEL TEKNİK ANALİZ RAPORU**\n\n${response}\n\n---\n⚡ **AI Motor:** DeepSeek + Groq Hibrit\n📅 **Tarih:** ${new Date().toLocaleString('tr-TR')}\n📌 **Kaynak:** raporlar/${context.repo.repo}\n\n⚠️ **Yatırım tavsiyesi değildir.**`
           });
           
-          try {
-            await github.rest.issues.addLabels({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: ['excel-ai', 'teknik-analiz', 'deepseek-groq']
-            });
-          } catch (e) {
-            console.log("Label eklenemedi:", e.message);
-          }
+          console.log("✅ Issue yanıtı eklendi!");
