@@ -1,24 +1,21 @@
 {
   "functions": {
-    "api/ask-direct.py": {
-      "maxDuration": 30
-    },
-    "api/index.py": {
+    "api/create-issue.js": {
       "maxDuration": 30
     }
   },
   "rewrites": [
     {
-      "source": "/api/ask-direct",
-      "destination": "/api/ask-direct.py"
+      "source": "/api/create-issue",
+      "destination": "/api/create-issue.js"
     },
     {
       "source": "/api/ask",
-      "destination": "/api/index.py"
+      "destination": "/api/create-issue.js"
     },
     {
       "source": "/api/",
-      "destination": "/api/index.py"
+      "destination": "/api/create-issue.js"
     }
   ],
   "headers": [
