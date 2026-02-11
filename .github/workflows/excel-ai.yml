@@ -1,4 +1,4 @@
-name: 🤖 Excel-Okuyan AI Yanıt
+name: 🤖 Excel-Okuyan AI Yanıt (DeepSeek + Groq)
 
 on:
   issues:
@@ -7,9 +7,7 @@ on:
 
 jobs:
   excel-ai:
-    
     runs-on: ubuntu-latest
-    
     permissions:
       issues: write
       contents: read
@@ -31,60 +29,61 @@ jobs:
     - name: 🔍 Excel dosyalarını kontrol et
       run: |
         echo "📂 Mevcut dosyalar:"
-        ls -la *.xls* || echo "Excel dosyası yok"
+        find . -name "*.xls*" -type f | head -10
+        echo ""
+        echo "📊 Excel sayısı:"
+        find . -name "*.xls*" -type f | wc -l
       
-    - name: 🤖 Excel AI analizini çalıştır
+    - name: 🤖 Excel AI analizini çalıştır (DEEPSEEK + GROQ HİBRİT)
       env:
+        DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-      run: python .github/excel_ai_analyzer.py "${{ github.event.issue.body }}"
+      run: python .github/workflows/excel_ai_analyzer.py "${{ github.event.issue.body }}"
       
-    - name: 📝 Yanıt dosyasını kontrol et (YENİ EKLENDİ)
+    - name: 📝 Yanıt dosyasını kontrol et
       id: check-response
       run: |
         if [ -f "ai_response.txt" ]; then
-          echo "✅ Yanıt dosyası bulundu."
+          echo "✅ Yanıt dosyası bulundu. Boyut: $(wc -c < ai_response.txt) byte"
           echo "has_response=true" >> $GITHUB_OUTPUT
         else
           echo "❌ Hata: ai_response.txt bulunamadı!"
           echo "has_response=false" >> $GITHUB_OUTPUT
-          # Acil durum yanıtı oluştur
-          echo "Üzgünüm, Excel AI yanıtı şu anda oluşturulamadı. Lütfen daha sonra tekrar deneyin veya soruyu manuel kontrol edin." > ai_response.txt
+          echo "Üzgünüm, Excel AI yanıtı oluşturulamadı. GitHub Actions loglarını kontrol edin." > ai_response.txt
         fi
       
     - name: 💬 Yanıtı Issue'a ekle
       uses: actions/github-script@v6
-      env:
-        AI_RESPONSE: ${{ steps.check-response.outputs.has_response }}
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           const fs = require('fs');
-          let response = "AI yanıtı oluşturulamadı.";
+          let response = "⚠️ Yanıt oluşturulamadı.";
           
           try {
-            response = fs.readFileSync('ai_response.txt', 'utf8');
+            if (fs.existsSync('ai_response.txt')) {
+              response = fs.readFileSync('ai_response.txt', 'utf8');
+            } else {
+              response = "❌ Excel AI analizi çalıştı ancak yanıt dosyası bulunamadı.";
+            }
           } catch (e) {
-            response = `⚠️ Teknik bir hata oluştu: ${e.message}. Lütfen daha sonra tekrar deneyin.`;
+            response = `❌ Hata: ${e.message}`;
           }
           
-          // Yanıtı Issue'a yorum olarak ekle
           await github.rest.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: `## 📈 EXCEL AI ANALİZ RAPORU\n\n${response}\n\n---\n⚡ **Sistem:** Otomatik Excel Okuyucu AI\n📅 **Analiz Tarihi:** ${new Date().toLocaleString('tr-TR')}\n🤖 **AI Model:** Groq Llama 3.1`
+            body: `## 📊 **BORSAANALİZ PROFESYONEL TEKNİK ANALİZ RAPORU**\n\n${response}\n\n---\n⚡ **AI Motor:** DeepSeek + Groq Hibrit\n📅 **Tarih:** ${new Date().toLocaleString('tr-TR')}\n📌 **Not:** Bu analiz yatırım tavsiyesi değildir.`
           });
           
-          // İsteğe bağlı: Issue'ya otomatik olarak bir label ekleyin
           try {
             await github.rest.issues.addLabels({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              labels: ['excel-ai-cevaplandı']
+              labels: ['excel-ai', 'teknik-analiz', 'deepseek-groq']
             });
-          } catch (error) {
-            console.log("Label eklenemedi, önemli değil.");
+          } catch (e) {
+            console.log("Label eklenemedi:", e.message);
           }
-          
-          console.log("✅ Excel AI yanıtı Issue'a eklendi!");
