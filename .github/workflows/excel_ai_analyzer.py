@@ -531,7 +531,7 @@ def call_deepseek(prompt, question):
                 "temperature": 0.1,
                 "max_tokens": 2000
             },
-            timeout=60
+            timeout=30   # ⚡ 60'tan 30'a düşür!
         )
         
         if response.status_code == 200:
