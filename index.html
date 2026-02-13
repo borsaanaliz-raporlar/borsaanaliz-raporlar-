@@ -1532,8 +1532,45 @@
             });
         });
     </script>
+    <script>
+// 🆕 YENİ FONKSİYON - Butonlarla çağrılacak
+function gonder(mode) {
+    const soru = document.getElementById('soru').value;
+    if (!soru) {
+        alert('Lütfen soru girin!');
+        return;
+    }
+    
+    // Mode'a göre soruyu işaretle
+    let gonderilecekSoru = soru;
+    if (mode === 'detayli') {
+        gonderilecekSoru = '📋 detaylı ' + soru;  // Detaylı mod için "detaylı" kelimesi ekle
+    } else {
+        gonderilecekSoru = '⚡ ' + soru;  // Hızlı mod için simge ekle (opsiyonel)
+    }
+    
+    // API'ye gönder
+    fetch('/api/create-issue', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({question: gonderilecekSoru})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ Sorunuz iletildi! Cevap gelecek...');
+        } else {
+            alert('❌ Hata: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('❌ Bağlantı hatası: ' + error);
+    });
+}
+</script>
 </body>
 </html>
+
 
 
 
