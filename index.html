@@ -589,7 +589,7 @@
         
         /* AI CHAT STYLES - PANEL İÇİ */
         .chat-container {
-            height: calc(70vh - 150px);
+            height: calc(70vh - 200px);
             overflow-y: auto;
             background: white;
             border-radius: 12px;
@@ -648,10 +648,59 @@
             font-size: 15px;
         }
         
+        /* 🆕 YENİ: BUTON GRUBU STYLES - AI PANEL İÇİN */
+        .ai-mode-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .ai-quick-btn, .ai-detailed-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .ai-quick-btn {
+            background: #4CAF50;
+        }
+        
+        .ai-quick-btn:hover:not(:disabled) {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .ai-detailed-btn {
+            background: #2196F3;
+        }
+        
+        .ai-detailed-btn:hover:not(:disabled) {
+            background: #1976D2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
+        }
+        
+        .ai-quick-btn:disabled, .ai-detailed-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
         .ai-input-container {
             display: flex;
             gap: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         #aiInput {
@@ -811,93 +860,6 @@
                 font-size: 14px;
             }
         }
-
-        /* YENİ: SORU SORMA ALANI STYLES */
-        .question-area {
-            margin: 20px 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #f5f7ff 0%, #eef2ff 100%);
-            border-radius: 15px;
-            border: 2px solid #667eea;
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
-        }
-        
-        .question-area h3 {
-            margin-bottom: 15px;
-            color: #333;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 18px;
-        }
-        
-        #soru {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 16px;
-            margin-bottom: 15px;
-            resize: vertical;
-            font-family: inherit;
-        }
-        
-        #soru:focus {
-            border-color: #667eea;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 5px;
-        }
-        
-        .btn-quick, .btn-detailed {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 15px;
-            transition: all 0.3s;
-            color: white;
-        }
-        
-        .btn-quick {
-            background: #4CAF50;
-        }
-        
-        .btn-quick:hover:not(:disabled) {
-            background: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
-        }
-        
-        .btn-detailed {
-            background: #2196F3;
-        }
-        
-        .btn-detailed:hover:not(:disabled) {
-            background: #1976D2;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
-        }
-        
-        .btn-quick:disabled, .btn-detailed:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .question-note {
-            margin-top: 10px;
-            color: #666;
-            font-size: 12px;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
@@ -951,7 +913,7 @@
                 <div class="email">iletisimborsaanaliz@gmail.com</div>
             </div>
             
-            <!-- KOMPAKT MAKRO UYARISI -->
+            <!-- YENİ: KOMPAKT MAKRO UYARISI -->
             <div class="macro-warning" style="
                 background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
                 border: 1px solid #ffb300;
@@ -1007,34 +969,11 @@
                 </div>
             </div>
             
-            <!-- YENİ: SORU SORMA ALANI VE BUTONLAR - AI ASİSTANININ ÜSTÜNE EKLENDİ -->
-            <div class="question-area">
-                <h3>
-                    <span style="font-size: 24px;">🤖</span>
-                    BORSAANALIZ AI ASİSTANINA SORU SOR
-                </h3>
-                
-                <textarea id="soru" rows="2" placeholder="Örnek: FROTO analiz et, VMA nedir, XU100 yorumla, bugün öne çıkan hisseler..."></textarea>
-                
-                <div class="button-group">
-                    <button class="btn-quick" onclick="gonder('hizli')">
-                        ⚡ HIZLI ANALİZ (10 sn)
-                    </button>
-                    <button class="btn-detailed" onclick="gonder('detayli')">
-                        📋 DETAYLI ANALİZ (25 sn)
-                    </button>
-                </div>
-                
-                <div class="question-note">
-                    <strong>Nasıl çalışır?</strong> Sorunuz AI'ya iletilir, GitHub'da issue oluşturulur, yanıt geldiğinde burada görünür.
-                </div>
-            </div>
-            
-            <!-- YENİ: AI ASİSTAN BUTONU (ESKİ YERİNDE) -->
+            <!-- YENİ: AI ASİSTAN BUTONU -->
             <div class="ai-button-container">
                 <button class="ai-assistant-button" id="openAiPanel">
                     <span class="ai-icon">🤖</span>
-                    BORSAANALIZ AI ASİSTANI (SOYBET)
+                    BORSAANALIZ AI ASİSTANI
                     <span class="ai-icon">⚡</span>
                 </button>
                 <p style="margin-top: 10px; color: #666; font-size: 14px;">
@@ -1060,6 +999,7 @@
             <h3 class="section-title">📁 Günlük Analiz Raporları</h3>
             
             <div class="file-list" id="fileList">
+                <!-- Dosyalar JS ile doldurulacak -->
             </div>
             
             <div class="warning">
@@ -1076,11 +1016,11 @@
         </div>
     </div>
     
-    <!-- AI PANEL (PERDE EFEKTLİ) -->
+    <!-- AI PANEL (PERDE EFEKTLİ) - 🆕 BUTONLAR EKLENDİ -->
     <div class="ai-panel-overlay" id="aiPanelOverlay">
         <div class="ai-panel" id="aiPanel">
             <div class="ai-panel-header">
-                <h3>🤖 BORSAANALIZ AI ASİSTANI (SOYBE)</h3>
+                <h3>🤖 BORSAANALIZ AI ASİSTANI</h3>
                 <button class="back-btn" id="closeAiPanel">
                     ← Geri Dön
                 </button>
@@ -1095,10 +1035,20 @@
                             <strong>Merhaba! BORSAANALIZ AI Asistanınıza hoş geldiniz.</strong><br><br>
                             • Sorunuz Excel dosyasından <strong>gerçek verilerle</strong> yanıtlanacak<br>
                             • Yanıt <strong>1-2 dakika</strong> içinde bu ekranda belirecek<br>
-                            • Her soru için GitHub'da yeni bir issue oluşturulur<br><br>
-                            <em>Örnek: "WT nasıl yorumlanır?", "Bugün hangi hisseler öne çıkıyor?"</em>
+                            • Aşağıdan analiz modunu seçebilirsiniz<br><br>
+                            <em>Örnek: "FROTO analiz et", "VMA nedir?", "XU100 yorumla"</em>
                         </div>
                     </div>
+                </div>
+                
+                <!-- 🆕 YENİ: BUTON GRUBU - AI PANEL İÇİNDE -->
+                <div class="ai-mode-buttons">
+                    <button class="ai-quick-btn" id="aiQuickBtn">
+                        ⚡ HIZLI ANALİZ
+                    </button>
+                    <button class="ai-detailed-btn" id="aiDetailedBtn">
+                        📋 DETAYLI ANALİZ
+                    </button>
                 </div>
                 
                 <div class="ai-input-container">
@@ -1107,21 +1057,21 @@
                 </div>
                 
                 <div class="quick-actions">
-                    <button class="quick-btn" data-q="VMA Algoritması nasıl yorumlanır?">📈 VMA algo analizi</button>
-                    <button class="quick-btn" data-q="Bugün öne çıkan hisseler hangileri?">💼 Öne Çıkan Hisseler</button>
+                    <button class="quick-btn" data-q="VMA Algoritması nasıl yorumlanır?">📈 VMA analizi</button>
+                    <button class="quick-btn" data-q="Bugün öne çıkan hisseler hangileri?">💼 Öne Çıkanlar</button>
                     <button class="quick-btn" data-q="Excel'de MACRO nasıl açılır?">🔓 MACRO Açma</button>
                     <button class="quick-btn" data-q="Teknik analiz nasıl yapılır?">📊 Teknik Analiz</button>
                 </div>
                 
                 <div class="ai-info">
-                    ⚡ <strong>Gerçek zamanlı Excel analizi:</strong> Sorunuz anında işlenir, yanıt bu ekranda görünür.
+                    ⚡ <strong>Seçtiğiniz moda göre analiz:</strong> Hızlı (10 sn) veya Detaylı (25 sn)
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ORJINAL MATRIX VE APP KODLARI
+        // ORJINAL MATRIX VE APP KODLARI (Aynen kalacak)
         const canvas = document.getElementById('matrixCanvas');
         const ctx = canvas.getContext('2d');
         let matrixAnimationId = null;
@@ -1415,12 +1365,19 @@
             }
         }, 2 * 60 * 60 * 1000);
         
-        // AI PANEL KONTROLLERİ
+        // 🆕 YENİ: AI PANEL KONTROLLERİ
         document.addEventListener('DOMContentLoaded', function() {
             const openBtn = document.getElementById('openAiPanel');
             const closeBtn = document.getElementById('closeAiPanel');
             const overlay = document.getElementById('aiPanelOverlay');
             const panel = document.getElementById('aiPanel');
+            const aiInput = document.getElementById('aiInput');
+            const aiSendBtn = document.getElementById('aiSendBtn');
+            const aiQuickBtn = document.getElementById('aiQuickBtn');
+            const aiDetailedBtn = document.getElementById('aiDetailedBtn');
+            const chatContainer = document.getElementById('chatContainer');
+            
+            let currentMode = 'hizli'; // varsayılan mod
             
             // Panel açma
             if (openBtn) {
@@ -1430,8 +1387,6 @@
                         overlay.classList.add('active');
                         panel.classList.add('active');
                     }, 10);
-                    
-                    // Body scroll'u engelle
                     document.body.style.overflow = 'hidden';
                 });
             }
@@ -1440,7 +1395,6 @@
             function closePanel() {
                 overlay.classList.remove('active');
                 panel.classList.remove('active');
-                
                 setTimeout(() => {
                     overlay.style.display = 'none';
                     document.body.style.overflow = '';
@@ -1451,7 +1405,6 @@
                 closeBtn.addEventListener('click', closePanel);
             }
             
-            // Overlay'e tıklayınca da kapat
             if (overlay) {
                 overlay.addEventListener('click', function(e) {
                     if (e.target === overlay) {
@@ -1466,181 +1419,184 @@
                     closePanel();
                 }
             });
-        });
-        
-        // YENİ FONKSİYON - Butonlarla çağrılacak
-        function gonder(mode) {
-            const soru = document.getElementById('soru');
-            if (!soru) {
-                alert('❌ Soru kutusu bulunamadı!');
-                return;
+            
+            // Mod butonları
+            if (aiQuickBtn) {
+                aiQuickBtn.addEventListener('click', function() {
+                    currentMode = 'hizli';
+                    aiQuickBtn.style.opacity = '1';
+                    aiDetailedBtn.style.opacity = '0.7';
+                });
             }
             
-            const soruMetni = soru.value.trim();
-            if (!soruMetni) {
-                alert('❌ Lütfen soru girin!');
-                soru.focus();
-                return;
+            if (aiDetailedBtn) {
+                aiDetailedBtn.addEventListener('click', function() {
+                    currentMode = 'detayli';
+                    aiDetailedBtn.style.opacity = '1';
+                    aiQuickBtn.style.opacity = '0.7';
+                });
             }
             
-            // Mode'a göre soruyu işaretle
-            let gonderilecekSoru = soruMetni;
-            if (mode === 'detayli') {
-                gonderilecekSoru = '📋 detaylı ' + soruMetni;
-            } else {
-                gonderilecekSoru = '⚡ ' + soruMetni;
-            }
-            
-            // Butonları devre dışı bırak (çift tıklamayı önle)
-            const buttons = document.querySelectorAll('.button-group button');
-            buttons.forEach(btn => btn.disabled = true);
-            
-            // Geçici mesaj göster
-            const originalText = buttons[0]?.innerText || '';
-            if (mode === 'hizli') {
-                buttons[0].innerText = '⏳ Gönderiliyor...';
-            } else {
-                buttons[1].innerText = '⏳ Gönderiliyor...';
-            }
-            
-            // API'ye gönder
-            fetch('/api/create-issue', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({question: gonderilecekSoru})
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('✅ Sorunuz iletildi! Issue #' + data.issueNumber + ' oluşturuldu.\n\nYanıt geldiğinde GitHub issues sayfasında göreceksiniz.');
-                    soru.value = ''; // Temizle
-                    
-                    // AI Panel'de mesaj göster (eğer açıksa)
-                    const chatContainer = document.getElementById('chatContainer');
-                    if (chatContainer && document.getElementById('aiPanelOverlay').style.display === 'flex') {
-                        const messageDiv = document.createElement('div');
-                        messageDiv.className = 'message user';
-                        messageDiv.innerHTML = `
-                            <div class="avatar">👤</div>
-                            <div class="content">${soruMetni}</div>
-                        `;
-                        chatContainer.appendChild(messageDiv);
-                        
-                        const aiDiv = document.createElement('div');
-                        aiDiv.className = 'message ai';
-                        aiDiv.innerHTML = `
-                            <div class="avatar">🤖</div>
-                            <div class="content">
-                                <strong>✅ Sorunuz iletildi!</strong><br>
-                                Issue #${data.issueNumber} oluşturuldu.<br>
-                                Yanıt 1-2 dakika içinde GitHub'da görünecek.
-                            </div>
-                        `;
-                        chatContainer.appendChild(aiDiv);
-                        chatContainer.scrollTop = chatContainer.scrollHeight;
-                    }
-                } else {
-                    alert('❌ Hata: ' + (data.error || 'Bilinmeyen hata'));
-                }
-            })
-            .catch(error => {
-                alert('❌ Bağlantı hatası: ' + error.message);
-            })
-            .finally(() => {
-                // Butonları tekrar aktif et
-                buttons.forEach(btn => btn.disabled = false);
-                if (mode === 'hizli') {
-                    buttons[0].innerText = '⚡ HIZLI ANALİZ (10 sn)';
-                } else {
-                    buttons[1].innerText = '📋 DETAYLI ANALİZ (25 sn)';
-                }
-            });
-        }
-
-        // AI Panel chat fonksiyonları
-        document.addEventListener('DOMContentLoaded', function() {
-            const aiInput = document.getElementById('aiInput');
-            const aiSendBtn = document.getElementById('aiSendBtn');
-            
-            if (aiSendBtn) {
-                aiSendBtn.addEventListener('click', function() {
-                    const soru = aiInput.value.trim();
-                    if (!soru) return;
-                    
-                    // Hızlı modda gönder (varsayılan)
-                    const soruMetni = '⚡ ' + soru;
-                    
-                    // Chat'e ekle
-                    const chatContainer = document.getElementById('chatContainer');
-                    const userMsg = document.createElement('div');
-                    userMsg.className = 'message user';
-                    userMsg.innerHTML = `
+            // Mesaj ekleme fonksiyonu
+            function addMessage(text, isUser = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
+                
+                const time = new Date().toLocaleTimeString('tr-TR', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                if (isUser) {
+                    messageDiv.innerHTML = `
                         <div class="avatar">👤</div>
-                        <div class="content">${soru}</div>
+                        <div class="content">${escapeHtml(text)}</div>
                     `;
-                    chatContainer.appendChild(userMsg);
-                    
-                    // Typing indicator
-                    const typingDiv = document.createElement('div');
-                    typingDiv.id = 'typingIndicator';
-                    typingDiv.className = 'typing-indicator';
-                    typingDiv.innerHTML = `
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <span style="color: #667eea; margin-left: 10px;">AI yanıtlıyor...</span>
+                } else {
+                    messageDiv.innerHTML = `
+                        <div class="avatar">🤖</div>
+                        <div class="content">${text}</div>
                     `;
-                    chatContainer.appendChild(typingDiv);
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }
+                
+                chatContainer.appendChild(messageDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            
+            // Escape HTML
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+            
+            // Typing indicator
+            function showTyping() {
+                const typingDiv = document.createElement('div');
+                typingDiv.id = 'typingIndicator';
+                typingDiv.className = 'typing-indicator';
+                typingDiv.innerHTML = `
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <span style="color: #667eea; margin-left: 10px;">AI yanıtlıyor...</span>
+                `;
+                chatContainer.appendChild(typingDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            
+            function hideTyping() {
+                const typing = document.getElementById('typingIndicator');
+                if (typing) typing.remove();
+            }
+            
+            // Soru gönderme fonksiyonu
+            function sendQuestion() {
+                const soru = aiInput.value.trim();
+                if (!soru) return;
+                
+                // Mod prefix'ini ekle
+                const soruMetni = currentMode === 'detayli' ? '📋 detaylı ' + soru : '⚡ ' + soru;
+                
+                // Kullanıcı mesajını ekle
+                addMessage(soru, true);
+                aiInput.value = '';
+                
+                // Typing indicator
+                showTyping();
+                
+                // Butonları devre dışı bırak
+                if (aiQuickBtn) aiQuickBtn.disabled = true;
+                if (aiDetailedBtn) aiDetailedBtn.disabled = true;
+                if (aiSendBtn) aiSendBtn.disabled = true;
+                
+                // API'ye gönder
+                fetch('/api/create-issue', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({question: soruMetni})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    hideTyping();
                     
-                    // API'ye gönder
-                    fetch('/api/create-issue', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({question: soruMetni})
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        document.getElementById('typingIndicator')?.remove();
+                    if (data.success) {
+                        addMessage(`✅ Sorunuz iletildi! Issue #${data.issueNumber} oluşturuldu.\n\nYanıt 1-2 dakika içinde burada görünecek.`);
                         
-                        const aiMsg = document.createElement('div');
-                        aiMsg.className = 'message ai';
+                        // Issue kontrolü başlat
+                        let attempts = 0;
+                        const checkInterval = setInterval(async () => {
+                            attempts++;
+                            
+                            try {
+                                const response = await fetch(
+                                    `https://api.github.com/repos/borsaanaliz-raporlar/borsaanaliz-raporlar-/issues/${data.issueNumber}/comments`,
+                                    {
+                                        headers: {
+                                            'Accept': 'application/vnd.github.v3+json'
+                                        }
+                                    }
+                                );
+                                
+                                if (response.ok) {
+                                    const comments = await response.json();
+                                    const aiComment = comments.find(c => 
+                                        c.user.login.includes('github-actions') || 
+                                        c.body.includes('EXCEL AI ANALİZ RAPORU')
+                                    );
+                                    
+                                    if (aiComment) {
+                                        clearInterval(checkInterval);
+                                        
+                                        // GitHub mention'larını temizle
+                                        let cleanText = aiComment.body
+                                            .replace(/@[\w-]+/g, '')
+                                            .replace(/<!--[\s\S]*?-->/g, '')
+                                            .replace(/\[\s*\]\(.*?\)/g, '')
+                                            .replace(/https?:\/\/[^\s]+/g, '[link]')
+                                            .trim();
+                                        
+                                        addMessage(`📊 **AI ANALİZ RAPORU**\n\n${cleanText}`);
+                                    }
+                                }
+                            } catch (error) {
+                                // Silent error
+                            }
+                            
+                            if (attempts >= 30) { // 2.5 dakika
+                                clearInterval(checkInterval);
+                                addMessage('⏳ Yanıt gecikiyor. Lütfen daha sonra kontrol edin.');
+                            }
+                        }, 5000);
                         
-                        if (data.success) {
-                            aiMsg.innerHTML = `
-                                <div class="avatar">🤖</div>
-                                <div class="content">
-                                    ✅ Sorunuz iletildi! Issue #${data.issueNumber} oluşturuldu.<br>
-                                    <small>Yanıt 1-2 dakika içinde GitHub'da görünecek.</small>
-                                </div>
-                            `;
-                        } else {
-                            aiMsg.innerHTML = `
-                                <div class="avatar">❌</div>
-                                <div class="content">
-                                    Hata: ${data.error || 'Bilinmeyen hata'}
-                                </div>
-                            `;
-                        }
-                        
-                        chatContainer.appendChild(aiMsg);
-                        chatContainer.scrollTop = chatContainer.scrollHeight;
-                        aiInput.value = '';
-                    })
-                    .catch(error => {
-                        document.getElementById('typingIndicator')?.remove();
-                        
-                        const errorMsg = document.createElement('div');
-                        errorMsg.className = 'message ai';
-                        errorMsg.innerHTML = `
-                            <div class="avatar">❌</div>
-                            <div class="content">
-                                Bağlantı hatası: ${error.message}
-                            </div>
-                        `;
-                        chatContainer.appendChild(errorMsg);
-                        chatContainer.scrollTop = chatContainer.scrollHeight;
-                    });
+                    } else {
+                        addMessage(`❌ Hata: ${data.error || 'Bilinmeyen hata'}`);
+                    }
+                })
+                .catch(error => {
+                    hideTyping();
+                    addMessage(`❌ Bağlantı hatası: ${error.message}`);
+                })
+                .finally(() => {
+                    // Butonları tekrar aktif et
+                    if (aiQuickBtn) aiQuickBtn.disabled = false;
+                    if (aiDetailedBtn) aiDetailedBtn.disabled = false;
+                    if (aiSendBtn) aiSendBtn.disabled = false;
+                });
+            }
+            
+            // Gönder butonu
+            if (aiSendBtn) {
+                aiSendBtn.addEventListener('click', sendQuestion);
+            }
+            
+            // Enter tuşu
+            if (aiInput) {
+                aiInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendQuestion();
+                    }
                 });
             }
             
@@ -1654,16 +1610,6 @@
                     }
                 });
             });
-            
-            // Enter tuşu ile gönder
-            if (aiInput) {
-                aiInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        aiSendBtn.click();
-                    }
-                });
-            }
         });
     </script>
 </body>
