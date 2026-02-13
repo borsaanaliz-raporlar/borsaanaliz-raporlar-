@@ -33,13 +33,12 @@
             position: relative;
         }
         
-        /* İçerik görününce arka planı DEĞİŞTİRME - ESKİ HALİNE DÖN */
         body.content-visible {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* ESKİ MOR GRADIENT */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         
         body.content-visible #matrixCanvas {
-            display: none; /* Matrix'i gizle */
+            display: none;
         }
         
         .container {
@@ -78,7 +77,7 @@
         }
         
         .tagline {
-            color: #ff9900; /* TURUNCU RENK */
+            color: #ff9900;
             font-weight: bold;
             font-size: 20px;
             margin: 10px 0;
@@ -230,29 +229,28 @@
         
         .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Kartları biraz daralt */
-            gap: 8px; /* Kart arası boşluk azalt */
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
             margin-bottom: 15px;
         }
 
         .stat-card {
             background: #f8f9fa;
-            padding: 8px 10px; /* Üst-alt: 8px, Sağ-sol: 10px */
+            padding: 8px 10px;
             border-radius: 8px;
             text-align: center;
-            min-height: auto; /* Minimum yüksekliği kaldır */
         }
 
         .stat-number {
-            font-size: 20px; /* Daha küçük rakamlar */
+            font-size: 20px;
             font-weight: bold;
             color: #667eea;
-            margin-bottom: 2px; /* Alt boşluk azalt */
+            margin-bottom: 2px;
         }
 
         .stat-label {
             color: #666;
-            font-size: 9px; /* Daha küçük etiketler */
+            font-size: 9px;
             line-height: 1.2;
         }
         
@@ -387,7 +385,6 @@
             margin-bottom: 5px;
         }
         
-        /* SADE İLETİŞİM SATIRI */
         .contact-line {
             text-align: center;
             margin: 20px 0;
@@ -413,7 +410,6 @@
             word-break: break-all;
         }
         
-        /* YENİ: AI BUTON STYLES */
         .ai-button-container {
             text-align: center;
             margin: 25px 0;
@@ -504,7 +500,6 @@
             50% { transform: scale(1.2); }
         }
         
-        /* AI PANEL STYLES - PERDE EFEKTLİ */
         .ai-panel-overlay {
             position: fixed;
             top: 0;
@@ -587,14 +582,13 @@
             background: #f8f9fa;
         }
         
-        /* AI CHAT STYLES - PANEL İÇİ */
         .chat-container {
-            height: calc(70vh - 200px);
+            height: calc(70vh - 180px);
             overflow-y: auto;
             background: white;
             border-radius: 12px;
             padding: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             border: 1px solid #e9ecef;
             box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
         }
@@ -648,11 +642,10 @@
             font-size: 15px;
         }
         
-        /* 🆕 YENİ: BUTON GRUBU STYLES - AI PANEL İÇİN */
         .ai-mode-buttons {
             display: flex;
             gap: 10px;
-            margin: 15px 0;
+            margin-bottom: 15px;
         }
         
         .ai-quick-btn, .ai-detailed-btn {
@@ -788,7 +781,6 @@
             }
         }
         
-        /* TYPING INDICATOR */
         .typing-indicator {
             display: flex;
             gap: 6px;
@@ -863,10 +855,8 @@
     </style>
 </head>
 <body>
-    <!-- MATRIX CANVAS -->
     <canvas id="matrixCanvas"></canvas>
     
-    <!-- ORJİNAL İÇERİK -->
     <div class="container">
         <div class="logo">
             <h1>📊 BORSAANALIZ V11</h1>
@@ -879,8 +869,6 @@
             <h2>🔒 Üye Girişi</h2>
             <p style="color: #666; margin-bottom: 20px; font-size: 14px;">
                 YouTube Katıl grubundan aldığınız şifre ile giriş yapın
-                https://borsaanaliz-raporlar.vercel.app/  bu adresi tarayıcınızda copy paste yapın
-                bu sitemizde AI asistanı aktif durumdadır
             </p>
             
             <div class="input-group">
@@ -907,78 +895,17 @@
                 <p>BORSAANALIZ V11 - Günlük Teknik Analiz Raporlarına Erişiminiz Aktif</p>
             </div>
             
-            <!-- SADE İLETİŞİM SATIRI -->
             <div class="contact-line">
                 <p>📩 İletişim E-posta Adresi:</p>
                 <div class="email">iletisimborsaanaliz@gmail.com</div>
             </div>
             
-            <!-- YENİ: KOMPAKT MAKRO UYARISI -->
-            <div class="macro-warning" style="
-                background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
-                border: 1px solid #ffb300;
-                border-radius: 10px;
-                padding: 15px;
-                margin: 15px 0;
-                box-shadow: 0 3px 8px rgba(255, 179, 0, 0.1);
-            ">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                    <div style="font-size: 20px;">⚠️</div>
-                    <h4 style="margin: 0; color: #ff6f00; font-size: 16px;">EXCEL DOSYASI AÇMA TALİMATI</h4>
-                </div>
-                
-                <div style="font-size: 13px; color: #333; line-height: 1.5; margin-bottom: 12px;">
-                    <p style="margin: 0 0 8px 0;"><strong>Sembol bazlı analiz için:</strong></p>
-                    
-                    <div style="display: flex; align-items: start; gap: 8px; margin-bottom: 6px;">
-                        <div style="min-width: 20px; height: 20px; background: #4caf50; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">1</div>
-                        <div>Dosyayı indir (.xlsm)</div>
-                    </div>
-                    
-                    <div style="display: flex; align-items: start; gap: 8px; margin-bottom: 6px;">
-                        <div style="min-width: 20px; height: 20px; background: #2196f3; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">2</div>
-                        <div>Sağ tık → Özellikler → <strong>"Engellemeyi Kaldır"</strong></div>
-                    </div>
-                    
-                    <div style="display: flex; align-items: start; gap: 8px; margin-bottom: 8px;">
-                        <div style="min-width: 20px; height: 20px; background: #ff9800; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">3</div>
-                        <div>Excel'de aç → <strong>"Makroları Etkinleştir"</strong></div>
-                    </div>
-                </div>
-                
-                <div style="background: #e8f5e9; padding: 8px 12px; border-radius: 6px; border-left: 3px solid #4caf50; margin-bottom: 10px;">
-                    <p style="margin: 0; font-size: 12px; color: #2e7d32;">
-                        <strong>✅ Hazır!</strong> Tüm analiz araçları aktif.
-                    </p>
-                </div>
-                
-                <div style="text-align: center;">
-                    <button onclick="this.parentElement.parentElement.style.display='none'" style="
-                        background: #757575;
-                        color: white;
-                        border: none;
-                        padding: 6px 16px;
-                        border-radius: 5px;
-                        cursor: pointer;
-                        font-size: 12px;
-                        font-weight: 500;
-                        transition: background 0.2s;
-                    " onmouseover="this.style.background='#616161'" onmouseout="this.style.background='#757575'">
-                        Tamam, Anladım
-                    </button>
-                </div>
-            </div>
-            
-            <!-- YENİ: AI ASİSTAN BUTONU -->
             <div class="ai-button-container">
                 <button class="ai-assistant-button" id="openAiPanel">
                     <span class="ai-icon">🤖</span>
                     BORSAANALIZ AI ASİSTANI
                     <span class="ai-icon">⚡</span>
                 </button>
-                <p style="margin-top: 10px; color: #666; font-size: 14px;">
-                    Excel raporlarınız hakkında soru sorun, yanıt anında gelsin!
-                </p>
             </div>
             
             <div class="stats">
@@ -998,16 +925,13 @@
             
             <h3 class="section-title">📁 Günlük Analiz Raporları</h3>
             
-            <div class="file-list" id="fileList">
-                <!-- Dosyalar JS ile doldurulacak -->
-            </div>
+            <div class="file-list" id="fileList"></div>
             
             <div class="warning">
                 <strong>⚠️ Önemli Uyarılar:</strong>
                 • Bu raporlar yatırım tavsiyesi değildir<br>
                 • Raporları üçüncü kişilerle paylaşmayınız<br>
-                • Şifrenizi kimseyle paylaşmayınız<br>
-                • Kendi araştırmanızı mutlaka yapınız
+                • Şifrenizi kimseyle paylaşmayınız
             </div>
             
             <button class="logout-btn" onclick="logout()">
@@ -1016,62 +940,46 @@
         </div>
     </div>
     
-    <!-- AI PANEL (PERDE EFEKTLİ) - 🆕 BUTONLAR EKLENDİ -->
+    <!-- AI PANEL -->
     <div class="ai-panel-overlay" id="aiPanelOverlay">
         <div class="ai-panel" id="aiPanel">
             <div class="ai-panel-header">
                 <h3>🤖 BORSAANALIZ AI ASİSTANI</h3>
-                <button class="back-btn" id="closeAiPanel">
-                    ← Geri Dön
-                </button>
+                <button class="back-btn" id="closeAiPanel">← Geri Dön</button>
             </div>
             
             <div class="ai-panel-content">
                 <div class="chat-container" id="chatContainer">
-                    <!-- Chat mesajları buraya eklenecek -->
                     <div class="message ai">
                         <div class="avatar">🤖</div>
                         <div class="content">
-                            <strong>Merhaba! BORSAANALIZ AI Asistanınıza hoş geldiniz.</strong><br><br>
-                            • Sorunuz Excel dosyasından <strong>gerçek verilerle</strong> yanıtlanacak<br>
-                            • Yanıt <strong>1-2 dakika</strong> içinde bu ekranda belirecek<br>
-                            • Aşağıdan analiz modunu seçebilirsiniz<br><br>
-                            <em>Örnek: "FROTO analiz et", "VMA nedir?", "XU100 yorumla"</em>
+                            Merhaba! BORSAANALIZ AI Asistanına hoş geldiniz.<br><br>
+                            Örnek: "FROTO analiz et", "VMA nedir?", "XU100 yorumla"
                         </div>
                     </div>
                 </div>
                 
-                <!-- 🆕 YENİ: BUTON GRUBU - AI PANEL İÇİNDE -->
                 <div class="ai-mode-buttons">
-                    <button class="ai-quick-btn" id="aiQuickBtn">
-                        ⚡ HIZLI ANALİZ
-                    </button>
-                    <button class="ai-detailed-btn" id="aiDetailedBtn">
-                        📋 DETAYLI ANALİZ
-                    </button>
+                    <button class="ai-quick-btn" id="aiQuickBtn">⚡ HIZLI</button>
+                    <button class="ai-detailed-btn" id="aiDetailedBtn">📋 DETAYLI</button>
                 </div>
                 
                 <div class="ai-input-container">
-                    <input type="text" id="aiInput" placeholder="Excel hakkında sorunuzu yazın..." autocomplete="off">
+                    <input type="text" id="aiInput" placeholder="Sorunuzu yazın..." autocomplete="off">
                     <button id="aiSendBtn">📤 Gönder</button>
                 </div>
                 
                 <div class="quick-actions">
-                    <button class="quick-btn" data-q="VMA Algoritması nasıl yorumlanır?">📈 VMA analizi</button>
-                    <button class="quick-btn" data-q="Bugün öne çıkan hisseler hangileri?">💼 Öne Çıkanlar</button>
-                    <button class="quick-btn" data-q="Excel'de MACRO nasıl açılır?">🔓 MACRO Açma</button>
-                    <button class="quick-btn" data-q="Teknik analiz nasıl yapılır?">📊 Teknik Analiz</button>
-                </div>
-                
-                <div class="ai-info">
-                    ⚡ <strong>Seçtiğiniz moda göre analiz:</strong> Hızlı (10 sn) veya Detaylı (25 sn)
+                    <button class="quick-btn" data-q="VMA Algoritması nasıl yorumlanır?">VMA analizi</button>
+                    <button class="quick-btn" data-q="Bugün öne çıkan hisseler hangileri?">Öne Çıkanlar</button>
+                    <button class="quick-btn" data-q="Excel'de MACRO nasıl açılır?">MACRO Açma</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ORJINAL MATRIX VE APP KODLARI (Aynen kalacak)
+        // MATRIX
         const canvas = document.getElementById('matrixCanvas');
         const ctx = canvas.getContext('2d');
         let matrixAnimationId = null;
@@ -1091,7 +999,6 @@
         function initMatrix() {
             columns = Math.floor(canvas.width / fontSize);
             drops = [];
-            
             for (let i = 0; i < columns; i++) {
                 drops[i] = {
                     y: canvas.height + Math.random() * canvas.height,
@@ -1104,41 +1011,17 @@
         function drawMatrixSimple() {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
             for (let i = 0; i < columns; i++) {
                 const x = i * fontSize;
                 const y = drops[i].y;
-                
-                const progress = y / canvas.height;
-                let r, g;
-                
-                if (progress > 0.7) {
-                    r = 255;
-                    g = 0;
-                } else if (progress > 0.4) {
-                    r = 255;
-                    g = Math.floor((0.7 - progress) * 255 / 0.3);
-                } else {
-                    r = Math.floor(progress * 255 / 0.4);
-                    g = 200 + Math.floor((0.4 - progress) * 55 / 0.4);
-                }
-                
-                ctx.fillStyle = `rgb(${r}, ${g}, 0)`;
+                ctx.fillStyle = '#0f0';
                 ctx.font = `bold ${fontSize}px 'Courier New', monospace`;
                 ctx.fillText(drops[i].char, x, y);
-                
                 drops[i].y -= drops[i].speed;
-                
                 if (drops[i].y < 0) {
                     drops[i].y = canvas.height + Math.random() * 100;
-                    drops[i].char = chars[Math.floor(Math.random() * chars.length)];
-                }
-                
-                if (Math.random() > 0.99) {
-                    drops[i].char = chars[Math.floor(Math.random() * chars.length)];
                 }
             }
-            
             if (isMatrixRunning) {
                 matrixAnimationId = requestAnimationFrame(drawMatrixSimple);
             }
@@ -1164,52 +1047,27 @@
         window.addEventListener('load', startMatrix);
         window.addEventListener('resize', resizeCanvas);
 
-        // ORJINAL APP CODE
+        // APP
         const correctPassword = "ba";
         
         const files = [
-            {
-                name: "BORSAANALIZ_V11_TAM_13022026.xlsm",
-                date: "13.02.2026",
-                dateObj: new Date("2026-02-13"),
-                url: "raporlar/BORSAANALIZ_V11_TAM_13022026.xlsm",
-                size: "1.5 MB"
-            },
-            {
-                name: "BORSAANALIZ_V11_TAM_12022026.xlsm",
-                date: "12.02.2026",
-                dateObj: new Date("2026-02-12"),
-                url: "raporlar/BORSAANALIZ_V11_TAM_12022026.xlsm",
-                size: "1.5 MB"
-            },
-            {
-                name: "BORSAANALIZ_V11_TAM_11022026.xlsm",
-                date: "11.02.2026",
-                dateObj: new Date("2026-02-11"),
-                url: "raporlar/BORSAANALIZ_V11_TAM_11022026.xlsm",
-                size: "1.5 MB"
-            }
+            { name: "BORSAANALIZ_V11_TAM_13022026.xlsm", date: "13.02.2026", dateObj: new Date("2026-02-13"), url: "raporlar/BORSAANALIZ_V11_TAM_13022026.xlsm", size: "1.5 MB" },
+            { name: "BORSAANALIZ_V11_TAM_12022026.xlsm", date: "12.02.2026", dateObj: new Date("2026-02-12"), url: "raporlar/BORSAANALIZ_V11_TAM_12022026.xlsm", size: "1.5 MB" },
+            { name: "BORSAANALIZ_V11_TAM_11022026.xlsm", date: "11.02.2026", dateObj: new Date("2026-02-11"), url: "raporlar/BORSAANALIZ_V11_TAM_11022026.xlsm", size: "1.5 MB" }
         ];
         
-        // OTURUM KONTROL FONKSİYONLARI
         function checkSessionValidity() {
             const loginTime = sessionStorage.getItem('loginTime');
             const currentTime = new Date().getTime();
-            
             if (loginTime) {
                 const loginDate = new Date(parseInt(loginTime));
                 const currentDate = new Date();
-                
-                const isDifferentDay = 
-                    loginDate.getDate() !== currentDate.getDate() ||
-                    loginDate.getMonth() !== currentDate.getMonth() ||
-                    loginDate.getFullYear() !== currentDate.getFullYear();
-                
-                if (isDifferentDay) {
+                if (loginDate.getDate() !== currentDate.getDate() || 
+                    loginDate.getMonth() !== currentDate.getMonth() || 
+                    loginDate.getFullYear() !== currentDate.getFullYear()) {
                     forceLogout();
                     return false;
                 }
-                
                 if ((currentTime - parseInt(loginTime)) > 24 * 60 * 60 * 1000) {
                     forceLogout();
                     return false;
@@ -1221,18 +1079,13 @@
         function forceLogout() {
             sessionStorage.removeItem('authenticated');
             sessionStorage.removeItem('loginTime');
-            
             if (document.getElementById('contentBox').style.display === 'block') {
                 document.getElementById('loginBox').style.display = 'block';
                 document.getElementById('contentBox').style.display = 'none';
                 document.body.classList.remove('content-visible');
                 startMatrix();
             }
-            
             document.getElementById('passwordInput').value = '';
-            document.getElementById('passwordInput').focus();
-            
-            alert('Oturum süreniz doldu. Lütfen tekrar giriş yapın.');
         }
         
         window.onload = function() {
@@ -1244,59 +1097,43 @@
         function checkPassword() {
             const input = document.getElementById('passwordInput').value.trim();
             const errorMsg = document.getElementById('errorMsg');
-            
             if (input === correctPassword) {
                 sessionStorage.setItem('loginTime', new Date().getTime());
                 sessionStorage.setItem('authenticated', 'true');
                 errorMsg.classList.remove('show');
-                
                 stopMatrix();
                 document.body.classList.add('content-visible');
-                
                 showContent();
             } else {
                 errorMsg.classList.add('show');
                 document.getElementById('passwordInput').value = '';
-                document.getElementById('passwordInput').focus();
             }
         }
         
         document.getElementById('passwordInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                checkPassword();
-            }
+            if (e.key === 'Enter') checkPassword();
         });
         
         function showContent() {
             document.getElementById('loginBox').style.display = 'none';
             document.getElementById('contentBox').style.display = 'block';
-            
             document.getElementById('totalReports').textContent = files.length;
             
             const fileList = document.getElementById('fileList');
             fileList.innerHTML = '';
-            
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             
-            files.forEach((file, index) => {
+            files.forEach((file) => {
                 const isToday = file.dateObj.getTime() === today.getTime();
-                
                 const fileItem = document.createElement('div');
                 fileItem.className = 'file-item' + (isToday ? ' today' : '');
                 fileItem.innerHTML = `
                     <div class="file-info">
-                        <div class="file-name">
-                            📊 ${file.name}
-                            ${isToday ? '<span class="today-badge">BUGÜN</span>' : ''}
-                        </div>
-                        <div class="file-date">
-                            📅 ${file.date} • 💾 ${file.size} • 🔢 11 Sayfa Analiz
-                        </div>
+                        <div class="file-name">📊 ${file.name} ${isToday ? '<span class="today-badge">BUGÜN</span>' : ''}</div>
+                        <div class="file-date">📅 ${file.date} • 💾 ${file.size}</div>
                     </div>
-                    <span class="download-btn" onclick="downloadFile('${file.url}', '${file.name}')">
-                        ⬇️ İndir
-                    </span>
+                    <span class="download-btn" onclick="downloadFile('${file.url}', '${file.name}')">⬇️ İndir</span>
                 `;
                 fileList.appendChild(fileItem);
             });
@@ -1306,7 +1143,6 @@
             const link = document.createElement('a');
             link.href = url;
             link.download = filename;
-            link.style.display = 'none';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1322,50 +1158,7 @@
             }
         }
         
-        // SAYFA KONTROLLERİ
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) {
-                checkSessionValidity();
-            }
-        });
-        
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted) {
-                checkSessionValidity();
-            }
-        });
-        
-        window.addEventListener('load', function() {
-            setTimeout(function() {
-                checkSessionValidity();
-            }, 1000);
-        });
-        
-        setInterval(function() {
-            checkSessionValidity();
-        }, 5 * 60 * 1000);
-        
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                stopMatrix();
-            } else if (!sessionStorage.getItem('authenticated')) {
-                startMatrix();
-            }
-        });
-        
-        const isLowEndDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        if (isLowEndDevice) {
-            fontSize = 16;
-        }
-        
-        setTimeout(function() {
-            if (sessionStorage.getItem('authenticated') === 'true') {
-                alert('Oturumunuz güvenlik nedeniyle sonlandırıldı. Lütfen tekrar giriş yapın.');
-                logout();
-            }
-        }, 2 * 60 * 60 * 1000);
-        
-        // 🆕 YENİ: AI PANEL KONTROLLERİ
+        // AI PANEL
         document.addEventListener('DOMContentLoaded', function() {
             const openBtn = document.getElementById('openAiPanel');
             const closeBtn = document.getElementById('closeAiPanel');
@@ -1377,21 +1170,17 @@
             const aiDetailedBtn = document.getElementById('aiDetailedBtn');
             const chatContainer = document.getElementById('chatContainer');
             
-            let currentMode = 'hizli'; // varsayılan mod
+            let currentMode = 'hizli';
             
-            // Panel açma
-            if (openBtn) {
-                openBtn.addEventListener('click', function() {
-                    overlay.style.display = 'flex';
-                    setTimeout(() => {
-                        overlay.classList.add('active');
-                        panel.classList.add('active');
-                    }, 10);
-                    document.body.style.overflow = 'hidden';
-                });
-            }
+            openBtn.addEventListener('click', function() {
+                overlay.style.display = 'flex';
+                setTimeout(() => {
+                    overlay.classList.add('active');
+                    panel.classList.add('active');
+                }, 10);
+                document.body.style.overflow = 'hidden';
+            });
             
-            // Panel kapatma
             function closePanel() {
                 overlay.classList.remove('active');
                 panel.classList.remove('active');
@@ -1401,86 +1190,44 @@
                 }, 500);
             }
             
-            if (closeBtn) {
-                closeBtn.addEventListener('click', closePanel);
-            }
+            closeBtn.addEventListener('click', closePanel);
             
-            if (overlay) {
-                overlay.addEventListener('click', function(e) {
-                    if (e.target === overlay) {
-                        closePanel();
-                    }
-                });
-            }
-            
-            // ESC tuşu ile kapat
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && overlay && overlay.style.display === 'flex') {
-                    closePanel();
-                }
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) closePanel();
             });
             
-            // Mod butonları
-            if (aiQuickBtn) {
-                aiQuickBtn.addEventListener('click', function() {
-                    currentMode = 'hizli';
-                    aiQuickBtn.style.opacity = '1';
-                    aiDetailedBtn.style.opacity = '0.7';
-                });
-            }
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && overlay.style.display === 'flex') closePanel();
+            });
             
-            if (aiDetailedBtn) {
-                aiDetailedBtn.addEventListener('click', function() {
-                    currentMode = 'detayli';
-                    aiDetailedBtn.style.opacity = '1';
-                    aiQuickBtn.style.opacity = '0.7';
-                });
-            }
+            aiQuickBtn.addEventListener('click', function() {
+                currentMode = 'hizli';
+                aiQuickBtn.style.background = '#45a049';
+                aiDetailedBtn.style.background = '#2196F3';
+            });
             
-            // Mesaj ekleme fonksiyonu
-            function addMessage(text, isUser = false) {
+            aiDetailedBtn.addEventListener('click', function() {
+                currentMode = 'detayli';
+                aiDetailedBtn.style.background = '#1976D2';
+                aiQuickBtn.style.background = '#4CAF50';
+            });
+            
+            function addMessage(text, isUser = false, isSystem = false) {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
-                
-                const time = new Date().toLocaleTimeString('tr-TR', { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                });
-                
-                if (isUser) {
-                    messageDiv.innerHTML = `
-                        <div class="avatar">👤</div>
-                        <div class="content">${escapeHtml(text)}</div>
-                    `;
-                } else {
-                    messageDiv.innerHTML = `
-                        <div class="avatar">🤖</div>
-                        <div class="content">${text}</div>
-                    `;
-                }
-                
+                messageDiv.innerHTML = `
+                    <div class="avatar">${isUser ? '👤' : '🤖'}</div>
+                    <div class="content">${text.replace(/\n/g, '<br>')}</div>
+                `;
                 chatContainer.appendChild(messageDiv);
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
             
-            // Escape HTML
-            function escapeHtml(text) {
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-            
-            // Typing indicator
             function showTyping() {
                 const typingDiv = document.createElement('div');
                 typingDiv.id = 'typingIndicator';
                 typingDiv.className = 'typing-indicator';
-                typingDiv.innerHTML = `
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                    <span style="color: #667eea; margin-left: 10px;">AI yanıtlıyor...</span>
-                `;
+                typingDiv.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
                 chatContainer.appendChild(typingDiv);
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
@@ -1490,27 +1237,17 @@
                 if (typing) typing.remove();
             }
             
-            // Soru gönderme fonksiyonu
             function sendQuestion() {
                 const soru = aiInput.value.trim();
                 if (!soru) return;
                 
-                // Mod prefix'ini ekle
                 const soruMetni = currentMode === 'detayli' ? '📋 detaylı ' + soru : '⚡ ' + soru;
                 
-                // Kullanıcı mesajını ekle
                 addMessage(soru, true);
                 aiInput.value = '';
                 
-                // Typing indicator
                 showTyping();
                 
-                // Butonları devre dışı bırak
-                if (aiQuickBtn) aiQuickBtn.disabled = true;
-                if (aiDetailedBtn) aiDetailedBtn.disabled = true;
-                if (aiSendBtn) aiSendBtn.disabled = true;
-                
-                // API'ye gönder
                 fetch('/api/create-issue', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -1521,93 +1258,67 @@
                     hideTyping();
                     
                     if (data.success) {
-                        addMessage(`✅ Sorunuz iletildi! Issue #${data.issueNumber} oluşturuldu.\n\nYanıt 1-2 dakika içinde burada görünecek.`);
+                        addMessage('✅ Sorunuz iletildi! Yanıt burada görünecek.');
                         
-                        // Issue kontrolü başlat
+                        // Issue kontrolü
                         let attempts = 0;
                         const checkInterval = setInterval(async () => {
                             attempts++;
-                            
                             try {
                                 const response = await fetch(
-                                    `https://api.github.com/repos/borsaanaliz-raporlar/borsaanaliz-raporlar-/issues/${data.issueNumber}/comments`,
-                                    {
-                                        headers: {
-                                            'Accept': 'application/vnd.github.v3+json'
-                                        }
-                                    }
+                                    `https://api.github.com/repos/borsaanaliz-raporlar/borsaanaliz-raporlar-/issues/${data.issueNumber}/comments`
                                 );
-                                
                                 if (response.ok) {
                                     const comments = await response.json();
                                     const aiComment = comments.find(c => 
                                         c.user.login.includes('github-actions') || 
-                                        c.body.includes('EXCEL AI ANALİZ RAPORU')
+                                        c.body.includes('AI ANALİZ RAPORU')
                                     );
-                                    
                                     if (aiComment) {
                                         clearInterval(checkInterval);
                                         
-                                        // GitHub mention'larını temizle
+                                        // Sadece analiz kısmını al
                                         let cleanText = aiComment.body
-                                            .replace(/@[\w-]+/g, '')
-                                            .replace(/<!--[\s\S]*?-->/g, '')
-                                            .replace(/\[\s*\]\(.*?\)/g, '')
-                                            .replace(/https?:\/\/[^\s]+/g, '[link]')
+                                            .replace(/## 📝 Kullanıcı Sorusu[\s\S]*?---/, '')
+                                            .replace(/---[\s\S]*$/, '')
+                                            .replace(/⚡.*?Hibrit/, '')
+                                            .replace(/📅.*?$/, '')
+                                            .replace(/📌.*?$/, '')
                                             .trim();
                                         
-                                        addMessage(`📊 **AI ANALİZ RAPORU**\n\n${cleanText}`);
+                                        addMessage('📊 ' + cleanText);
                                     }
                                 }
-                            } catch (error) {
-                                // Silent error
-                            }
+                            } catch (error) {}
                             
-                            if (attempts >= 30) { // 2.5 dakika
+                            if (attempts >= 24) { // 2 dakika
                                 clearInterval(checkInterval);
-                                addMessage('⏳ Yanıt gecikiyor. Lütfen daha sonra kontrol edin.');
+                                addMessage('⏳ Yanıt gecikiyor.');
                             }
                         }, 5000);
-                        
                     } else {
-                        addMessage(`❌ Hata: ${data.error || 'Bilinmeyen hata'}`);
+                        addMessage('❌ Hata oluştu.');
                     }
                 })
-                .catch(error => {
+                .catch(() => {
                     hideTyping();
-                    addMessage(`❌ Bağlantı hatası: ${error.message}`);
-                })
-                .finally(() => {
-                    // Butonları tekrar aktif et
-                    if (aiQuickBtn) aiQuickBtn.disabled = false;
-                    if (aiDetailedBtn) aiDetailedBtn.disabled = false;
-                    if (aiSendBtn) aiSendBtn.disabled = false;
+                    addMessage('❌ Bağlantı hatası.');
                 });
             }
             
-            // Gönder butonu
-            if (aiSendBtn) {
-                aiSendBtn.addEventListener('click', sendQuestion);
-            }
+            aiSendBtn.addEventListener('click', sendQuestion);
             
-            // Enter tuşu
-            if (aiInput) {
-                aiInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        sendQuestion();
-                    }
-                });
-            }
+            aiInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    sendQuestion();
+                }
+            });
             
-            // Quick buttons
             document.querySelectorAll('.quick-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const question = this.getAttribute('data-q');
-                    if (aiInput) {
-                        aiInput.value = question;
-                        aiInput.focus();
-                    }
+                    aiInput.value = this.getAttribute('data-q');
+                    aiInput.focus();
                 });
             });
         });
