@@ -177,13 +177,17 @@ def create_detailed_prompt(question, excel_data, hisse_adi=None):
    • <-60 = Aşırı satım
    • POZİTİF/NEGATİF = Trend yönü
 
-2️⃣ **VMA (%94 doğruluk):**
-   • POZİTİF(57) = 57 gündür yükselen hacim trendi (ÇOK GÜÇLÜ)
-   • NEGATİF(7) = 7 gündür düşen hacim trendi (ZAYIF)
+2️⃣ **VMA (hacim ağırlıklı trend algoritmasıdır):**
+   • VMA %94 doğrulukla sinyal üreten özel bir algoritmadır
+   • Bu, basit bir hareketli ortalama DEĞİLDİR!
+   • POZİTİF(57) = 57 gündür yükselen  trend devam ediyor
+   • NEGATİF(7) = 7 gündür düşen trend devam ediyor
+   • ASLA "Volume Moving Average" olarak yorumlama!
+   • ASLA fiyatla karşılaştırma, sadece HACİM AĞIRLIKLI TREND olarak yorumla!
 
 3️⃣ **LSMA KAMA:**
-   • POZİTİF(48) = 48 gündür yükseliş trendi (UZUN VADELİ)
-   • NEGATİF(5) = 5 gündür düşüş trendi (KISA VADELİ)
+   • POZİTİF(48) = 48 gündür yükseliş trendi devam ediyor 
+   • NEGATİF(5) = 5 gündür düşüş trendi devam ediyor
 
 4️⃣ **PEARSON KATSAYISI:**
    • 0.70-1.00 = ÇOK GÜÇLÜ trend
@@ -207,7 +211,8 @@ def create_detailed_prompt(question, excel_data, hisse_adi=None):
    • Fiyat < Alt bant = AŞIRI SATIM
    • Bant içinde = NORMAL
 
-**🚫 KESİNLİKLE YOK:** RSI, MACD, Stokastik
+**🚫 KESİNLİKLE YOK:** RSI, MACD, Stokastik - SAKIN KULLANMA!
+**📌 PARANTEZ İÇİNDEKİ RAKAMLAR:** Trendin kaç gündür devam ettiğini gösterir!
 ═══════════════════════════════════════════
 """
     
