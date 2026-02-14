@@ -341,7 +341,7 @@ def call_deepseek(prompt, question, detailed=False):
                     {"role": "system", "content": prompt},
                     {"role": "user", "content": question}
                 ],
-                "temperature": 0.1,
+                "temperature": 0.01,
                 "max_tokens": 2000 if detailed else 1000
             },
             timeout=timeout
