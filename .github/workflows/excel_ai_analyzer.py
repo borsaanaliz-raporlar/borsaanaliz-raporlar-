@@ -299,7 +299,7 @@ def create_detailed_prompt(question, excel_data, hisse_adi=None):
 
 2️⃣ **ÖNE ÇIKAN HİSSELER**
    • En uzun VMA POZİTİF olanlar
-   • Pearson55 > 0.7 olanlar
+   • Pearson55 > 0.85 olanlar
    • Hacim senaryosu güçlü olanlar
 
 3️⃣ **SEKTÖREL DEĞERLENDİRME**
