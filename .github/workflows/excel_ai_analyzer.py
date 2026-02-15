@@ -350,9 +350,8 @@ def call_deepseek(prompt, question, detailed=False):
             json={
                 "model": "deepseek-chat",
                 "messages": [
-                    {"role": "system", "content": "SEN BORSAANALİZ V11 ASİSTANISIN. SADECE verilen prompt'taki bilgileri kullan. SAKIN kendi bildiklerini anlatma!"},
-                    {"role": "system", "content": prompt},
-                    {"role": "user", "content": question}
+                    {"role": "system", "content": "SEN BORSAANALİZ V11 ASİSTANISIN. SAKIN genel bilgi verme! SADECE şu anda sana verilen prompt'u KULLAN. Kendi eğitim verilerindeki hiçbir bilgiyi KULLANMA! GMSTR bir gümüş fonudur, hisse değildir. VMA Hacim Ağırlıklı Trend Algoritmasıdır, Volume Moving Average değildir."},
+                    {"role": "user", "content": f"PROMPT: {prompt}\n\nSORU: {question}\n\nCEVAP VERİRKEN SADECE PROMPT'TAKİ BİLGİLERİ KULLAN!"}
                 ],
                 "temperature": 0.0,
                 "max_tokens": 2000 if detailed else 1000
