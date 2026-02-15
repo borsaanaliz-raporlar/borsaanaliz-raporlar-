@@ -1,9 +1,20 @@
-print("⚡⚡⚡ ANALİZ BAŞLADI - VERSİYON 15.02.2026 ⚡⚡⚡")
+
 #!/usr/bin/env python3
 """
 BORSAANALİZ V11 UZMAN TEKNİK ANALİST
 ⚡ HIZLI (DeepSeek) + 📋 DETAYLI (DeepSeek+Groq) BUTONLU SİSTEM
 """
+# ============ ZORUNLU: ESKİ BİLGİLERİ UNUT ============
+AI_TALIMAT = """ESKİ BİLGİLERİ UNUT! SADECE BUNU BİL:
+
+VMA = HACİM AĞIRLIKLI TREND ALGORİTMASI
+- POZİTİF(57) = 57 gündür yükselen trend
+- NEGATİF(7) = 7 gündür düşen trend
+
+ASLA "Volume Moving Average" deme!
+ASLA MACD, RSI kullanma!
+"""
+# ===================================================
 import os
 import sys
 import json
@@ -340,7 +351,7 @@ def call_deepseek(prompt, question, detailed=False):
             json={
                 "model": "deepseek-chat",
                 "messages": [
-                    {"role": "system", "content": prompt},
+                    {"role": "system", "content": AI_TALIMAT + "\n\n" + prompt},
                     {"role": "user", "content": question}
                 ],
                 "temperature": 0.01,
