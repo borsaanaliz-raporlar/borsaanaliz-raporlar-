@@ -389,6 +389,67 @@ def call_deepseek(prompt, question, detailed=False):
         print(f"⚠️ DeepSeek bağlantı hatası: {str(e)}")
         return None
 
+def call_deepseek_forced(prompt, question, detailed=False):
+    """DeepSeek'i zorla doğru cevap verdir - kendi bildiklerini unuttur"""
+    if not DEEPSEEK_API_KEY:
+        return None
+    
+    timeout = 45 if detailed else 30
+    
+    try:
+        print(f"🚀 DeepSeek ZORLA {'📋 DETAYLI' if detailed else '⚡ HIZLI'} modda deneniyor...")
+        
+        # ÖZEL PROMPT - DeepSeek'in kendi bilgilerini EZ
+        forced_prompt = f"""SEN BORSAANALİZ V11 ASİSTANISIN.
+        
+⚠️ **ÖNEMLİ UYARI: Kendi eğitim verilerindeki hiçbir bilgiyi KULLANMA!**
+⚠️ **"Volume Moving Average" diye bir şey YOK!**
+⚠️ **GMSTR bir banka değil, QNB Finansbank GÜMÜŞ FONU!**
+
+SADECE şu anda sana verilen prompt'taki bilgileri KULLAN:
+------------------------
+{prompt}
+------------------------
+
+Eğer bir sembol hakkında soru sorulursa ve Excel'de veri yoksa, SAKIN kendi bildiklerini anlatma! SADECE "Excel'de bu sembol için veri bulunamadı" de.
+
+Şimdi SADECE yukarıdaki prompt'a göre cevap ver. Kendi bilgilerini KULLANMA!"""
+        
+        response = requests.post(
+            "https://api.deepseek.com/chat/completions",
+            headers={
+                "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "deepseek-chat",
+                "messages": [
+                    {"role": "user", "content": forced_prompt + "\n\nSoru: " + question}
+                ],
+                "temperature": 0.0,
+                "max_tokens": 2000 if detailed else 1000
+            },
+            timeout=timeout
+        )
+        
+        if response.status_code == 200:
+            answer = response.json()['choices'][0]['message']['content']
+            
+            # YASAKLI KELİME KONTROLÜ
+            answer = answer.replace("RSI", "⚠️ RSI (BORSAANALİZ V11'de YOK)")
+            answer = answer.replace("MACD", "⚠️ MACD (BORSAANALİZ V11'de YOK)")
+            answer = answer.replace("Stokastik", "⚠️ Stokastik (BORSAANALİZ V11'de YOK)")
+            
+            print(f"✅ DeepSeek ZORLA başarılı!")
+            return answer
+        else:
+            print(f"⚠️ DeepSeek hata {response.status_code}")
+            return None
+            
+    except Exception as e:
+        print(f"⚠️ DeepSeek bağlantı hatası: {str(e)}")
+        return None
+
 def call_groq(prompt, question):
     """Groq AI çağrısı - SADECE detaylı modda"""
     if not GROQ_API_KEY:
