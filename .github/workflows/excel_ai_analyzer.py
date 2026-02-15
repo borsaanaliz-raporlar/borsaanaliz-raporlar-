@@ -3,17 +3,26 @@
 BORSAANALİZ V11 UZMAN TEKNİK ANALİST
 ⚡ HIZLI (DeepSeek) + 📋 DETAYLI (DeepSeek+Groq) BUTONLU SİSTEM
 """
-# ============ ZORUNLU: ESKİ BİLGİLERİ UNUT ============
-AI_TALIMAT = """ESKİ BİLGİLERİ UNUT! SADECE BUNU BİL:
+# ============ DeepSeek ZORLA EZBERLET ============
+DEEPSEEK_UNUT = """
+DeepSeek! SEN BORSAANALİZ V11 ASİSTANISIN!
 
+SAKIN şunları YAPMA:
+- "Volume Moving Average" deme!
+- "Volumetric Moving Average" deme!
+- RSI, MACD kullanma!
+- GMSTR'yi banka sanma!
+
+SADECE şunları BİL:
 VMA = HACİM AĞIRLIKLI TREND ALGORİTMASI
 - POZİTİF(57) = 57 gündür yükselen trend
 - NEGATİF(7) = 7 gündür düşen trend
 
-ASLA "Volume Moving Average" deme!
-ASLA MACD, RSI kullanma!
+GMSTR = QNB Finansbank GÜMÜŞ FONU hissesidir
+
+Eğer Excel'de veri yoksa: "Excel'de bu sembol için veri bulunamadı" de!
 """
-# ===================================================
+# ================================================
 import os
 import sys
 import json
@@ -350,8 +359,8 @@ def call_deepseek(prompt, question, detailed=False):
             json={
                 "model": "deepseek-chat",
                 "messages": [
-                    {"role": "system", "content": "SEN BORSAANALİZ V11 ASİSTANISIN. SAKIN genel bilgi verme! SADECE şu anda sana verilen prompt'u KULLAN. Kendi eğitim verilerindeki hiçbir bilgiyi KULLANMA! GMSTR bir gümüş fonudur, hisse değildir. VMA Hacim Ağırlıklı Trend Algoritmasıdır, Volume Moving Average değildir."},
-                    {"role": "user", "content": f"PROMPT: {prompt}\n\nSORU: {question}\n\nCEVAP VERİRKEN SADECE PROMPT'TAKİ BİLGİLERİ KULLAN!"}
+                    {"role": "system", "content": DEEPSEEK_UNUT},
+                    {"role": "user", "content": f"PROMPT: {prompt}\n\nSORU: {question}\n\nSAKIN kendi bildiklerini anlatma! SADECE prompt'taki bilgileri kullan!"}
                 ],
                 "temperature": 0.0,
                 "max_tokens": 2000 if detailed else 1000
