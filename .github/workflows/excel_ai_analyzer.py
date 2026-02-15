@@ -351,10 +351,11 @@ def call_deepseek(prompt, question, detailed=False):
             json={
                 "model": "deepseek-chat",
                 "messages": [
-                    {"role": "system", "content": AI_TALIMAT + "\n\n" + prompt},
+                    {"role": "system", "content": "SEN BORSAANALİZ V11 ASİSTANISIN. SADECE verilen prompt'taki bilgileri kullan. SAKIN kendi bildiklerini anlatma!"},
+                    {"role": "system", "content": prompt},
                     {"role": "user", "content": question}
                 ],
-                "temperature": 0.01,
+                "temperature": 0.0,
                 "max_tokens": 2000 if detailed else 1000
             },
             timeout=timeout
