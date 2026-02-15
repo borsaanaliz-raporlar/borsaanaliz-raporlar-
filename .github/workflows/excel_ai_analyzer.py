@@ -110,6 +110,7 @@ def create_quick_prompt(question, excel_data, hisse_adi=None):
 
 **📊 KRİTİK GÖSTERGELER:**
 • VMA: %94 doğruluk, parantez içi GÜN SAYISI
+• POZİTİF(57) = 57 gündür yükselen trend, NEGATİF(7) = 7 gündür düşen trend
 • LSMA: Trend göstergesi, parantez içi GÜN SAYISI
 • Pearson: >0.3 yükseliş, <-0.3 düşüş
 
@@ -180,7 +181,7 @@ def create_detailed_prompt(question, excel_data, hisse_adi=None):
 2️⃣ **VMA (hacim ağırlıklı trend algoritmasıdır):**
    • VMA %94 doğrulukla sinyal üreten özel bir algoritmadır
    • Bu, basit bir hareketli ortalama DEĞİLDİR!
-   • POZİTİF(57) = 57 gündür yükselen  trend devam ediyor
+   • POZİTİF(57) = 57 gündür yükselen trend devam ediyor
    • NEGATİF(7) = 7 gündür düşen trend devam ediyor
    • ASLA "Volume Moving Average" olarak yorumlama!
    • ASLA fiyatla karşılaştırma, sadece HACİM AĞIRLIKLI TREND olarak yorumla!
