@@ -1,3 +1,4 @@
+print("⚡⚡⚡ ANALİZ BAŞLADI - VERSİYON 15.02.2026 ⚡⚡⚡")
 #!/usr/bin/env python3
 """
 BORSAANALİZ V11 UZMAN TEKNİK ANALİST
