@@ -529,7 +529,7 @@ def main():
             prompt = create_detailed_prompt(question, excel_data, hisse_adi)
             
             # 1. DeepSeek ile detaylı analiz
-            answer = call_deepseek(prompt, question, detailed=True)
+            answer = call_deepseek_forced(prompt, question, detailed=True)  # forced kullan
             
             # 2. Groq ile zenginleştir (DeepSeek başarılı olduysa)
             if answer and GROQ_API_KEY:
@@ -540,7 +540,7 @@ def main():
         else:
             # HIZLI MOD - Sadece DeepSeek
             prompt = create_quick_prompt(question, excel_data, hisse_adi)
-            answer = call_deepseek(prompt, question, detailed=False)
+            answer = call_deepseek_forced(prompt, question, detailed=False)  # forced kullan
             
             # DeepSeek çalışmazsa Groq'u dene
             if not answer:
