@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 """
 BORSAANALİZ V11 UZMAN TEKNİK ANALİST
