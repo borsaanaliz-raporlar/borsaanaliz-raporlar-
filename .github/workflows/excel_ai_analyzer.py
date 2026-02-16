@@ -2,7 +2,7 @@
 """
 BORSAANALİZ V11 UZMAN TEKNİK ANALİST
 ⚡ HIZLI (Groq) + 📋 DETAYLI (Groq) BUTONLU SİSTEM
-AI'IN VERİ UYDURMASI ENGELLENDİ!
+Excel'deki hisseleri otomatik okur, veri uydurmaz!
 """
 import os
 import sys
@@ -73,10 +73,42 @@ def get_excel_data_for_ai(excel_path):
     except Exception as e:
         return {"error": f"Excel okuma hatası: {str(e)}"}
 
-def extract_hisse_adi(question):
-    """HİSSE ADI BULUCU - LİSTE YOK, SAF REGEX!"""
-    words = re.findall(r'\b[A-Z0-9]{3,8}\b', question.upper())
-    return words[0] if words else None
+def extract_hisse_adi(question, excel_data=None):
+    """HİSSE ADI BULUCU - EXCEL'DEKİ İLK KOLONDAN OKUR"""
+    if not excel_data:
+        return None
+    
+    question_upper = question.upper()
+    
+    # Tüm hisse isimlerini topla (ilk kolon)
+    tum_hisseler = []
+    
+    for sheet_name, sheet_info in excel_data["data"].items():
+        for hisse in sheet_info["data"]:
+            # İlk kolondaki değer (genelde "Hisse" veya "Sembol")
+            ilk_kolon = list(hisse.values())[0] if hisse else None
+            if ilk_kolon and isinstance(ilk_kolon, str):
+                tum_hisseler.append(ilk_kolon.upper())
+    
+    print(f"📊 Excel'de toplam {len(tum_hisseler)} hisse/fon bulundu")
+    
+    # Önce tam eşleşme ara
+    for hisse in tum_hisseler:
+        if hisse and hisse in question_upper:
+            print(f"🎯 Tam eşleşme bulundu: {hisse}")
+            return hisse
+    
+    # Kısmi eşleşme ara (THY -> THYAO gibi)
+    for hisse in tum_hisseler:
+        if hisse and len(hisse) >= 3:
+            # Sorudaki her kelimeyi kontrol et
+            for kelime in question_upper.split():
+                if len(kelime) >= 3 and kelime in hisse:
+                    print(f"🎯 Kısmi eşleşme bulundu: {hisse} (aranan: {kelime})")
+                    return hisse
+    
+    print("⚠️ Hisse adı bulunamadı")
+    return None
 
 def get_hisse_raw_data(hisse_info, headers):
     """Hisse'nin ham verilerini formatlı şekilde döndür"""
@@ -145,7 +177,7 @@ def create_quick_prompt(question, excel_data, hisse_adi=None):
             
             # Veri var mı kontrol et
             if not ham_veri.strip():
-                return f"⚠️ **{hisse_adi}** için Excel'de veri bulunamadı. Lütfen sembolü kontrol edin."
+                return f"⚠️ **{hisse_adi}** için Excel'de yeterli veri bulunamadı."
             
             prompt = system_intro + f"""
 
@@ -259,7 +291,7 @@ def create_detailed_prompt(question, excel_data, hisse_adi=None):
             
             # Veri var mı kontrol et
             if not ham_veri.strip():
-                return f"⚠️ **{hisse_adi}** için Excel'de veri bulunamadı. Lütfen sembolü kontrol edin."
+                return f"⚠️ **{hisse_adi}** için Excel'de yeterli veri bulunamadı."
             
             prompt = system_intro + f"""
 
@@ -367,7 +399,7 @@ def call_groq(prompt, question):
         # Prompt'ta gerçek veri var mı kontrol et
         if "HAM VERİLER" not in prompt and "Close" not in prompt:
             print("⚠️ UYARI: Prompt'ta ham veri yok!")
-            return "⚠️ Excel'de bu sorgu için yeterli veri bulunamadı."
+            return prompt  # Zaten hata mesajı olabilir
         
         # Groq için özel sistem mesajı - ÇOK SIKI KURALLAR
         system_message = """Sen BORSAANALİZ V11 uzmanısın.
@@ -484,7 +516,8 @@ def main():
     if "error" in excel_data:
         answer = f"❌ {excel_data['error']}"
     else:
-        hisse_adi = extract_hisse_adi(question)
+        # Hisse adını bul - Excel'deki ilk kolondan okuyarak
+        hisse_adi = extract_hisse_adi(question, excel_data)
         
         if hisse_adi:
             print(f"🎯 Hisse: {hisse_adi}")
@@ -497,7 +530,7 @@ def main():
         else:
             prompt = create_quick_prompt(question, excel_data, hisse_adi)
         
-        # Eğer prompt zaten bir hata mesajıysa (veri bulunamadı gibi), onu direkt kullan
+        # Eğer prompt zaten bir hata mesajıysa (⚠️ ile başlıyorsa), onu direkt kullan
         if prompt.startswith("⚠️"):
             answer = prompt
         else:
