@@ -1,48 +1,9 @@
 #!/usr/bin/env python3
 """
 BORSAANALİZ V11 UZMAN TEKNİK ANALİST
-⚡ HIZLI (DeepSeek) + 📋 DETAYLI (DeepSeek+Groq) BUTONLU SİSTEM
+⚡ HIZLI (Groq) + 📋 DETAYLI (Groq) BUTONLU SİSTEM
+DeepSeek inat etti, şimdilik yedekte bekliyor!
 """
-# ============ DeepSeek ZORLA EZBERLET ============
-DEEPSEEK_UNUT = """
-╔══════════════════════════════════════════════════════════════════════╗
-║              ⚠️ BORSAANALİZ V11 ZORUNLU TALİMAT ⚠️                     ║
-╠══════════════════════════════════════════════════════════════════════╣
-║                                                                      ║
-║   SEN BORSAANALİZ V11 ASİSTANISIN!                                   ║
-║   KENDİ EĞİTİM VERİLERİNİ TAMAMEN UNUT!                              ║
-║   SADECE AŞAĞIDA VERİLEN BİLGİLERİ KULLAN!                           ║
-║                                                                      ║
-╠══════════════════════════════════════════════════════════════════════╣
-║                                                                      ║
-║   ❌ **KESİNLİKLE YASAK OLANLAR:**                                    ║
-║   • "Volume Moving Average" ASLA KULLANMA!                           ║
-║   • "Volumetric Moving Average" ASLA KULLANMA!                       ║
-║   • RSI, MACD, Stokastik, Stochastic ASLA KULLANMA!                  ║
-║   • GMSTR için "Garanti Bankası", "banka", "hisse" ASLA KULLANMA!    ║
-║   • Kendi bildiğin hiçbir hisse/fon bilgisini KULLANMA!              ║
-║                                                                      ║
-╠══════════════════════════════════════════════════════════════════════╣
-║                                                                      ║
-║   ✅ **SADECE BU TANIMLARI KULLAN:**                                  ║
-║   • VMA = HACİM AĞIRLIKLI TREND ALGORİTMASI                          ║
-║   • POZİTİF(57) = 57 gündür yükselen trend devam ediyor              ║
-║   • NEGATİF(7) = 7 gündür düşen trend devam ediyor                   ║
-║   • GMSTR = QNB Finansbank GÜMÜŞ FONU (hisse değil, FON!)            ║
-║   • LSMA = Trend göstergesi, parantez içi GÜN SAYISI                 ║
-║   • Pearson >0.3 = yükseliş, <-0.3 = düşüş                           ║
-║                                                                      ║
-╠══════════════════════════════════════════════════════════════════════╣
-║                                                                      ║
-║   📋 **ALTIN KURAL:**                                                ║
-║   Aşağıda "📊 **HAM VERİLER:**" başlığı altında verilenler           ║
-║   SADECE onlar var. Diğer tüm bilgiler YOK!                          ║
-║   Eğer Excel'de veri yoksa:                                          ║
-║   "Excel'de bu sembol için veri bulunamadı" de!                      ║
-║                                                                      ║
-╚══════════════════════════════════════════════════════════════════════╝
-"""
-# ================================================
 import os
 import sys
 import json
@@ -57,7 +18,6 @@ DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY', '')
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
 
 # ============= MODE AYARI =============
-# 📋 Web'den gelen soruda "detaylı" kelimesi varsa DETAYLI mod
 def is_detailed_mode(question):
     """Detaylı analiz isteği kontrolü"""
     detailed_keywords = ["detaylı", "detayli", "kapsamlı", "kapsamli", "profesyonel", "uzun"]
@@ -147,7 +107,7 @@ def get_hisse_raw_data(hisse_info, headers):
     return ham_veriler
 
 def create_quick_prompt(question, excel_data, hisse_adi=None):
-    """⚡ HIZLI ANALİZ - Sadece DeepSeek, kısa prompt"""
+    """⚡ HIZLI ANALİZ - Kısa prompt"""
     
     timestamp = excel_data["timestamp"]
     data = excel_data["data"]
@@ -188,10 +148,6 @@ def create_quick_prompt(question, excel_data, hisse_adi=None):
 📊 **{hisse_adi} HAM VERİLER:**
 {ham_veri}
 
-**⚠️ ÖNEMLİ UYARI:** 
-Sadece yukarıdaki HAM VERİLER'i kullan! Kendi bildiğin hiçbir bilgiyi kullanma!
-Eğer {hisse_adi} hakkında yukarıda veri yoksa "Veri bulunamadı" de!
-
 **ŞU SORULARA CEVAP VER:**
 1. Kısa vadeli görünüm (EMA8/21, WT)
 2. Destek/direnç seviyeleri (S1/R1)
@@ -214,12 +170,10 @@ Hızlı piyasa analizi yap:
 - Endekslerin durumu
 - Öne çıkan hisseler
 - Genel trend yönü
-
-⚠️ Yatırım tavsiyesi değildir.
 """
 
 def create_detailed_prompt(question, excel_data, hisse_adi=None):
-    """📋 DETAYLI ANALİZ - DeepSeek + Groq, uzun prompt"""
+    """📋 DETAYLI ANALİZ - Uzun prompt"""
     
     timestamp = excel_data["timestamp"]
     data = excel_data["data"]
@@ -303,10 +257,6 @@ def create_detailed_prompt(question, excel_data, hisse_adi=None):
 **📊 HAM VERİLER:**
 {ham_veri}
 
-**⚠️ ÖNEMLİ UYARI:** 
-Sadece yukarıdaki HAM VERİLER'i kullan! Kendi bildiğin hiçbir bilgiyi kullanma!
-Eğer {hisse_adi} hakkında yukarıda veri yoksa "Veri bulunamadı" de!
-
 **🔍 ŞU BAŞLIKLARDA DETAYLI ANALİZ YAP:**
 
 1️⃣ **KISA VADELİ GÖRÜNÜM (1-5 GÜN)**
@@ -386,82 +336,35 @@ Eğer {hisse_adi} hakkında yukarıda veri yoksa "Veri bulunamadı" de!
 ⚠️ **YASAL UYARI:** Yatırım tavsiyesi değildir.
 """
 
-def call_deepseek_forced(prompt, question, detailed=False):
-    """DeepSeek'i zorla doğru cevap verdir - kendi bildiklerini unuttur"""
-    if not DEEPSEEK_API_KEY:
-        return None
-    
-    timeout = 45 if detailed else 30
-    
-    try:
-        print(f"🚀 DeepSeek ZORLA {'📋 DETAYLI' if detailed else '⚡ HIZLI'} modda deneniyor...")
-        
-        # DeepSeek'in kendi bilgilerini tamamen unutturan özel prompt
-        forced_prompt = f"""
-{ DEEPSEEK_UNUT }
-
-═══════════════════════════════════════════════════════════════════════
-📊 **BUGÜNÜN EXCEL VERİLERİ (SADECE BUNLAR GERÇEK):**
-{prompt}
-═══════════════════════════════════════════════════════════════════════
-
-❓ **KULLANICI SORUSU:** {question}
-
-⚠️ **SON UYARI:** Yukarıdaki Excel verileri DIŞINDA hiçbir bilgiyi kullanma!
-Kendini "Garanti Bankası" falan diye bir şey bilmiyor gibi düşün!
-Sadece bu mesajda gördüklerin var, başka hiçbir şey bilmiyorsun!
-"""
-        
-        response = requests.post(
-            "https://api.deepseek.com/chat/completions",
-            headers={
-                "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": "deepseek-chat",
-                "messages": [
-                    {"role": "system", "content": "Sen BORSAANALİZ V11 asistanısın. Kendi eğitim verilerini tamamen unut. Sadece kullanıcının mesajındaki bilgileri kullan."},
-                    {"role": "user", "content": forced_prompt}
-                ],
-                "temperature": 0.0,
-                "max_tokens": 2000 if detailed else 1000
-            },
-            timeout=timeout
-        )
-        
-        if response.status_code == 200:
-            answer = response.json()['choices'][0]['message']['content']
-            
-            # YASAKLI KELİME KONTROLÜ
-            answer = answer.replace("RSI", "⚠️ RSI (BORSAANALİZ V11'de YOK)")
-            answer = answer.replace("MACD", "⚠️ MACD (BORSAANALİZ V11'de YOK)")
-            answer = answer.replace("Stokastik", "⚠️ Stokastik (BORSAANALİZ V11'de YOK)")
-            answer = answer.replace("Stochastic", "⚠️ Stochastic (BORSAANALİZ V11'de YOK)")
-            
-            # GMSTR için kontrol - eğer hala banka derse düzelt
-            if "garanti" in answer.lower() and "gmstr" in prompt.lower():
-                answer = "⚠️ **DÜZELTME:** " + answer
-                answer = answer.replace("Garanti Bankası", "QNB Finansbank GÜMÜŞ FONU")
-                answer = answer.replace("Garanti", "QNB Finansbank")
-            
-            print(f"✅ DeepSeek ZORLA başarılı!")
-            return answer
-        else:
-            print(f"⚠️ DeepSeek hata {response.status_code}")
-            return None
-            
-    except Exception as e:
-        print(f"⚠️ DeepSeek bağlantı hatası: {str(e)}")
-        return None
-
 def call_groq(prompt, question):
-    """Groq AI çağrısı - SADECE detaylı modda"""
+    """Groq AI çağrısı - ANA ANALİZ MOTORU"""
     if not GROQ_API_KEY:
         return None
     
     try:
-        print("⚡ Groq AI (zenginleştirme için) deneniyor...")
+        print("⚡ Groq AI analiz yapıyor...")
+        
+        # Groq için özel sistem mesajı - DeepSeek'in inatçılığını unuttur!
+        system_message = """Sen BORSAANALİZ V11 uzmanısın. 
+        
+⚠️ **ÇOK ÖNEMLİ KURALLAR - SAKIN UNUTMA!** ⚠️
+
+1️⃣ VMA KESİNLİKLE "Volume Moving Average" DEĞİLDİR!
+   VMA = HACİM AĞIRLIKLI TREND ALGORİTMASI
+   • POZİTİF(57) = 57 gündür yükselen trend
+   • NEGATİF(7) = 7 gündür düşen trend
+
+2️⃣ GMSTR KESİNLİKLE banka veya hisse DEĞİLDİR!
+   GMSTR = QNB Finansbank GÜMÜŞ FONU
+
+3️⃣ RSI, MACD, Stokastik KESİNLİKLE YOK!
+   Bu göstergeleri ASLA kullanma!
+
+4️⃣ SADECE aşağıda verilen Excel verilerini kullan!
+   Kendi bildiğin hiçbir bilgiyi kullanma!
+
+Şimdi aşağıdaki soruyu cevapla:"""
+        
         response = requests.post(
             "https://api.groq.com/openai/v1/chat/completions",
             headers={
@@ -471,26 +374,45 @@ def call_groq(prompt, question):
             json={
                 "model": "llama-3.3-70b-versatile",
                 "messages": [
-                    {"role": "system", "content": "Sen BORSAANALİZ V11 uzmanısın. Verilen analizi daha anlaşılır ve akıcı hale getir, ek yorum ekle. Ancak SAKIN yeni bilgi ekleme, sadece verilen analizi zenginleştir."},
-                    {"role": "user", "content": f"Bu analizi zenginleştir, daha profesyonel hale getir:\n\n{question}"}
+                    {"role": "system", "content": system_message},
+                    {"role": "user", "content": f"📊 **EXCEL VERİLERİ:**\n{prompt}\n\n❓ **SORU:** {question}"}
                 ],
-                "temperature": 0.3,
-                "max_tokens": 1000
+                "temperature": 0.2,  # Biraz daha düşük, daha az yaratıcı
+                "max_tokens": 2000
             },
-            timeout=30
+            timeout=60
         )
         
         if response.status_code == 200:
-            return response.json()['choices'][0]['message']['content']
+            answer = response.json()['choices'][0]['message']['content']
+            
+            # Son bir güvenlik kontrolü - hala yanlış kelimeler varsa düzelt
+            answer = answer.replace("Volume Moving Average", "HACİM AĞIRLIKLI TREND ALGORİTMASI")
+            answer = answer.replace("Volumetric Moving Average", "HACİM AĞIRLIKLI TREND ALGORİTMASI")
+            answer = answer.replace("Garanti Bankası", "QNB Finansbank GÜMÜŞ FONU")
+            answer = answer.replace("Garanti", "QNB Finansbank")
+            answer = answer.replace("RSI", "⚠️ RSI (BORSAANALİZ V11'de YOK)")
+            answer = answer.replace("MACD", "⚠️ MACD (BORSAANALİZ V11'de YOK)")
+            answer = answer.replace("Stokastik", "⚠️ Stokastik (BORSAANALİZ V11'de YOK)")
+            
+            print(f"✅ Groq başarılı!")
+            return answer
         else:
+            print(f"⚠️ Groq hata {response.status_code}")
             return None
             
     except Exception as e:
         print(f"⚠️ Groq bağlantı hatası: {str(e)}")
         return None
 
+def call_deepseek_yedek(prompt, question, detailed=False):
+    """DeepSeek yedekte bekliyor - şimdilik kullanılmıyor"""
+    # Bu fonksiyon şimdilik kullanılmıyor
+    # DeepSeek inat etti, Groq'a geçtik
+    return None
+
 def main():
-    """Ana fonksiyon"""
+    """Ana fonksiyon - SADECE GROQ KULLANIR, DeepSeek yedekte"""
     if len(sys.argv) < 2:
         print("❌ Hata: Soru girmediniz!")
         return
@@ -532,43 +454,22 @@ def main():
         # MOD'A GÖRE PROMPT OLUŞTUR
         if detailed_mode:
             prompt = create_detailed_prompt(question, excel_data, hisse_adi)
-            
-            # 1. ÖNCE GROQ DENE (çünkü DeepSeek inatçı)
-            print("⚡ Önce Groq deneniyor...")
-            answer = call_groq(prompt, question)
-            
-            # 2. Groq çalışmazsa DeepSeek'i dene
-            if not answer:
-                print("⚠️ Groq çalışmadı, DeepSeek deneniyor...")
-                answer = call_deepseek_forced(prompt, question, detailed=True)
-            
-            # 3. DeepSeek başarılı olduysa Groq ile zenginleştir
-            elif answer and GROQ_API_KEY and False:  # False ekledik, zenginleştirmeyi kapattık
-                print("✨ Groq ile analiz zenginleştiriliyor...")
-                enriched = call_groq(prompt, answer)
-                if enriched:
-                    answer = enriched + "\n\n---\n📌 *Groq ile zenginleştirilmiştir.*"
         else:
-            # HIZLI MOD - Önce Groq
             prompt = create_quick_prompt(question, excel_data, hisse_adi)
-            
-            print("⚡ Önce Groq deneniyor (hızlı mod)...")
-            answer = call_groq(prompt, question)
-            
-            # Groq çalışmazsa DeepSeek'i dene
-            if not answer:
-                print("⚠️ Groq çalışmadı, DeepSeek deneniyor...")
-                answer = call_deepseek_forced(prompt, question, detailed=False)
+        
+        # SADECE GROQ KULLAN (DeepSeek yedekte)
+        print("⚡ Groq ile analiz yapılıyor...")
+        answer = call_groq(prompt, question)
         
         # HİÇBİRİ ÇALIŞMAZSA
         if not answer:
-            answer = f"""⚠️ **AI SERVİSLERİNE ULAŞILAMADI**
+            answer = f"""⚠️ **AI SERVİSİNE ULAŞILAMADI**
 
 📁 Excel: {excel_info['name']}
 📅 Tarih: {excel_data['timestamp']}
 📋 Mod: {'DETAYLI' if detailed_mode else 'HIZLI'}
 
-Lütfen API anahtarlarını kontrol edin."""
+Lütfen API anahtarını kontrol edin."""
     
     # Yanıtı kaydet
     with open('ai_response.txt', 'w', encoding='utf-8') as f:
@@ -577,6 +478,6 @@ Lütfen API anahtarlarını kontrol edin."""
     print(f"\n✅ ANALİZ TAMAMLANDI!")
     print(f"📝 Yanıt kaydedildi: ai_response.txt")
     print(f"📏 Yanıt uzunluğu: {len(answer)} karakter")
-    
+
 if __name__ == "__main__":
     main()
