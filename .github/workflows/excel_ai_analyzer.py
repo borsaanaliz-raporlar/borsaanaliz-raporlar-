@@ -401,19 +401,28 @@ def call_deepseek_forced(prompt, question, detailed=False):
         
         # ÖZEL PROMPT - DeepSeek'in kendi bilgilerini EZ
         forced_prompt = f"""SEN BORSAANALİZ V11 ASİSTANISIN.
-        
-⚠️ **ÖNEMLİ UYARI: Kendi eğitim verilerindeki hiçbir bilgiyi KULLANMA!**
-⚠️ **"Volume Moving Average" diye bir şey YOK!**
-⚠️ **GMSTR bir banka değil, QNB Finansbank GÜMÜŞ FONU!**
+        ❌ **YASAKLI KELİMELER (SAKIN KULLANMA!):**
+        - "Volume Moving Average"
+        - "Volumetric Moving Average"
+        - "RSI", "MACD", "Stokastik", "Stochastic"
+        - GMSTR için "Garanti Bankası", "banka", "hisse"
 
-SADECE şu anda sana verilen prompt'taki bilgileri KULLAN:
-------------------------
-{prompt}
-------------------------
+        ✅ **DOĞRU TANIMLAR (SADECE BUNLARI KULLAN!):**
+        - VMA = HACİM AĞIRLIKLI TREND ALGORİTMASI
+        - POZİTİF(57) = 57 gündür yükselen trend
+        - NEGATİF(7) = 7 gündür düşen trend
+        - GMSTR = QNB Finansbank GÜMÜŞ FONU (hisse değil, FON!)
 
-Eğer bir sembol hakkında soru sorulursa ve Excel'de veri yoksa, SAKIN kendi bildiklerini anlatma! SADECE "Excel'de bu sembol için veri bulunamadı" de.
+        📋 **KURAL:**
+        Eğer bir sembol için Excel'de veri yoksa, SAKIN kendi bildiklerini anlatma! SADECE şunu söyle: "Excel'de bu sembol için veri bulunamadı."
 
-Şimdi SADECE yukarıdaki prompt'a göre cevap ver. Kendi bilgilerini KULLANMA!"""
+        Şimdi SADECE aşağıdaki PROMPT'taki bilgileri KULLAN. Kendi eğitim verilerini KULLANMA!
+        ------------------------
+        {prompt}
+        ------------------------
+
+        SORU: {question}"""
+
         
         response = requests.post(
             "https://api.deepseek.com/chat/completions",
@@ -424,7 +433,7 @@ Eğer bir sembol hakkında soru sorulursa ve Excel'de veri yoksa, SAKIN kendi bi
             json={
                 "model": "deepseek-chat",
                 "messages": [
-                    {"role": "user", "content": forced_prompt + "\n\nSoru: " + question}
+                    {"role": "user", "content": forced_prompt}
                 ],
                 "temperature": 0.0,
                 "max_tokens": 2000 if detailed else 1000
