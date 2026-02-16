@@ -533,25 +533,32 @@ def main():
         if detailed_mode:
             prompt = create_detailed_prompt(question, excel_data, hisse_adi)
             
-            # 1. DeepSeek ile detaylı analiz
-            answer = call_deepseek_forced(prompt, question, detailed=True)
+            # 1. ÖNCE GROQ DENE (çünkü DeepSeek inatçı)
+            print("⚡ Önce Groq deneniyor...")
+            answer = call_groq(prompt, question)
             
-            # 2. Groq ile zenginleştir (DeepSeek başarılı olduysa)
-            if answer and GROQ_API_KEY:
+            # 2. Groq çalışmazsa DeepSeek'i dene
+            if not answer:
+                print("⚠️ Groq çalışmadı, DeepSeek deneniyor...")
+                answer = call_deepseek_forced(prompt, question, detailed=True)
+            
+            # 3. DeepSeek başarılı olduysa Groq ile zenginleştir
+            elif answer and GROQ_API_KEY and False:  # False ekledik, zenginleştirmeyi kapattık
                 print("✨ Groq ile analiz zenginleştiriliyor...")
                 enriched = call_groq(prompt, answer)
                 if enriched:
                     answer = enriched + "\n\n---\n📌 *Groq ile zenginleştirilmiştir.*"
         else:
-            # HIZLI MOD - Sadece DeepSeek
+            # HIZLI MOD - Önce Groq
             prompt = create_quick_prompt(question, excel_data, hisse_adi)
-            answer = call_deepseek_forced(prompt, question, detailed=False)
             
-            # DeepSeek çalışmazsa Groq'u dene
+            print("⚡ Önce Groq deneniyor (hızlı mod)...")
+            answer = call_groq(prompt, question)
+            
+            # Groq çalışmazsa DeepSeek'i dene
             if not answer:
-                print("⚠️ DeepSeek çalışmadı, Groq deneniyor...")
-                prompt = create_quick_prompt(question, excel_data, hisse_adi)
-                answer = call_groq(prompt, question)
+                print("⚠️ Groq çalışmadı, DeepSeek deneniyor...")
+                answer = call_deepseek_forced(prompt, question, detailed=False)
         
         # HİÇBİRİ ÇALIŞMAZSA
         if not answer:
@@ -570,6 +577,6 @@ Lütfen API anahtarlarını kontrol edin."""
     print(f"\n✅ ANALİZ TAMAMLANDI!")
     print(f"📝 Yanıt kaydedildi: ai_response.txt")
     print(f"📏 Yanıt uzunluğu: {len(answer)} karakter")
-
+    
 if __name__ == "__main__":
     main()
