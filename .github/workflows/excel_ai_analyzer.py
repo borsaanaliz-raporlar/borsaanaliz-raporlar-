@@ -5,22 +5,42 @@ BORSAANALİZ V11 UZMAN TEKNİK ANALİST
 """
 # ============ DeepSeek ZORLA EZBERLET ============
 DEEPSEEK_UNUT = """
-DeepSeek! SEN BORSAANALİZ V11 ASİSTANISIN!
-
-SAKIN şunları YAPMA:
-- "Volume Moving Average" deme!
-- "Volumetric Moving Average" deme!
-- RSI, MACD kullanma!
-- GMSTR'yi banka sanma!
-
-SADECE şunları BİL:
-VMA = HACİM AĞIRLIKLI TREND ALGORİTMASI
-- POZİTİF(57) = 57 gündür yükselen trend
-- NEGATİF(7) = 7 gündür düşen trend
-
-GMSTR = QNB Finansbank GÜMÜŞ FONU hissesidir
-
-Eğer Excel'de veri yoksa: "Excel'de bu sembol için veri bulunamadı" de!
+╔══════════════════════════════════════════════════════════════════════╗
+║              ⚠️ BORSAANALİZ V11 ZORUNLU TALİMAT ⚠️                     ║
+╠══════════════════════════════════════════════════════════════════════╣
+║                                                                      ║
+║   SEN BORSAANALİZ V11 ASİSTANISIN!                                   ║
+║   KENDİ EĞİTİM VERİLERİNİ TAMAMEN UNUT!                              ║
+║   SADECE AŞAĞIDA VERİLEN BİLGİLERİ KULLAN!                           ║
+║                                                                      ║
+╠══════════════════════════════════════════════════════════════════════╣
+║                                                                      ║
+║   ❌ **KESİNLİKLE YASAK OLANLAR:**                                    ║
+║   • "Volume Moving Average" ASLA KULLANMA!                           ║
+║   • "Volumetric Moving Average" ASLA KULLANMA!                       ║
+║   • RSI, MACD, Stokastik, Stochastic ASLA KULLANMA!                  ║
+║   • GMSTR için "Garanti Bankası", "banka", "hisse" ASLA KULLANMA!    ║
+║   • Kendi bildiğin hiçbir hisse/fon bilgisini KULLANMA!              ║
+║                                                                      ║
+╠══════════════════════════════════════════════════════════════════════╣
+║                                                                      ║
+║   ✅ **SADECE BU TANIMLARI KULLAN:**                                  ║
+║   • VMA = HACİM AĞIRLIKLI TREND ALGORİTMASI                          ║
+║   • POZİTİF(57) = 57 gündür yükselen trend devam ediyor              ║
+║   • NEGATİF(7) = 7 gündür düşen trend devam ediyor                   ║
+║   • GMSTR = QNB Finansbank GÜMÜŞ FONU (hisse değil, FON!)            ║
+║   • LSMA = Trend göstergesi, parantez içi GÜN SAYISI                 ║
+║   • Pearson >0.3 = yükseliş, <-0.3 = düşüş                           ║
+║                                                                      ║
+╠══════════════════════════════════════════════════════════════════════╣
+║                                                                      ║
+║   📋 **ALTIN KURAL:**                                                ║
+║   Aşağıda "📊 **HAM VERİLER:**" başlığı altında verilenler           ║
+║   SADECE onlar var. Diğer tüm bilgiler YOK!                          ║
+║   Eğer Excel'de veri yoksa:                                          ║
+║   "Excel'de bu sembol için veri bulunamadı" de!                      ║
+║                                                                      ║
+╚══════════════════════════════════════════════════════════════════════╝
 """
 # ================================================
 import os
@@ -115,7 +135,14 @@ def get_hisse_raw_data(hisse_info, headers):
     for kolon in kritik_kolonlar:
         if kolon in hisse_info and hisse_info[kolon] is not None:
             deger = hisse_info[kolon]
-            ham_veriler += f"• **{kolon}:** {deger}\n"
+            # Sayısal değerleri formatla
+            if isinstance(deger, (int, float)):
+                if kolon in ["Close", "Pivot", "S1", "S2", "S3", "R1", "R2", "R3"]:
+                    ham_veriler += f"• **{kolon}:** {deger:.2f}\n"
+                else:
+                    ham_veriler += f"• **{kolon}:** {deger}\n"
+            else:
+                ham_veriler += f"• **{kolon}:** {deger}\n"
     
     return ham_veriler
 
@@ -137,9 +164,10 @@ def create_quick_prompt(question, excel_data, hisse_adi=None):
 **🚫 YOK:** RSI, MACD, Stokastik
 """
     
-    if hisse_adi and hisse_adi in str(excel_data):
+    if hisse_adi:
         hisse_info = None
         sheet_name = None
+        found = False
         
         for sname, sinfo in data.items():
             for hisse in sinfo["data"]:
@@ -147,7 +175,10 @@ def create_quick_prompt(question, excel_data, hisse_adi=None):
                 if hisse_name and hisse_adi.upper() in str(hisse_name).upper():
                     hisse_info = hisse
                     sheet_name = sname
+                    found = True
                     break
+            if found:
+                break
         
         if hisse_info:
             ham_veri = get_hisse_raw_data(hisse_info, sinfo["headers"])
@@ -156,6 +187,10 @@ def create_quick_prompt(question, excel_data, hisse_adi=None):
 
 📊 **{hisse_adi} HAM VERİLER:**
 {ham_veri}
+
+**⚠️ ÖNEMLİ UYARI:** 
+Sadece yukarıdaki HAM VERİLER'i kullan! Kendi bildiğin hiçbir bilgiyi kullanma!
+Eğer {hisse_adi} hakkında yukarıda veri yoksa "Veri bulunamadı" de!
 
 **ŞU SORULARA CEVAP VER:**
 1. Kısa vadeli görünüm (EMA8/21, WT)
@@ -179,6 +214,8 @@ Hızlı piyasa analizi yap:
 - Endekslerin durumu
 - Öne çıkan hisseler
 - Genel trend yönü
+
+⚠️ Yatırım tavsiyesi değildir.
 """
 
 def create_detailed_prompt(question, excel_data, hisse_adi=None):
@@ -240,6 +277,7 @@ def create_detailed_prompt(question, excel_data, hisse_adi=None):
     if hisse_adi:
         hisse_info = None
         sheet_name = None
+        found = False
         
         for sname, sinfo in data.items():
             for hisse in sinfo["data"]:
@@ -247,7 +285,10 @@ def create_detailed_prompt(question, excel_data, hisse_adi=None):
                 if hisse_name and hisse_adi.upper() in str(hisse_name).upper():
                     hisse_info = hisse
                     sheet_name = sname
+                    found = True
                     break
+            if found:
+                break
         
         if hisse_info:
             ham_veri = get_hisse_raw_data(hisse_info, sinfo["headers"])
@@ -261,6 +302,10 @@ def create_detailed_prompt(question, excel_data, hisse_adi=None):
 
 **📊 HAM VERİLER:**
 {ham_veri}
+
+**⚠️ ÖNEMLİ UYARI:** 
+Sadece yukarıdaki HAM VERİLER'i kullan! Kendi bildiğin hiçbir bilgiyi kullanma!
+Eğer {hisse_adi} hakkında yukarıda veri yoksa "Veri bulunamadı" de!
 
 **🔍 ŞU BAŞLIKLARDA DETAYLI ANALİZ YAP:**
 
@@ -341,54 +386,6 @@ def create_detailed_prompt(question, excel_data, hisse_adi=None):
 ⚠️ **YASAL UYARI:** Yatırım tavsiyesi değildir.
 """
 
-def call_deepseek(prompt, question, detailed=False):
-    """DeepSeek AI çağrısı - hızlı veya detaylı"""
-    if not DEEPSEEK_API_KEY:
-        return None
-    
-    timeout = 45 if detailed else 30  # Detaylı analizde biraz daha uzun süre
-    
-    try:
-        print(f"🚀 DeepSeek AI {'📋 DETAYLI' if detailed else '⚡ HIZLI'} modda deneniyor...")
-        response = requests.post(
-            "https://api.deepseek.com/chat/completions",
-            headers={
-                "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": "deepseek-chat",
-                "messages": [
-                    {"role": "system", "content": DEEPSEEK_UNUT},
-                    {"role": "user", "content": f"PROMPT: {prompt}\n\nSORU: {question}\n\nSAKIN kendi bildiklerini anlatma! SADECE prompt'taki bilgileri kullan!"}
-                ],
-                "temperature": 0.0,
-                "max_tokens": 2000 if detailed else 1000
-            },
-            timeout=timeout
-        )
-        
-        if response.status_code == 200:
-            answer = response.json()['choices'][0]['message']['content']
-            
-            # YASAKLI KELİME KONTROLÜ
-            answer = answer.replace("RSI", "⚠️ RSI (BORSAANALİZ V11'de YOK)")
-            answer = answer.replace("MACD", "⚠️ MACD (BORSAANALİZ V11'de YOK)")
-            answer = answer.replace("Stokastik", "⚠️ Stokastik (BORSAANALİZ V11'de YOK)")
-            
-            if "yatırım tavsiyesi" not in answer.lower():
-                answer += "\n\n⚠️ **YASAL UYARI:** Bu analiz BORSAANALİZ V11 Excel verilerine dayanmaktadır ve yatırım tavsiyesi değildir."
-            
-            print(f"✅ DeepSeek {'DETAYLI' if detailed else 'HIZLI'} başarılı!")
-            return answer
-        else:
-            print(f"⚠️ DeepSeek hata {response.status_code}")
-            return None
-            
-    except Exception as e:
-        print(f"⚠️ DeepSeek bağlantı hatası: {str(e)}")
-        return None
-
 def call_deepseek_forced(prompt, question, detailed=False):
     """DeepSeek'i zorla doğru cevap verdir - kendi bildiklerini unuttur"""
     if not DEEPSEEK_API_KEY:
@@ -399,30 +396,21 @@ def call_deepseek_forced(prompt, question, detailed=False):
     try:
         print(f"🚀 DeepSeek ZORLA {'📋 DETAYLI' if detailed else '⚡ HIZLI'} modda deneniyor...")
         
-        # ÖZEL PROMPT - DeepSeek'in kendi bilgilerini EZ
-        forced_prompt = f"""SEN BORSAANALİZ V11 ASİSTANISIN.
-        ❌ **YASAKLI KELİMELER (SAKIN KULLANMA!):**
-        - "Volume Moving Average"
-        - "Volumetric Moving Average"
-        - "RSI", "MACD", "Stokastik", "Stochastic"
-        - GMSTR için "Garanti Bankası", "banka", "hisse"
+        # DeepSeek'in kendi bilgilerini tamamen unutturan özel prompt
+        forced_prompt = f"""
+{ DEEPSEEK_UNUT }
 
-        ✅ **DOĞRU TANIMLAR (SADECE BUNLARI KULLAN!):**
-        - VMA = HACİM AĞIRLIKLI TREND ALGORİTMASI
-        - POZİTİF(57) = 57 gündür yükselen trend
-        - NEGATİF(7) = 7 gündür düşen trend
-        - GMSTR = QNB Finansbank GÜMÜŞ FONU (hisse değil, FON!)
+═══════════════════════════════════════════════════════════════════════
+📊 **BUGÜNÜN EXCEL VERİLERİ (SADECE BUNLAR GERÇEK):**
+{prompt}
+═══════════════════════════════════════════════════════════════════════
 
-        📋 **KURAL:**
-        Eğer bir sembol için Excel'de veri yoksa, SAKIN kendi bildiklerini anlatma! SADECE şunu söyle: "Excel'de bu sembol için veri bulunamadı."
+❓ **KULLANICI SORUSU:** {question}
 
-        Şimdi SADECE aşağıdaki PROMPT'taki bilgileri KULLAN. Kendi eğitim verilerini KULLANMA!
-        ------------------------
-        {prompt}
-        ------------------------
-
-        SORU: {question}"""
-
+⚠️ **SON UYARI:** Yukarıdaki Excel verileri DIŞINDA hiçbir bilgiyi kullanma!
+Kendini "Garanti Bankası" falan diye bir şey bilmiyor gibi düşün!
+Sadece bu mesajda gördüklerin var, başka hiçbir şey bilmiyorsun!
+"""
         
         response = requests.post(
             "https://api.deepseek.com/chat/completions",
@@ -433,6 +421,7 @@ def call_deepseek_forced(prompt, question, detailed=False):
             json={
                 "model": "deepseek-chat",
                 "messages": [
+                    {"role": "system", "content": "Sen BORSAANALİZ V11 asistanısın. Kendi eğitim verilerini tamamen unut. Sadece kullanıcının mesajındaki bilgileri kullan."},
                     {"role": "user", "content": forced_prompt}
                 ],
                 "temperature": 0.0,
@@ -448,6 +437,13 @@ def call_deepseek_forced(prompt, question, detailed=False):
             answer = answer.replace("RSI", "⚠️ RSI (BORSAANALİZ V11'de YOK)")
             answer = answer.replace("MACD", "⚠️ MACD (BORSAANALİZ V11'de YOK)")
             answer = answer.replace("Stokastik", "⚠️ Stokastik (BORSAANALİZ V11'de YOK)")
+            answer = answer.replace("Stochastic", "⚠️ Stochastic (BORSAANALİZ V11'de YOK)")
+            
+            # GMSTR için kontrol - eğer hala banka derse düzelt
+            if "garanti" in answer.lower() and "gmstr" in prompt.lower():
+                answer = "⚠️ **DÜZELTME:** " + answer
+                answer = answer.replace("Garanti Bankası", "QNB Finansbank GÜMÜŞ FONU")
+                answer = answer.replace("Garanti", "QNB Finansbank")
             
             print(f"✅ DeepSeek ZORLA başarılı!")
             return answer
@@ -475,7 +471,7 @@ def call_groq(prompt, question):
             json={
                 "model": "llama-3.3-70b-versatile",
                 "messages": [
-                    {"role": "system", "content": "Sen BORSAANALİZ V11 uzmanısın. Verilen analizi daha anlaşılır ve akıcı hale getir, ek yorum ekle."},
+                    {"role": "system", "content": "Sen BORSAANALİZ V11 uzmanısın. Verilen analizi daha anlaşılır ve akıcı hale getir, ek yorum ekle. Ancak SAKIN yeni bilgi ekleme, sadece verilen analizi zenginleştir."},
                     {"role": "user", "content": f"Bu analizi zenginleştir, daha profesyonel hale getir:\n\n{question}"}
                 ],
                 "temperature": 0.3,
@@ -538,7 +534,7 @@ def main():
             prompt = create_detailed_prompt(question, excel_data, hisse_adi)
             
             # 1. DeepSeek ile detaylı analiz
-            answer = call_deepseek_forced(prompt, question, detailed=True)  # forced kullan
+            answer = call_deepseek_forced(prompt, question, detailed=True)
             
             # 2. Groq ile zenginleştir (DeepSeek başarılı olduysa)
             if answer and GROQ_API_KEY:
@@ -549,7 +545,7 @@ def main():
         else:
             # HIZLI MOD - Sadece DeepSeek
             prompt = create_quick_prompt(question, excel_data, hisse_adi)
-            answer = call_deepseek_forced(prompt, question, detailed=False)  # forced kullan
+            answer = call_deepseek_forced(prompt, question, detailed=False)
             
             # DeepSeek çalışmazsa Groq'u dene
             if not answer:
