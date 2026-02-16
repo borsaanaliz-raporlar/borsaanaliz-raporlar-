@@ -2,7 +2,7 @@
 """
 BORSAANALİZ V11 UZMAN TEKNİK ANALİST
 ⚡ HIZLI (Groq) + 📋 DETAYLI (Groq) BUTONLU SİSTEM
-DeepSeek inat etti, şimdilik yedekte bekliyor!
+AI'IN VERİ UYDURMASI ENGELLENDİ!
 """
 import os
 import sys
@@ -143,10 +143,18 @@ def create_quick_prompt(question, excel_data, hisse_adi=None):
         if hisse_info:
             ham_veri = get_hisse_raw_data(hisse_info, sinfo["headers"])
             
+            # Veri var mı kontrol et
+            if not ham_veri.strip():
+                return f"⚠️ **{hisse_adi}** için Excel'de veri bulunamadı. Lütfen sembolü kontrol edin."
+            
             prompt = system_intro + f"""
 
-📊 **{hisse_adi} HAM VERİLER:**
+📊 **{hisse_adi} HAM VERİLER (SADECE BUNLAR GERÇEK):**
 {ham_veri}
+
+**⚠️ ÇOK ÖNEMLİ UYARI:**
+Yukarıdaki HAM VERİLER dışında hiçbir rakam KULLANMA!
+Eğer bir bilgi yukarıda yoksa, SAKIN kendin rakam uydurma!
 
 **ŞU SORULARA CEVAP VER:**
 1. Kısa vadeli görünüm (EMA8/21, WT)
@@ -158,6 +166,8 @@ def create_quick_prompt(question, excel_data, hisse_adi=None):
 ⚠️ Yatırım tavsiyesi değildir.
 """
             return prompt
+        else:
+            return f"⚠️ **{hisse_adi}** Excel dosyasında bulunamadı. Lütfen sembolü kontrol edin."
     
     # Genel analiz
     return system_intro + f"""
@@ -247,6 +257,10 @@ def create_detailed_prompt(question, excel_data, hisse_adi=None):
         if hisse_info:
             ham_veri = get_hisse_raw_data(hisse_info, sinfo["headers"])
             
+            # Veri var mı kontrol et
+            if not ham_veri.strip():
+                return f"⚠️ **{hisse_adi}** için Excel'de veri bulunamadı. Lütfen sembolü kontrol edin."
+            
             prompt = system_intro + f"""
 
 ═══════════════════════════════════════════
@@ -254,8 +268,12 @@ def create_detailed_prompt(question, excel_data, hisse_adi=None):
 📌 **Kaynak:** {sheet_name}
 ═══════════════════════════════════════════
 
-**📊 HAM VERİLER:**
+**📊 HAM VERİLER (SADECE BUNLAR GERÇEK):**
 {ham_veri}
+
+**⚠️ ÇOK ÖNEMLİ UYARI:**
+Yukarıdaki HAM VERİLER dışında hiçbir rakam KULLANMA!
+Eğer bir bilgi yukarıda yoksa, SAKIN kendin rakam uydurma!
 
 **🔍 ŞU BAŞLIKLARDA DETAYLI ANALİZ YAP:**
 
@@ -301,6 +319,8 @@ def create_detailed_prompt(question, excel_data, hisse_adi=None):
 ⚠️ **YASAL UYARI:** Yatırım tavsiyesi değildir.
 """
             return prompt
+        else:
+            return f"⚠️ **{hisse_adi}** Excel dosyasında bulunamadı. Lütfen sembolü kontrol edin."
     
     # Genel detaylı analiz
     return system_intro + f"""
@@ -337,33 +357,48 @@ def create_detailed_prompt(question, excel_data, hisse_adi=None):
 """
 
 def call_groq(prompt, question):
-    """Groq AI çağrısı - ANA ANALİZ MOTORU"""
+    """Groq AI çağrısı - ANA ANALİZ MOTORU - VERİ UYDURMA ENGELLİ"""
     if not GROQ_API_KEY:
         return None
     
     try:
         print("⚡ Groq AI analiz yapıyor...")
         
-        # Groq için özel sistem mesajı - DeepSeek'in inatçılığını unuttur!
-        system_message = """Sen BORSAANALİZ V11 uzmanısın. 
+        # Prompt'ta gerçek veri var mı kontrol et
+        if "HAM VERİLER" not in prompt and "Close" not in prompt:
+            print("⚠️ UYARI: Prompt'ta ham veri yok!")
+            return "⚠️ Excel'de bu sorgu için yeterli veri bulunamadı."
         
-⚠️ **ÇOK ÖNEMLİ KURALLAR - SAKIN UNUTMA!** ⚠️
+        # Groq için özel sistem mesajı - ÇOK SIKI KURALLAR
+        system_message = """Sen BORSAANALİZ V11 uzmanısın.
 
-1️⃣ VMA KESİNLİKLE "Volume Moving Average" DEĞİLDİR!
-   VMA = HACİM AĞIRLIKLI TREND ALGORİTMASI
-   • POZİTİF(57) = 57 gündür yükselen trend
-   • NEGATİF(7) = 7 gündür düşen trend
+🚫 **KESİNLİKLE YASAK OLANLAR:**
+1. SAKIN kendin rakam uydurma!
+2. SAKIN "POZİTİF(57)" gibi örnek rakamlar kullanma!
+3. SAKIN "LSMA: 20 gün" gibi uydurma değerler yazma!
+4. SAKIN "Pearson: 0.5" gibi uydurma katsayılar yazma!
 
-2️⃣ GMSTR KESİNLİKLE banka veya hisse DEĞİLDİR!
-   GMSTR = QNB Finansbank GÜMÜŞ FONU
+✅ **SADECE ŞUNLARI YAP:**
+1. Sana verilen "HAM VERİLER" başlığı altındaki bilgileri KULLAN
+2. Eğer bir bilgi HAM VERİLER'de yoksa "Bu bilgi Excel'de bulunmamaktadır" DE
+3. Sadece gerçek verilerle yorum yap
 
-3️⃣ RSI, MACD, Stokastik KESİNLİKLE YOK!
-   Bu göstergeleri ASLA kullanma!
+📋 **ÖRNEK DOĞRU CEVAP:**
+"AKBNK için Excel verilerinde Close: 15.34, VMA trend algo: NEGATİF(7) olarak görünüyor. Destek seviyeleri S1:14.90, S2:14.50..."
 
-4️⃣ SADECE aşağıda verilen Excel verilerini kullan!
-   Kendi bildiğin hiçbir bilgiyi kullanma!
+📋 **ÖRNEK YANLIŞ CEVAP (SAKIN YAPMA):**
+"VMA: POZİTİF(57), LSMA: 20 gün, Pearson: 0.5" (çünkü bu rakamlar uydurma!)
 
-Şimdi aşağıdaki soruyu cevapla:"""
+Şimdi aşağıdaki verilere göre cevap ver:"""
+        
+        # Kullanıcı mesajını hazırla
+        user_message = f"""📊 **EXCEL'DEN ALINAN GERÇEK VERİLER (SADECE BUNLAR VAR):**
+{prompt}
+
+❓ **SORU:** {question}
+
+⚠️ **SON UYARI:** Yukarıdaki veriler dışında hiçbir rakam kullanma!
+Eğer bir bilgi yoksa "Bu bilgi Excel'de bulunmamaktadır" de."""
         
         response = requests.post(
             "https://api.groq.com/openai/v1/chat/completions",
@@ -375,9 +410,9 @@ def call_groq(prompt, question):
                 "model": "llama-3.3-70b-versatile",
                 "messages": [
                     {"role": "system", "content": system_message},
-                    {"role": "user", "content": f"📊 **EXCEL VERİLERİ:**\n{prompt}\n\n❓ **SORU:** {question}"}
+                    {"role": "user", "content": user_message}
                 ],
-                "temperature": 0.2,  # Biraz daha düşük, daha az yaratıcı
+                "temperature": 0.1,  # Çok düşük, neredeyse hiç yaratıcılık yok
                 "max_tokens": 2000
             },
             timeout=60
@@ -386,14 +421,25 @@ def call_groq(prompt, question):
         if response.status_code == 200:
             answer = response.json()['choices'][0]['message']['content']
             
-            # Son bir güvenlik kontrolü - hala yanlış kelimeler varsa düzelt
+            # Uydurma rakam kontrolü
+            uydurma_kontrol = [
+                "POZİTİF(57)", "NEGATİF(57)", "POZİTİF(48)", "NEGATİF(48)",
+                "LSMA: 20", "LSMA: 15", "LSMA: 10", "LSMA: 5",
+                "Pearson: 0.5", "Pearson: 0.6", "Pearson: 0.7", "Pearson: 0.8",
+                "Pearson: -0.5", "Pearson: -0.6"
+            ]
+            
+            for uydurma in uydurma_kontrol:
+                if uydurma in answer and uydurma not in prompt:
+                    print(f"⚠️ UYARI: AI '{uydurma}' uydurdu! Cevap düzeltiliyor...")
+                    answer = f"⚠️ **UYARI: AI veri uydurmaya çalıştı!**\n\nLütfen Excel dosyasını kontrol edin.\n\n{answer}"
+                    break
+            
+            # Yazım hatalarını düzelt
             answer = answer.replace("Volume Moving Average", "HACİM AĞIRLIKLI TREND ALGORİTMASI")
             answer = answer.replace("Volumetric Moving Average", "HACİM AĞIRLIKLI TREND ALGORİTMASI")
             answer = answer.replace("Garanti Bankası", "QNB Finansbank GÜMÜŞ FONU")
-            answer = answer.replace("Garanti", "QNB Finansbank")
-            answer = answer.replace("RSI", "⚠️ RSI (BORSAANALİZ V11'de YOK)")
-            answer = answer.replace("MACD", "⚠️ MACD (BORSAANALİZ V11'de YOK)")
-            answer = answer.replace("Stokastik", "⚠️ Stokastik (BORSAANALİZ V11'de YOK)")
+            answer = answer.replace("Hacım", "Hacim")
             
             print(f"✅ Groq başarılı!")
             return answer
@@ -405,14 +451,8 @@ def call_groq(prompt, question):
         print(f"⚠️ Groq bağlantı hatası: {str(e)}")
         return None
 
-def call_deepseek_yedek(prompt, question, detailed=False):
-    """DeepSeek yedekte bekliyor - şimdilik kullanılmıyor"""
-    # Bu fonksiyon şimdilik kullanılmıyor
-    # DeepSeek inat etti, Groq'a geçtik
-    return None
-
 def main():
-    """Ana fonksiyon - SADECE GROQ KULLANIR, DeepSeek yedekte"""
+    """Ana fonksiyon - SADECE GROQ KULLANIR, veri uydurma engelli"""
     if len(sys.argv) < 2:
         print("❌ Hata: Soru girmediniz!")
         return
@@ -457,9 +497,13 @@ def main():
         else:
             prompt = create_quick_prompt(question, excel_data, hisse_adi)
         
-        # SADECE GROQ KULLAN (DeepSeek yedekte)
-        print("⚡ Groq ile analiz yapılıyor...")
-        answer = call_groq(prompt, question)
+        # Eğer prompt zaten bir hata mesajıysa (veri bulunamadı gibi), onu direkt kullan
+        if prompt.startswith("⚠️"):
+            answer = prompt
+        else:
+            # Groq ile analiz yap
+            print("⚡ Groq ile analiz yapılıyor...")
+            answer = call_groq(prompt, question)
         
         # HİÇBİRİ ÇALIŞMAZSA
         if not answer:
