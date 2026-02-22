@@ -232,29 +232,29 @@
         
         .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 8px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Kartları biraz daralt */
+            gap: 8px; /* Kart arası boşluk azalt */
             margin-bottom: 15px;
         }
 
         .stat-card {
             background: #f8f9fa;
-            padding: 8px 10px;
+            padding: 8px 10px; /* Üst-alt: 8px, Sağ-sol: 10px */
             border-radius: 8px;
             text-align: center;
-            min-height: auto;
+            min-height: auto; /* Minimum yüksekliği kaldır */
         }
 
         .stat-number {
-            font-size: 20px;
+            font-size: 20px; /* Daha küçük rakamlar */
             font-weight: bold;
             color: #667eea;
-            margin-bottom: 2px;
+            margin-bottom: 2px; /* Alt boşluk azalt */
         }
 
         .stat-label {
             color: #666;
-            font-size: 9px;
+            font-size: 9px; /* Daha küçük etiketler */
             line-height: 1.2;
         }
         
@@ -591,7 +591,7 @@
         
         /* AI CHAT STYLES - PANEL İÇİ */
         .chat-container {
-            height: calc(70vh - 200px);
+            height: calc(70vh - 200px); /* Biraz küçülttük butonlara yer açmak için */
             overflow-y: auto;
             background: white;
             border-radius: 12px;
@@ -650,7 +650,7 @@
             font-size: 15px;
         }
         
-        /* MOD BUTONLARI - AI PANEL İÇİNE */
+        /* 🆕 YENİ: MOD BUTONLARI - AI PANEL İÇİNE */
         .mode-buttons {
             display: flex;
             gap: 10px;
@@ -915,7 +915,7 @@
                 <div class="email">iletisimborsaanaliz@gmail.com</div>
             </div>
             
-            <!-- KOMPAKT MAKRO UYARISI -->
+            <!-- YENİ: KOMPAKT MAKRO UYARISI -->
             <div class="macro-warning" style="
                 background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
                 border: 1px solid #ffb300;
@@ -971,7 +971,7 @@
                 </div>
             </div>
             
-            <!-- AI ASİSTAN BUTONU -->
+            <!-- YENİ: AI ASİSTAN BUTONU -->
             <div class="ai-button-container">
                 <button class="ai-assistant-button" id="openAiPanel">
                     <span class="ai-icon">🤖</span>
@@ -1017,7 +1017,7 @@
         </div>
     </div>
     
-    <!-- AI PANEL (PERDE EFEKTLİ) -->
+    <!-- AI PANEL (PERDE EFEKTLİ) - 🆕 BUTONLAR EKLENDİ -->
     <div class="ai-panel-overlay" id="aiPanelOverlay">
         <div class="ai-panel" id="aiPanel">
             <div class="ai-panel-header">
@@ -1042,7 +1042,7 @@
                     </div>
                 </div>
                 
-                <!-- MOD SEÇİM BUTONLARI -->
+                <!-- 🆕 YENİ: MOD SEÇİM BUTONLARI -->
                 <div class="mode-buttons">
                     <button class="mode-btn quick" id="quickModeBtn">⚡ HIZLI ANALİZ</button>
                     <button class="mode-btn detailed" id="detailedModeBtn">📋 DETAYLI ANALİZ</button>
@@ -1068,9 +1068,7 @@
     </div>
 
     <script>
-        // ===========================================
-        // MATRIX CANVAS KODLARI (AYNEN KALDI)
-        // ===========================================
+        // ORJINAL MATRIX VE APP KODLARI (Aynen kalacak)
         const canvas = document.getElementById('matrixCanvas');
         const ctx = canvas.getContext('2d');
         let matrixAnimationId = null;
@@ -1163,9 +1161,8 @@
         window.addEventListener('load', startMatrix);
         window.addEventListener('resize', resizeCanvas);
 
-        // ===========================================
-        // ORJINAL APP KODLARI (DOSYA LİSTESİ VS.)
-        // ===========================================
+        // ORJINAL APP CODE
+        const correctPassword = "ba";
         
         const files = [
             {
@@ -1191,163 +1188,82 @@
             }
         ];
         
-        // ===========================================
-        // YENİ: SUNUCU TABANLI OTURUM YÖNETİMİ
-        // ===========================================
-        let sessionCheckInterval = null;
-        let forceLogoutInProgress = false;
-
-        // Sunucuda oturum kontrolü yap
-        async function checkServerSession() {
-            if (forceLogoutInProgress) return false;
+        // OTURUM KONTROL FONKSİYONLARI
+        function checkSessionValidity() {
+            const loginTime = sessionStorage.getItem('loginTime');
+            const currentTime = new Date().getTime();
             
-            try {
-                const response = await fetch('session-check.php', {
-                    method: 'GET',
-                    credentials: 'same-origin',
-                    cache: 'no-cache'
-                });
+            if (loginTime) {
+                const loginDate = new Date(parseInt(loginTime));
+                const currentDate = new Date();
                 
-                const data = await response.json();
+                const isDifferentDay = 
+                    loginDate.getDate() !== currentDate.getDate() ||
+                    loginDate.getMonth() !== currentDate.getMonth() ||
+                    loginDate.getFullYear() !== currentDate.getFullYear();
                 
-                if (data.forceLogout) {
-                    forceLogout(data.message || 'Oturum sonlandırıldı');
+                if (isDifferentDay) {
+                    forceLogout();
                     return false;
                 }
                 
-                return data.valid;
-            } catch (error) {
-                console.error('Session check error:', error);
-                return false;
+                if ((currentTime - parseInt(loginTime)) > 24 * 60 * 60 * 1000) {
+                    forceLogout();
+                    return false;
+                }
             }
+            return true;
         }
-
-        // Oturum takibini başlat
-        function startSessionMonitoring() {
-            if (sessionCheckInterval) {
-                clearInterval(sessionCheckInterval);
-            }
+        
+        function forceLogout() {
+            sessionStorage.removeItem('authenticated');
+            sessionStorage.removeItem('loginTime');
             
-            // Her 30 saniyede bir kontrol et
-            sessionCheckInterval = setInterval(async () => {
-                const isValid = await checkServerSession();
-                if (!isValid && document.getElementById('contentBox').style.display === 'block') {
-                    forceLogout('Oturum süreniz doldu');
-                }
-            }, 30000);
-            
-            // Sayfa görünürlük değişiminde kontrol et
-            document.addEventListener('visibilitychange', function() {
-                if (!document.hidden && document.getElementById('contentBox').style.display === 'block') {
-                    checkServerSession();
-                }
-            });
-        }
-
-        // Zorla çıkış yap
-        function forceLogout(message = 'Oturum sonlandırıldı') {
-            if (forceLogoutInProgress) return;
-            forceLogoutInProgress = true;
-            
-            // Sunucuda oturumu temizle
-            fetch('logout.php', {
-                method: 'POST',
-                credentials: 'same-origin'
-            }).finally(() => {
-                if (sessionCheckInterval) {
-                    clearInterval(sessionCheckInterval);
-                    sessionCheckInterval = null;
-                }
-                
-                // Client tarafını temizle
-                document.body.classList.remove('content-visible');
+            if (document.getElementById('contentBox').style.display === 'block') {
                 document.getElementById('loginBox').style.display = 'block';
                 document.getElementById('contentBox').style.display = 'none';
-                document.getElementById('passwordInput').value = '';
-                
+                document.body.classList.remove('content-visible');
                 startMatrix();
-                forceLogoutInProgress = false;
-                
-                alert(message + '. Lütfen tekrar giriş yapın.');
-            });
+            }
+            
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('passwordInput').focus();
+            
+            alert('Oturum süreniz doldu. Lütfen tekrar giriş yapın.');
         }
-
-        // Giriş kontrolü (GÜNCELLENDİ)
-        async function checkPassword() {
+        
+        window.onload = function() {
+            if (checkSessionValidity() && sessionStorage.getItem('authenticated') === 'true') {
+                showContent();
+            }
+        };
+        
+        function checkPassword() {
             const input = document.getElementById('passwordInput').value.trim();
             const errorMsg = document.getElementById('errorMsg');
             
-            try {
-                const response = await fetch('login.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ password: input }),
-                    credentials: 'same-origin'
-                });
+            if (input === correctPassword) {
+                sessionStorage.setItem('loginTime', new Date().getTime());
+                sessionStorage.setItem('authenticated', 'true');
+                errorMsg.classList.remove('show');
                 
-                const data = await response.json();
+                stopMatrix();
+                document.body.classList.add('content-visible');
                 
-                if (data.success) {
-                    errorMsg.classList.remove('show');
-                    stopMatrix();
-                    document.body.classList.add('content-visible');
-                    showContent();
-                    startSessionMonitoring(); // Oturum takibini başlat
-                } else {
-                    errorMsg.classList.add('show');
-                    document.getElementById('passwordInput').value = '';
-                    document.getElementById('passwordInput').focus();
-                }
-            } catch (error) {
-                console.error('Login error:', error);
+                showContent();
+            } else {
                 errorMsg.classList.add('show');
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('passwordInput').focus();
             }
         }
-
-        // Çıkış yap (GÜNCELLENDİ)
-        function logout() {
-            if (confirm('Çıkış yapmak istediğinizden emin misiniz?')) {
-                fetch('logout.php', {
-                    method: 'POST',
-                    credentials: 'same-origin'
-                }).finally(() => {
-                    if (sessionCheckInterval) {
-                        clearInterval(sessionCheckInterval);
-                        sessionCheckInterval = null;
-                    }
-                    
-                    document.body.classList.remove('content-visible');
-                    startMatrix();
-                    location.reload();
-                });
-            }
-        }
-
-        // Sayfa yüklendiğinde oturum kontrolü
-        window.addEventListener('load', function() {
-            setTimeout(async () => {
-                const isValid = await checkServerSession();
-                if (isValid) {
-                    showContent();
-                    startSessionMonitoring();
-                }
-            }, 500);
-        });
-
-        // Sayfa yenileme uyarısı (isteğe bağlı)
-        window.addEventListener('beforeunload', function(e) {
-            if (document.getElementById('contentBox').style.display === 'block') {
-                e.preventDefault();
-                e.returnValue = 'Sayfayı yenilerseniz oturumunuz sonlanacak!';
-                return 'Sayfayı yenilerseniz oturumunuz sonlanacak!';
+        
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
             }
         });
-
-        // ===========================================
-        // ORJINAL FONKSİYONLAR (AYNEN KALDI)
-        // ===========================================
+        
         function showContent() {
             document.getElementById('loginBox').style.display = 'none';
             document.getElementById('contentBox').style.display = 'block';
@@ -1360,7 +1276,7 @@
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             
-            files.forEach((file) => {
+            files.forEach((file, index) => {
                 const isToday = file.dateObj.getTime() === today.getTime();
                 
                 const fileItem = document.createElement('div');
@@ -1392,17 +1308,61 @@
             link.click();
             document.body.removeChild(link);
         }
-
-        // Enter tuşu ile giriş
-        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                checkPassword();
+        
+        function logout() {
+            if (confirm('Çıkış yapmak istediğinizden emin misiniz?')) {
+                sessionStorage.removeItem('authenticated');
+                sessionStorage.removeItem('loginTime');
+                document.body.classList.remove('content-visible');
+                startMatrix();
+                location.reload();
+            }
+        }
+        
+        // SAYFA KONTROLLERİ
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                checkSessionValidity();
             }
         });
-
-        // ===========================================
-        // AI PANEL KONTROLLERİ (AYNEN KALDI)
-        // ===========================================
+        
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                checkSessionValidity();
+            }
+        });
+        
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                checkSessionValidity();
+            }, 1000);
+        });
+        
+        setInterval(function() {
+            checkSessionValidity();
+        }, 5 * 60 * 1000);
+        
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                stopMatrix();
+            } else if (!sessionStorage.getItem('authenticated')) {
+                startMatrix();
+            }
+        });
+        
+        const isLowEndDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isLowEndDevice) {
+            fontSize = 16;
+        }
+        
+        setTimeout(function() {
+            if (sessionStorage.getItem('authenticated') === 'true') {
+                alert('Oturumunuz güvenlik nedeniyle sonlandırıldı. Lütfen tekrar giriş yapın.');
+                logout();
+            }
+        }, 2 * 60 * 60 * 1000);
+        
+        // YENİ: AI PANEL KONTROLLERİ (GÜNCELLENDİ - MOD BUTONLARI EKLENDİ)
         document.addEventListener('DOMContentLoaded', function() {
             const openBtn = document.getElementById('openAiPanel');
             const closeBtn = document.getElementById('closeAiPanel');
@@ -1414,7 +1374,7 @@
             const quickModeBtn = document.getElementById('quickModeBtn');
             const detailedModeBtn = document.getElementById('detailedModeBtn');
             
-            let currentMode = 'quick';
+            let currentMode = 'quick'; // varsayılan mod
             
             // Panel açma
             openBtn.addEventListener('click', function() {
@@ -1423,6 +1383,8 @@
                     overlay.classList.add('active');
                     panel.classList.add('active');
                 }, 10);
+                
+                // Body scroll'u engelle
                 document.body.style.overflow = 'hidden';
             });
             
@@ -1439,12 +1401,14 @@
             
             closeBtn.addEventListener('click', closePanel);
             
+            // Overlay'e tıklayınca da kapat
             overlay.addEventListener('click', function(e) {
                 if (e.target === overlay) {
                     closePanel();
                 }
             });
             
+            // ESC tuşu ile kapat
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape' && overlay.style.display === 'flex') {
                     closePanel();
@@ -1468,7 +1432,7 @@
                 quickModeBtn.style.transform = 'scale(1)';
             });
             
-            // Mesaj ekleme fonksiyonları
+            // Add message to chat
             function addMessage(text, isUser = false, isError = false) {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `message ${isUser ? 'user' : 'ai'} ${isError ? 'error' : ''}`;
@@ -1489,6 +1453,7 @@
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
             
+            // Show typing indicator
             function showTyping() {
                 const typingDiv = document.createElement('div');
                 typingDiv.id = 'typingIndicator';
@@ -1503,23 +1468,20 @@
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
             
+            // Hide typing indicator
             function hideTyping() {
                 const typing = document.getElementById('typingIndicator');
                 if (typing) typing.remove();
             }
             
-            function escapeHtml(text) {
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-            
+            // Send question to API (mod prefix'li)
             async function sendQuestion(question) {
                 if (!question.trim()) {
                     addMessage('Lütfen bir soru yazın!', false, true);
                     return;
                 }
                 
+                // Mode'a göre prefix ekle
                 const questionWithMode = currentMode === 'detailed' ? '📋 detaylı ' + question : '⚡ ' + question;
                 
                 addMessage(question, true);
@@ -1563,6 +1525,7 @@
                 }
             }
             
+            // Wait for AI response
             async function waitForResponse(issueNumber) {
                 let attempts = 0;
                 const maxAttempts = 30;
@@ -1604,7 +1567,9 @@
                 }, 5000);
             }
             
+            // Display AI response
             function displayAIResponse(responseText) {
+                // Sadece analiz kısmını göster
                 let cleanText = responseText
                     .replace(/## 📝 Kullanıcı Sorusu[\s\S]*?---/, '')
                     .replace(/---[\s\S]*$/, '')
@@ -1618,7 +1583,14 @@
                 addMessage(`<strong>📊 AI ANALİZ RAPORU</strong><br><br>${cleanText}`, false);
             }
             
-            // Event listeners
+            // Utility function
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+            
+            // Event listeners for chat
             sendBtn.addEventListener('click', () => sendQuestion(input.value));
             
             input.addEventListener('keypress', (e) => {
@@ -1628,6 +1600,7 @@
                 }
             });
             
+            // Quick buttons
             document.querySelectorAll('.quick-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const question = this.getAttribute('data-q');
