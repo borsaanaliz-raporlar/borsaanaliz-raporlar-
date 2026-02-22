@@ -4,15 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BORSAANALIZ V11 - Günlük Teknik Analiz Raporları</title>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-68REYJ5Y7L"></script>
-    <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
- 
-    gtag('config', 'G-68REYJ5Y7L');
-    </script>
     <style>
         /* TÜM STILLER AYNEN KALDI - SADECE AI PANEL İÇİNE YENİ STILLER EKLENDİ */
         
@@ -241,29 +232,29 @@
         
         .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Kartları biraz daralt */
-            gap: 8px; /* Kart arası boşluk azalt */
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
             margin-bottom: 15px;
         }
 
         .stat-card {
             background: #f8f9fa;
-            padding: 8px 10px; /* Üst-alt: 8px, Sağ-sol: 10px */
+            padding: 8px 10px;
             border-radius: 8px;
             text-align: center;
-            min-height: auto; /* Minimum yüksekliği kaldır */
+            min-height: auto;
         }
 
         .stat-number {
-            font-size: 20px; /* Daha küçük rakamlar */
+            font-size: 20px;
             font-weight: bold;
             color: #667eea;
-            margin-bottom: 2px; /* Alt boşluk azalt */
+            margin-bottom: 2px;
         }
 
         .stat-label {
             color: #666;
-            font-size: 9px; /* Daha küçük etiketler */
+            font-size: 9px;
             line-height: 1.2;
         }
         
@@ -600,7 +591,7 @@
         
         /* AI CHAT STYLES - PANEL İÇİ */
         .chat-container {
-            height: calc(70vh - 200px); /* Biraz küçülttük butonlara yer açmak için */
+            height: calc(70vh - 200px);
             overflow-y: auto;
             background: white;
             border-radius: 12px;
@@ -659,7 +650,7 @@
             font-size: 15px;
         }
         
-        /* 🆕 YENİ: MOD BUTONLARI - AI PANEL İÇİNE */
+        /* MOD BUTONLARI - AI PANEL İÇİNE */
         .mode-buttons {
             display: flex;
             gap: 10px;
@@ -924,7 +915,7 @@
                 <div class="email">iletisimborsaanaliz@gmail.com</div>
             </div>
             
-            <!-- YENİ: KOMPAKT MAKRO UYARISI -->
+            <!-- KOMPAKT MAKRO UYARISI -->
             <div class="macro-warning" style="
                 background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
                 border: 1px solid #ffb300;
@@ -980,7 +971,7 @@
                 </div>
             </div>
             
-            <!-- YENİ: AI ASİSTAN BUTONU -->
+            <!-- AI ASİSTAN BUTONU -->
             <div class="ai-button-container">
                 <button class="ai-assistant-button" id="openAiPanel">
                     <span class="ai-icon">🤖</span>
@@ -1023,15 +1014,10 @@
             <button class="logout-btn" onclick="logout()">
                 🚪 Güvenli Çıkış
             </button>
-            
-            <!-- KVKK BİLGİLENDİRMESİ (CONTAINER İÇİNDE) -->
-            <div style="font-size: 11px; color: #999; text-align: center; margin-top: 20px; padding: 10px 0; border-top: 1px solid #eee; width: 100%;">
-                Bu site anonim ziyaretçi analizi için Google Analytics kullanmaktadır.
-            </div>
-        </div>  <!-- contentBox bitişi -->
-    </div>  <!-- container bitişi -->
+        </div>
+    </div>
     
-    <!-- AI PANEL (PERDE EFEKTLİ) - 🆕 BUTONLAR EKLENDİ -->
+    <!-- AI PANEL (PERDE EFEKTLİ) -->
     <div class="ai-panel-overlay" id="aiPanelOverlay">
         <div class="ai-panel" id="aiPanel">
             <div class="ai-panel-header">
@@ -1056,7 +1042,7 @@
                     </div>
                 </div>
                 
-                <!-- 🆕 YENİ: MOD SEÇİM BUTONLARI -->
+                <!-- MOD SEÇİM BUTONLARI -->
                 <div class="mode-buttons">
                     <button class="mode-btn quick" id="quickModeBtn">⚡ HIZLI ANALİZ</button>
                     <button class="mode-btn detailed" id="detailedModeBtn">📋 DETAYLI ANALİZ</button>
@@ -1082,7 +1068,9 @@
     </div>
 
     <script>
-        // ORJINAL MATRIX VE APP KODLARI (Aynen kalacak)
+        // ===========================================
+        // MATRIX CANVAS KODLARI (AYNEN KALDI)
+        // ===========================================
         const canvas = document.getElementById('matrixCanvas');
         const ctx = canvas.getContext('2d');
         let matrixAnimationId = null;
@@ -1175,8 +1163,9 @@
         window.addEventListener('load', startMatrix);
         window.addEventListener('resize', resizeCanvas);
 
-        // ORJINAL APP CODE
-        const correctPassword = "ba";
+        // ===========================================
+        // ORJINAL APP KODLARI (DOSYA LİSTESİ VS.)
+        // ===========================================
         
         const files = [
             {
@@ -1202,82 +1191,163 @@
             }
         ];
         
-        // OTURUM KONTROL FONKSİYONLARI
-        function checkSessionValidity() {
-            const loginTime = sessionStorage.getItem('loginTime');
-            const currentTime = new Date().getTime();
+        // ===========================================
+        // YENİ: SUNUCU TABANLI OTURUM YÖNETİMİ
+        // ===========================================
+        let sessionCheckInterval = null;
+        let forceLogoutInProgress = false;
+
+        // Sunucuda oturum kontrolü yap
+        async function checkServerSession() {
+            if (forceLogoutInProgress) return false;
             
-            if (loginTime) {
-                const loginDate = new Date(parseInt(loginTime));
-                const currentDate = new Date();
+            try {
+                const response = await fetch('session-check.php', {
+                    method: 'GET',
+                    credentials: 'same-origin',
+                    cache: 'no-cache'
+                });
                 
-                const isDifferentDay = 
-                    loginDate.getDate() !== currentDate.getDate() ||
-                    loginDate.getMonth() !== currentDate.getMonth() ||
-                    loginDate.getFullYear() !== currentDate.getFullYear();
+                const data = await response.json();
                 
-                if (isDifferentDay) {
-                    forceLogout();
+                if (data.forceLogout) {
+                    forceLogout(data.message || 'Oturum sonlandırıldı');
                     return false;
                 }
                 
-                if ((currentTime - parseInt(loginTime)) > 24 * 60 * 60 * 1000) {
-                    forceLogout();
-                    return false;
-                }
+                return data.valid;
+            } catch (error) {
+                console.error('Session check error:', error);
+                return false;
             }
-            return true;
         }
-        
-        function forceLogout() {
-            sessionStorage.removeItem('authenticated');
-            sessionStorage.removeItem('loginTime');
+
+        // Oturum takibini başlat
+        function startSessionMonitoring() {
+            if (sessionCheckInterval) {
+                clearInterval(sessionCheckInterval);
+            }
             
-            if (document.getElementById('contentBox').style.display === 'block') {
+            // Her 30 saniyede bir kontrol et
+            sessionCheckInterval = setInterval(async () => {
+                const isValid = await checkServerSession();
+                if (!isValid && document.getElementById('contentBox').style.display === 'block') {
+                    forceLogout('Oturum süreniz doldu');
+                }
+            }, 30000);
+            
+            // Sayfa görünürlük değişiminde kontrol et
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden && document.getElementById('contentBox').style.display === 'block') {
+                    checkServerSession();
+                }
+            });
+        }
+
+        // Zorla çıkış yap
+        function forceLogout(message = 'Oturum sonlandırıldı') {
+            if (forceLogoutInProgress) return;
+            forceLogoutInProgress = true;
+            
+            // Sunucuda oturumu temizle
+            fetch('logout.php', {
+                method: 'POST',
+                credentials: 'same-origin'
+            }).finally(() => {
+                if (sessionCheckInterval) {
+                    clearInterval(sessionCheckInterval);
+                    sessionCheckInterval = null;
+                }
+                
+                // Client tarafını temizle
+                document.body.classList.remove('content-visible');
                 document.getElementById('loginBox').style.display = 'block';
                 document.getElementById('contentBox').style.display = 'none';
-                document.body.classList.remove('content-visible');
+                document.getElementById('passwordInput').value = '';
+                
                 startMatrix();
-            }
-            
-            document.getElementById('passwordInput').value = '';
-            document.getElementById('passwordInput').focus();
-            
-            alert('Oturum süreniz doldu. Lütfen tekrar giriş yapın.');
+                forceLogoutInProgress = false;
+                
+                alert(message + '. Lütfen tekrar giriş yapın.');
+            });
         }
-        
-        window.onload = function() {
-            if (checkSessionValidity() && sessionStorage.getItem('authenticated') === 'true') {
-                showContent();
-            }
-        };
-        
-        function checkPassword() {
+
+        // Giriş kontrolü (GÜNCELLENDİ)
+        async function checkPassword() {
             const input = document.getElementById('passwordInput').value.trim();
             const errorMsg = document.getElementById('errorMsg');
             
-            if (input === correctPassword) {
-                sessionStorage.setItem('loginTime', new Date().getTime());
-                sessionStorage.setItem('authenticated', 'true');
-                errorMsg.classList.remove('show');
+            try {
+                const response = await fetch('login.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ password: input }),
+                    credentials: 'same-origin'
+                });
                 
-                stopMatrix();
-                document.body.classList.add('content-visible');
+                const data = await response.json();
                 
-                showContent();
-            } else {
+                if (data.success) {
+                    errorMsg.classList.remove('show');
+                    stopMatrix();
+                    document.body.classList.add('content-visible');
+                    showContent();
+                    startSessionMonitoring(); // Oturum takibini başlat
+                } else {
+                    errorMsg.classList.add('show');
+                    document.getElementById('passwordInput').value = '';
+                    document.getElementById('passwordInput').focus();
+                }
+            } catch (error) {
+                console.error('Login error:', error);
                 errorMsg.classList.add('show');
-                document.getElementById('passwordInput').value = '';
-                document.getElementById('passwordInput').focus();
             }
         }
-        
-        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                checkPassword();
+
+        // Çıkış yap (GÜNCELLENDİ)
+        function logout() {
+            if (confirm('Çıkış yapmak istediğinizden emin misiniz?')) {
+                fetch('logout.php', {
+                    method: 'POST',
+                    credentials: 'same-origin'
+                }).finally(() => {
+                    if (sessionCheckInterval) {
+                        clearInterval(sessionCheckInterval);
+                        sessionCheckInterval = null;
+                    }
+                    
+                    document.body.classList.remove('content-visible');
+                    startMatrix();
+                    location.reload();
+                });
+            }
+        }
+
+        // Sayfa yüklendiğinde oturum kontrolü
+        window.addEventListener('load', function() {
+            setTimeout(async () => {
+                const isValid = await checkServerSession();
+                if (isValid) {
+                    showContent();
+                    startSessionMonitoring();
+                }
+            }, 500);
+        });
+
+        // Sayfa yenileme uyarısı (isteğe bağlı)
+        window.addEventListener('beforeunload', function(e) {
+            if (document.getElementById('contentBox').style.display === 'block') {
+                e.preventDefault();
+                e.returnValue = 'Sayfayı yenilerseniz oturumunuz sonlanacak!';
+                return 'Sayfayı yenilerseniz oturumunuz sonlanacak!';
             }
         });
-        
+
+        // ===========================================
+        // ORJINAL FONKSİYONLAR (AYNEN KALDI)
+        // ===========================================
         function showContent() {
             document.getElementById('loginBox').style.display = 'none';
             document.getElementById('contentBox').style.display = 'block';
@@ -1290,7 +1360,7 @@
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             
-            files.forEach((file, index) => {
+            files.forEach((file) => {
                 const isToday = file.dateObj.getTime() === today.getTime();
                 
                 const fileItem = document.createElement('div');
@@ -1322,61 +1392,17 @@
             link.click();
             document.body.removeChild(link);
         }
-        
-        function logout() {
-            if (confirm('Çıkış yapmak istediğinizden emin misiniz?')) {
-                sessionStorage.removeItem('authenticated');
-                sessionStorage.removeItem('loginTime');
-                document.body.classList.remove('content-visible');
-                startMatrix();
-                location.reload();
-            }
-        }
-        
-        // SAYFA KONTROLLERİ
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) {
-                checkSessionValidity();
+
+        // Enter tuşu ile giriş
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
             }
         });
-        
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted) {
-                checkSessionValidity();
-            }
-        });
-        
-        window.addEventListener('load', function() {
-            setTimeout(function() {
-                checkSessionValidity();
-            }, 1000);
-        });
-        
-        setInterval(function() {
-            checkSessionValidity();
-        }, 5 * 60 * 1000);
-        
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                stopMatrix();
-            } else if (!sessionStorage.getItem('authenticated')) {
-                startMatrix();
-            }
-        });
-        
-        const isLowEndDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        if (isLowEndDevice) {
-            fontSize = 16;
-        }
-        
-        setTimeout(function() {
-            if (sessionStorage.getItem('authenticated') === 'true') {
-                alert('Oturumunuz güvenlik nedeniyle sonlandırıldı. Lütfen tekrar giriş yapın.');
-                logout();
-            }
-        }, 2 * 60 * 60 * 1000);
-        
-        // YENİ: AI PANEL KONTROLLERİ (GÜNCELLENDİ - MOD BUTONLARI EKLENDİ)
+
+        // ===========================================
+        // AI PANEL KONTROLLERİ (AYNEN KALDI)
+        // ===========================================
         document.addEventListener('DOMContentLoaded', function() {
             const openBtn = document.getElementById('openAiPanel');
             const closeBtn = document.getElementById('closeAiPanel');
@@ -1388,7 +1414,7 @@
             const quickModeBtn = document.getElementById('quickModeBtn');
             const detailedModeBtn = document.getElementById('detailedModeBtn');
             
-            let currentMode = 'quick'; // varsayılan mod
+            let currentMode = 'quick';
             
             // Panel açma
             openBtn.addEventListener('click', function() {
@@ -1397,8 +1423,6 @@
                     overlay.classList.add('active');
                     panel.classList.add('active');
                 }, 10);
-                
-                // Body scroll'u engelle
                 document.body.style.overflow = 'hidden';
             });
             
@@ -1415,14 +1439,12 @@
             
             closeBtn.addEventListener('click', closePanel);
             
-            // Overlay'e tıklayınca da kapat
             overlay.addEventListener('click', function(e) {
                 if (e.target === overlay) {
                     closePanel();
                 }
             });
             
-            // ESC tuşu ile kapat
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape' && overlay.style.display === 'flex') {
                     closePanel();
@@ -1446,7 +1468,7 @@
                 quickModeBtn.style.transform = 'scale(1)';
             });
             
-            // Add message to chat
+            // Mesaj ekleme fonksiyonları
             function addMessage(text, isUser = false, isError = false) {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `message ${isUser ? 'user' : 'ai'} ${isError ? 'error' : ''}`;
@@ -1467,7 +1489,6 @@
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
             
-            // Show typing indicator
             function showTyping() {
                 const typingDiv = document.createElement('div');
                 typingDiv.id = 'typingIndicator';
@@ -1482,20 +1503,23 @@
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
             
-            // Hide typing indicator
             function hideTyping() {
                 const typing = document.getElementById('typingIndicator');
                 if (typing) typing.remove();
             }
             
-            // Send question to API (mod prefix'li)
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+            
             async function sendQuestion(question) {
                 if (!question.trim()) {
                     addMessage('Lütfen bir soru yazın!', false, true);
                     return;
                 }
                 
-                // Mode'a göre prefix ekle
                 const questionWithMode = currentMode === 'detailed' ? '📋 detaylı ' + question : '⚡ ' + question;
                 
                 addMessage(question, true);
@@ -1539,7 +1563,6 @@
                 }
             }
             
-            // Wait for AI response
             async function waitForResponse(issueNumber) {
                 let attempts = 0;
                 const maxAttempts = 30;
@@ -1581,9 +1604,7 @@
                 }, 5000);
             }
             
-            // Display AI response
             function displayAIResponse(responseText) {
-                // Sadece analiz kısmını göster
                 let cleanText = responseText
                     .replace(/## 📝 Kullanıcı Sorusu[\s\S]*?---/, '')
                     .replace(/---[\s\S]*$/, '')
@@ -1597,14 +1618,7 @@
                 addMessage(`<strong>📊 AI ANALİZ RAPORU</strong><br><br>${cleanText}`, false);
             }
             
-            // Utility function
-            function escapeHtml(text) {
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-            
-            // Event listeners for chat
+            // Event listeners
             sendBtn.addEventListener('click', () => sendQuestion(input.value));
             
             input.addEventListener('keypress', (e) => {
@@ -1614,7 +1628,6 @@
                 }
             });
             
-            // Quick buttons
             document.querySelectorAll('.quick-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const question = this.getAttribute('data-q');
